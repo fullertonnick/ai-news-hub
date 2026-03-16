@@ -1,0 +1,27 @@
+{
+  "name": "ai-news-hub",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.1.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "tailwindcss": "^3.3.0",
+    "autoprefixer": "^10.0.1",
+    "postcss": "^8",
+    "framer-motion": "^10.18.0",
+    "lucide-react": "^0.303.0",
+    "html-to-image": "^1.11.11",
+    "clsx": "^2.1.0"
+  }
+}
