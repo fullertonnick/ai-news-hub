@@ -7,8 +7,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'brand-orange': '#FF6B35',
-        'brand-dark': '#0A0A0A',
+        'brand-orange': '#FF7107',    // SimpliScale tangerine (updated from #FF6B35)
+        'brand-gold': '#FFC26B',      // SimpliScale sunrise yellow
+        'brand-dark': '#111111',      // SimpliScale near-black
+        'brand-surface': '#282828',   // SimpliScale card surface
       },
     },
   },
