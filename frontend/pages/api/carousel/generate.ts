@@ -704,7 +704,7 @@ function buildFallback(topic: string, style: string, researchContext?: any) {
 
   if (style === 'use_case_list') {
     return {
-      topic, style, keyword,
+      topic, style, keyword, topicCategory: category,
       slides: [
         coverSlide,
         {
@@ -733,7 +733,7 @@ function buildFallback(topic: string, style: string, researchContext?: any) {
 
   if (style === 'prompt_reveal') {
     return {
-      topic, style, keyword,
+      topic, style, keyword, topicCategory: category,
       slides: [
         coverSlide,
         {
@@ -773,7 +773,7 @@ function buildFallback(topic: string, style: string, researchContext?: any) {
   // ── tech_breakdown (default) — category-specific slide sequence ──
   const seq = SLIDE_SEQUENCES[category];
   return {
-    topic, style, keyword,
+    topic, style, keyword, topicCategory: category,
     slides: buildSlidesFromSequence(seq, topic, category, hash, researchContext, keyword, gradientHue, ctaHeadline, icons, stats, steps),
     caption,
   };
@@ -911,7 +911,7 @@ slides[0] = cover_photo. slides[4] = cta_slide. Set accent_word on all slides.`;
 
     const qg = runQualityGate(data.slides, data.keyword || 'REPLY', data.caption || '', topic);
     return res.json({
-      topic, style,
+      topic, style, topicCategory: category,
       slides: qg.slides, keyword: qg.keyword, caption: qg.caption,
       quality_report: { passed: qg.passed, issues: qg.issues, warnings: qg.warnings },
       generated_at: new Date().toISOString(),

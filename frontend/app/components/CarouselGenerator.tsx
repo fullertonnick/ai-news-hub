@@ -5,6 +5,7 @@ import { toPng } from 'html-to-image';
 import SlideRenderer from './SlideRenderer';
 import { CarouselSlide, ResearchData, QualityReport } from '../types';
 import { Brand } from '../brand/simpliscale';
+import { generateBackgroundPrompts, detectCategoryClient, type TopicCategory } from '../lib/generateBackgroundPrompts';
 
 interface Props { topic: string; onClose: () => void; }
 type Step = 'research' | 'generate' | 'preview';
@@ -48,7 +49,44 @@ export default function CarouselGenerator({ topic, onClose }: Props) {
   const [keyword, setKeyword] = useState('');
   const [qualityReport, setQualityReport] = useState<QualityReport | null>(null);
   const [captionCopied, setCaptionCopied] = useState(false);
+  const [imagesLoading, setImagesLoading] = useState(false);
+  const [bgProgress, setBgProgress] = useState(0);
+  const [bgWarning, setBgWarning] = useState('');
   const exportRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // ── Imagen 3 helpers ────────────────────────────────────────────────────────
+
+  const callImagen = useCallback(async (prompt: string, negativePrompt: string): Promise<string> => {
+    try {
+      const res = await fetch('/api/imagen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, negative_prompt: negativePrompt }),
+      });
+      if (!res.ok) { console.error('Background generation failed:', await res.text()); return ''; }
+      const data = await res.json();
+      return data.dataUrl || '';
+    } catch (err) {
+      console.error('Imagen call failed:', err);
+      return '';
+    }
+  }, []);
+
+  const generateAllBackgrounds = useCallback(async (
+    topicStr: string, category: TopicCategory, kw: string
+  ): Promise<string[]> => {
+    const prompts = generateBackgroundPrompts(topicStr, category, kw);
+    setBgProgress(0);
+    const tick = (v: string) => { setBgProgress(p => p + 1); return v; };
+    const results = await Promise.all([
+      callImagen(prompts.cover,  prompts.negative).then(tick),
+      callImagen(prompts.slide2, prompts.negative).then(tick),
+      callImagen(prompts.slide3, prompts.negative).then(tick),
+      callImagen(prompts.slide4, prompts.negative).then(tick),
+      callImagen(prompts.cta,    prompts.negative).then(tick),
+    ]);
+    return results;
+  }, [callImagen]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -75,21 +113,54 @@ export default function CarouselGenerator({ topic, onClose }: Props) {
   }, [topic]);
 
   const doGenerate = useCallback(async () => {
-    setLoading(true); setError('');
+    setLoading(true); setError(''); setBgWarning('');
     try {
-      // Fix A: forward full research context so generate API can produce dynamic content
-      const r = await fetch('/api/carousel/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic, style, custom_angle: angle, research_context: research }) });
+      // Step 1: Generate text content
+      const r = await fetch('/api/carousel/generate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, style, custom_angle: angle, research_context: research }),
+      });
       const d = await r.json();
       if (!d.slides?.length) throw new Error('No slides');
-      setSlides(d.slides);
+
+      // Step 2: Show preview with loading state (text content visible immediately)
+      const textSlides: CarouselSlide[] = d.slides;
       setCaption(d.caption || '');
       setKeyword(d.keyword || '');
       setQualityReport(d.quality_report || null);
       setCurrentSlide(0);
+      setSlides(textSlides);
       setStep('preview');
-    } catch { setError('Generation failed. Try again.'); }
-    setLoading(false);
-  }, [topic, style, angle]);
+      setLoading(false);
+
+      // Step 3: Generate Imagen 3 backgrounds in parallel
+      setImagesLoading(true);
+      const category = (d.topicCategory || detectCategoryClient(topic)) as TopicCategory;
+      const kw = d.keyword || '';
+
+      const bgImages = await generateAllBackgrounds(topic, category, kw);
+
+      const failCount = bgImages.filter(b => !b).length;
+      if (failCount > 0) setBgWarning(`${failCount} background(s) used dark fallback`);
+
+      // Step 4: Attach backgrounds to slides
+      setSlides(prev => prev.map((slide, i) => ({
+        ...slide,
+        backgroundImage: i === 0 ? bgImages[0]
+          : i === prev.length - 1 ? bgImages[4]
+          : i === 1 ? bgImages[1]
+          : i === 2 ? bgImages[2]
+          : bgImages[3],
+      })));
+
+      setImagesLoading(false);
+    } catch (err) {
+      console.error('Generation error:', err);
+      setError('Generation failed. Try again.');
+      setLoading(false);
+      setImagesLoading(false);
+    }
+  }, [topic, style, angle, research, generateAllBackgrounds]);
 
   const downloadSlide = useCallback(async (i: number) => {
     const el = exportRefs.current[i];
@@ -290,50 +361,86 @@ export default function CarouselGenerator({ topic, onClose }: Props) {
                   <button onClick={() => setStep('generate')} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
                     <RefreshCw size={12} />Regenerate
                   </button>
-                  <button onClick={() => downloadSlide(currentSlide)} disabled={downloading !== null} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
+                  <button onClick={() => downloadSlide(currentSlide)} disabled={downloading !== null || imagesLoading} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white disabled:opacity-40 px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
                     {downloading === currentSlide ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}This Slide
                   </button>
-                  <button onClick={downloadAll} disabled={downloading !== null} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
+                  <button onClick={downloadAll} disabled={downloading !== null || imagesLoading} className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white disabled:opacity-40 px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
                     {downloading === 'all' ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}All {slides.length} Slides
                   </button>
-                  <button onClick={downloadZip} disabled={downloading !== null} className="flex items-center gap-1.5 text-xs font-semibold text-white px-3 py-1.5 rounded-lg bg-brand-orange/20 border border-brand-orange/30 hover:bg-brand-orange/30 transition-colors">
-                    {downloading === 'zip' ? <Loader2 size={12} className="animate-spin" /> : <Package size={12} />}
-                    {downloading === 'zip' ? 'Packaging...' : 'Download ZIP'}
+                  <button onClick={downloadZip} disabled={downloading !== null || imagesLoading} className="flex items-center gap-1.5 text-xs font-semibold text-white disabled:opacity-40 px-3 py-1.5 rounded-lg bg-brand-orange/20 border border-brand-orange/30 hover:bg-brand-orange/30 transition-colors">
+                    {imagesLoading ? <Loader2 size={12} className="animate-spin" /> : downloading === 'zip' ? <Loader2 size={12} className="animate-spin" /> : <Package size={12} />}
+                    {imagesLoading ? 'Generating...' : downloading === 'zip' ? 'Packaging...' : 'Download ZIP'}
                   </button>
                 </div>
               </div>
 
-              {/* Slide viewer */}
-              <div className="flex" style={{ height: 'min(500px, 55vh)' }}>
-                {/* Prev button */}
-                <button onClick={() => setCurrentSlide(s => Math.max(0, s - 1))} disabled={currentSlide === 0}
-                  className="flex-shrink-0 w-12 flex items-center justify-center text-gray-600 hover:text-white disabled:opacity-20 transition-colors">
-                  <ChevronLeft size={24} />
-                </button>
+              {/* Slide viewer — loading state while Imagen 3 generates */}
+              {imagesLoading ? (
+                <div className="flex flex-col items-center justify-center py-8 px-6 gap-6" style={{ height: 'min(500px, 55vh)' }}>
+                  <style>{`
+                    @keyframes shimmer {
+                      0% { background-position: 200% 0; }
+                      100% { background-position: -200% 0; }
+                    }
+                    .slide-shimmer {
+                      background: linear-gradient(90deg, #1a1a1a 25%, #2d1400 50%, #1a1a1a 75%);
+                      background-size: 200% 100%;
+                      animation: shimmer 1.5s infinite;
+                    }
+                  `}</style>
+                  {/* 5 placeholder tiles */}
+                  <div className="flex gap-2 items-end">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} className="flex flex-col items-center gap-1.5">
+                        <div
+                          className="slide-shimmer rounded-lg border border-white/5 flex items-center justify-center"
+                          style={{ width: 60, height: 75, opacity: i <= bgProgress ? 0.4 : 1 }}
+                        >
+                          {i <= bgProgress
+                            ? <span style={{ fontSize: 18, filter: 'drop-shadow(0 0 6px rgba(255,113,7,0.8))' }}>✦</span>
+                            : null}
+                        </div>
+                        <div className={`text-[10px] font-bold ${i <= bgProgress ? 'text-brand-orange' : 'text-gray-700'}`}>{i}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-semibold text-sm">✦ Generating cinematic backgrounds with Imagen 3...</p>
+                    <p className="text-gray-500 text-xs mt-1">{bgProgress}/5 images ready · ~15 seconds total</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex" style={{ height: 'min(500px, 55vh)' }}>
+                  {/* Prev button */}
+                  <button onClick={() => setCurrentSlide(s => Math.max(0, s - 1))} disabled={currentSlide === 0}
+                    className="flex-shrink-0 w-12 flex items-center justify-center text-gray-600 hover:text-white disabled:opacity-20 transition-colors">
+                    <ChevronLeft size={24} />
+                  </button>
 
-                {/* Slide display */}
-                <div className="flex-1 flex items-center justify-center py-4 min-w-0 overflow-hidden">
-                  <div style={{ width: '100%', maxWidth: '360px', aspectRatio: '4/5', position: 'relative' }}>
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '12px' }}>
-                      <div style={{ transform: 'scale(var(--slide-scale, 1))', transformOrigin: 'top center' }}
-                        ref={el => {
-                          if (el) {
-                            const containerW = el.parentElement?.parentElement?.offsetWidth || 360;
-                            el.style.setProperty('--slide-scale', String(Math.min(containerW / 540, 1)));
-                          }
-                        }}>
-                        <SlideRenderer slide={slides[currentSlide]} slideNumber={currentSlide + 1} totalSlides={slides.length} />
+                  {/* Slide display */}
+                  <div className="flex-1 flex items-center justify-center py-4 min-w-0 overflow-hidden">
+                    <div style={{ width: '100%', maxWidth: '360px', aspectRatio: '4/5', position: 'relative' }}>
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '12px' }}>
+                        <div style={{ transform: 'scale(var(--slide-scale, 1))', transformOrigin: 'top center' }}
+                          ref={el => {
+                            if (el) {
+                              const containerW = el.parentElement?.parentElement?.offsetWidth || 360;
+                              el.style.setProperty('--slide-scale', String(Math.min(containerW / 540, 1)));
+                            }
+                          }}>
+                          <SlideRenderer slide={slides[currentSlide]} slideNumber={currentSlide + 1} totalSlides={slides.length} />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Next button */}
-                <button onClick={() => setCurrentSlide(s => Math.min(slides.length - 1, s + 1))} disabled={currentSlide === slides.length - 1}
-                  className="flex-shrink-0 w-12 flex items-center justify-center text-gray-600 hover:text-white disabled:opacity-20 transition-colors">
-                  <ChevronRight size={24} />
-                </button>
-              </div>
+                  {/* Next button */}
+                  <button onClick={() => setCurrentSlide(s => Math.min(slides.length - 1, s + 1))} disabled={currentSlide === slides.length - 1}
+                    className="flex-shrink-0 w-12 flex items-center justify-center text-gray-600 hover:text-white disabled:opacity-20 transition-colors">
+                    <ChevronRight size={24} />
+                  </button>
+                </div>
+              )}
 
               {/* Slide text strip */}
               <div className="px-6 py-3 border-t border-white/5 flex-shrink-0">
@@ -367,6 +474,11 @@ export default function CarouselGenerator({ topic, onClose }: Props) {
                     <div className="mt-2 text-xs text-yellow-500/80 bg-yellow-500/5 border border-yellow-500/15 rounded-lg px-3 py-2">
                       {qualityReport.issues.map((issue, i) => <div key={i}>⚠ {issue}</div>)}
                       {qualityReport.warnings.map((w, i) => <div key={i} className="text-yellow-600/60">• {w}</div>)}
+                    </div>
+                  )}
+                  {bgWarning && (
+                    <div className="mt-2 text-xs text-orange-400/70 bg-orange-500/5 border border-orange-500/15 rounded-lg px-3 py-2">
+                      ◌ {bgWarning}
                     </div>
                   )}
                 </div>

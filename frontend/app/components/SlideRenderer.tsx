@@ -115,64 +115,60 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
   const v = slide.visual as CoverPhotoVisual;
   const words = slide.text.split(/\s+/);
   const fontSize = Math.max(72 * sc, words.length <= 5 ? 92 * sc : words.length <= 7 ? 80 * sc : 70 * sc);
+  const hasImagen = !!slide.backgroundImage;
 
   return (
-    <div style={{ position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden', fontFamily: Brand.typography.font_family, backgroundColor: '#1a1a1a' }}>
+    <div style={{
+      position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden',
+      fontFamily: Brand.typography.font_family,
+      // Imagen 3: CSS background-image. Fallback: dark solid color.
+      ...(hasImagen
+        ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : { backgroundColor: '#1a1a1a' }),
+    }}>
 
-      {/* ── Full-bleed photo background ── */}
-      <img
-        src="/nick.jpg"
-        alt=""
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
-      />
+      {/* Fallback: nick.jpg full-bleed photo (only when no Imagen 3 image) */}
+      {!hasImagen && (
+        <img src="/nick.jpg" alt=""
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
+        />
+      )}
 
-      {/* ── Dark overlay ── */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.52)' }} />
+      {/* Dark overlay — heavier over Imagen 3 to ensure text contrast */}
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: hasImagen ? 'rgba(0,0,0,0.58)' : 'rgba(0,0,0,0.52)' }} />
 
-      {/* ── Bottom gradient for text readability ── */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.85) 100%)' }} />
+      {/* Readability gradient — text area at bottom */}
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.85) 100%)' }} />
 
-      {/* ── Hue-based gradient bloom — unique per topic ── */}
-      <div style={{ position: 'absolute', bottom: '-15%', left: '-10%', width: '65%', height: '55%', background: `radial-gradient(ellipse, hsla(${v.gradient_hue ?? 25}, 80%, 45%, 0.30) 0%, transparent 70%)`, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: '-12%', right: '-10%', width: '50%', height: '45%', background: `radial-gradient(ellipse, hsla(${((v.gradient_hue ?? 25) + 40) % 360}, 60%, 35%, 0.18) 0%, transparent 65%)`, pointerEvents: 'none' }} />
+      {/* CSS hue blooms — only when no Imagen 3 (Imagen provides its own atmosphere) */}
+      {!hasImagen && <>
+        <div style={{ position: 'absolute', bottom: '-15%', left: '-10%', width: '65%', height: '55%', background: `radial-gradient(ellipse, hsla(${v.gradient_hue ?? 25}, 80%, 45%, 0.30) 0%, transparent 70%)`, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-12%', right: '-10%', width: '50%', height: '45%', background: `radial-gradient(ellipse, hsla(${((v.gradient_hue ?? 25) + 40) % 360}, 60%, 35%, 0.18) 0%, transparent 65%)`, pointerEvents: 'none' }} />
+      </>}
 
-      {/* ── Themed floating icons ── */}
+      {/* Themed floating icons — always shown, orange glow ties brand to image */}
       {COVER_ICONS.map((icon, i) => (
         <div key={i} style={{
-          position: 'absolute',
-          ...icon.pos,
-          fontSize: `${icon.size * sc}px`,
-          lineHeight: 1,
-          opacity: icon.opacity,
+          position: 'absolute', ...icon.pos,
+          fontSize: `${icon.size * sc}px`, lineHeight: 1,
+          opacity: hasImagen ? icon.opacity * 0.75 : icon.opacity,
           filter: `drop-shadow(0 0 ${16 * sc}px rgba(255,113,7,0.65))`,
           zIndex: 2,
         }}>{icon.emoji}</div>
       ))}
 
-      {/* ── Headline — starts at 60% down, left-aligned ── */}
-      <div style={{
-        position: 'absolute',
-        top: `${H * 0.60}px`,
-        bottom: `${120 * sc}px`,
-        left: `${60 * sc}px`,
-        right: `${60 * sc}px`,
-        zIndex: 3,
-      }}>
+      {/* Headline — starts at 60% down */}
+      <div style={{ position: 'absolute', top: `${H * 0.60}px`, bottom: `${120 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3 }}>
         <div style={{ fontSize: `${fontSize}px`, fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: `${14 * sc}px` }}>
           {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
         </div>
-
         {v.subtext && (
-          <p style={{ color: Brand.colors.text_muted, fontSize: `${18 * sc}px`, fontWeight: 500, lineHeight: 1.4, margin: 0 }}>
-            {v.subtext}
-          </p>
+          <p style={{ color: Brand.colors.text_muted, fontSize: `${18 * sc}px`, fontWeight: 500, lineHeight: 1.4, margin: 0 }}>{v.subtext}</p>
         )}
       </div>
 
       {/* Footer */}
-      <div style={{
-        position: 'absolute', bottom: `${34 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3,
-      }}>
+      <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3 }}>
         <Footer sc={sc} light />
       </div>
     </div>
@@ -185,14 +181,24 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
   const v = slide.visual as CTASlideVisual;
   const PH = 52 * sc;
 
+  const hasImagen = !!slide.backgroundImage;
+
   // ── Option A: Photo variant — Nick on right, text on left ──
   if (v.layout_variant === 'photo') {
     return (
-      <div style={{ position: 'relative', width: `${W}px`, height: `${H}px`, backgroundColor: Brand.colors.bg_primary, overflow: 'hidden', fontFamily: Brand.typography.font_family }}>
+      <div style={{
+        position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden', fontFamily: Brand.typography.font_family,
+        ...(hasImagen
+          ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+          : { backgroundColor: Brand.colors.bg_primary }),
+      }}>
         {/* Nick's photo — right half */}
-        <img src="/nick.jpg" alt="" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.60}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.72 }} />
+        {/* When Imagen 3 is present, add a base dark overlay first */}
+        {hasImagen && <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 0 }} />}
+        {/* Nick's photo on right — always shown for photo layout (design element, not background) */}
+        <img src="/nick.jpg" alt="" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.60}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: hasImagen ? 0.55 : 0.72, zIndex: 1 }} />
         {/* Gradient fade left — keeps text readable */}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 32%, rgba(17,17,17,0.88) 52%, rgba(17,17,17,0.40) 72%, rgba(17,17,17,0.08) 100%)` }} />
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 32%, rgba(17,17,17,0.88) 52%, rgba(17,17,17,0.40) 72%, rgba(17,17,17,0.08) 100%)`, zIndex: 2 }} />
         {/* Subtle orange glow on left */}
         <div style={{ position: 'absolute', left: 0, top: 0, width: '60%', height: '100%', background: 'radial-gradient(ellipse 80% 60% at 25% 50%, rgba(255,113,7,0.09) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
@@ -219,9 +225,17 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
 
   // ── Option B: Text-only (centered) ──
   return (
-    <div style={{ position: 'relative', width: `${W}px`, height: `${H}px`, backgroundColor: Brand.colors.bg_primary, overflow: 'hidden', fontFamily: Brand.typography.font_family }}>
+    <div style={{
+      position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden', fontFamily: Brand.typography.font_family,
+      ...(hasImagen
+        ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : { backgroundColor: Brand.colors.bg_primary }),
+    }}>
 
-      {/* Stronger radial glow for CTA */}
+      {/* Dark overlay */}
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: hasImagen ? 'rgba(0,0,0,0.50)' : 'transparent' }} />
+
+      {/* Stronger radial glow for CTA — adds brand orange on top of any background */}
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 55% at 50% 50%, rgba(255,113,7,0.12) 0%, transparent 70%)' }} />
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 40% 30% at 50% 48%, rgba(255,113,7,0.06) 0%, transparent 65%)' }} />
 
@@ -280,6 +294,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
 
   const isBigQuote = slide.visual?.type === 'big_quote';
   const hasVis = slide.visual?.type !== 'none' && !!slide.visual?.type;
+  const hasImagen = !!slide.backgroundImage;
   const paras = (slide.text || '').split('\n\n').filter(Boolean);
   const chars = (slide.text || '').length;
   const fs = isBigQuote
@@ -289,13 +304,19 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   return (
     <div ref={ref} style={{
       width: `${W}px`, height: `${H}px`,
-      backgroundColor: Brand.colors.bg_primary,
       position: 'relative', overflow: 'hidden', flexShrink: 0,
       fontFamily: Brand.typography.font_family,
       display: 'flex', flexDirection: 'column',
+      // Imagen 3 background when available, else dark solid
+      ...(hasImagen
+        ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : { backgroundColor: Brand.colors.bg_primary }),
     }}>
-      {/* Subtle top gradient wash */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '25%', background: `linear-gradient(to bottom, rgba(255,113,7,0.025), transparent)`, pointerEvents: 'none' }} />
+      {/* Dark overlay for text readability over Imagen 3 */}
+      {hasImagen && <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 0, pointerEvents: 'none' }} />}
+
+      {/* Subtle top gradient wash — only when no Imagen 3 */}
+      {!hasImagen && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '25%', background: `linear-gradient(to bottom, rgba(255,113,7,0.025), transparent)`, pointerEvents: 'none' }} />}
 
       {/* ── Step 4 accent system ── */}
       {/* Slide 2: 3px left border */}

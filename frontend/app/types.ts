@@ -97,9 +97,10 @@ export interface CarouselSlide {
   slide_number?: number;
   type?: 'hook' | 'context' | 'proof' | 'how_it_works' | 'results' | 'cta' | 'cover' | 'content' | 'step' | 'skill';
   text: string;
-  accent_word?: string;    // single word to render in #FF7107 orange
-  section_label?: string;  // e.g. "Step 1" or "— Skill 2 —"
+  accent_word?: string;       // single word to render in #FF7107 orange
+  section_label?: string;     // e.g. "Step 1" or "— Skill 2 —"
   visual: SlideVisual;
+  backgroundImage?: string;   // base64 data URL from Imagen 3 generation
 }
 
 // ─── Quality Gate ─────────────────────────────────────────────────────────────
