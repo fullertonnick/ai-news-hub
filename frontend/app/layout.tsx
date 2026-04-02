@@ -5,8 +5,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'], weight: ['400','600','700','800'], display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'AI News Hub | Nick Cornelius',
-  description: 'Trending AI news and carousel generator for business owners.',
+  title: 'SimpliScale Command Center',
+  description: 'Content growth dashboard — carousels, scripts, posts, LinkedIn, ideas.',
   twitter: { card: 'summary_large_image', creator: '@thenickcornelius' },
 };
 

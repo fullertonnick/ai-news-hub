@@ -181,17 +181,7 @@ function pickInRange(hash: number, min: number, max: number): number {
   return min + (hash % (max - min + 1));
 }
 
-function generateTopicStats(topic: string, category: string, baseHash: number, research: any): StatItem[] {
-  // Priority 1: extract real metrics from research if they look specific
-  if (research?.metrics?.length >= 4) {
-    // research.metrics are strings like "Hours saved per week" — use as labels with seeded values
-    // Only use this path if metrics look non-generic
-    const isSpecific = research.metrics.some((m: string) => /\d/.test(m));
-    if (isSpecific) {
-      // Has actual numbers — use them (rare without Gemini, but possible)
-    }
-  }
-
+function generateTopicStats(topic: string, category: string, baseHash: number, _research: any): StatItem[] {
   const cat = (STAT_RANGES[category as CategoryKey] || STAT_RANGES['business-ai']);
   // Use 4 different hash seeds per stat slot for variety
   const h1 = baseHash;
@@ -373,7 +363,14 @@ function buildCaption(topic: string, keyword: string, category: CategoryKey): st
   const hook = CAPTION_HOOKS[category] || `Your competitors are already using ${topic}. Here's the playbook they're following.`;
   const bullets = CAPTION_BULLETS[category] || CAPTION_BULLETS['business-ai'];
   const magnet = generateLeadMagnetText(category);
-  return `${hook}\n\nHere's the complete breakdown:\n\n${bullets.join('\n')}\n\nComment "${keyword}" and I'll send you the ${magnet} 🔥\n\n📌 Save this before you lose it\n\n#claudecode #claudeai #aiautomation #aiforbusiness #aiagents #automation #anthropic #artificialintelligence #aitools #machinelearning #futureofwork #productivity #businessowner #entrepreneurship #businessgrowth #scaleyourbusiness #simpliscale #thenickcornelius #nocode #solopreneur #agencyowner`;
+  const baseHashtags = '#aiautomation #aiforbusiness #automation #artificialintelligence #aitools #futureofwork #productivity #businessowner #entrepreneurship #businessgrowth #scaleyourbusiness #simpliscale #thenickcornelius #solopreneur #agencyowner';
+  const catHashtags: Record<CategoryKey, string> = {
+    'claude-code':     '#claudecode #claudeai #anthropic #codingwithai #aideveloper #devtools',
+    'make-automation': '#makecom #nocode #workflowautomation #businessautomation #zapier #n8n',
+    'ai-agents':       '#aiagents #autonomousai #agenticai #machinelearning #buildwithAI #anthropic',
+    'business-ai':     '#chatgpt #openai #aistrategy #businessai #aitips #machinelearning',
+  };
+  return `${hook}\n\nHere's the complete breakdown:\n\n${bullets.join('\n')}\n\nComment "${keyword}" and I'll send you the ${magnet} 🔥\n\n📌 Save this before you lose it\n\n${catHashtags[category] || catHashtags['business-ai']} ${baseHashtags}`;
 }
 
 // ─── Quality Gate ─────────────────────────────────────────────────────────────
@@ -416,11 +413,12 @@ function runQualityGate(slides: any[], keyword: string, caption: string, topic =
   // Fix CTA keyword in last slide too (Bonus Fix 1+2)
   const fixedSlides = slides.map((s, i) => {
     let base = i === 0 ? fixedCover : s;
-    // Fix CTA slide keyword
+    // Fix CTA slide keyword + ensure layout_variant is set
     if (base.visual?.type === 'cta_slide') {
       const ctaKw = KW_STOP.has((base.visual.keyword || '').toUpperCase())
         ? kw : (base.visual.keyword || kw).toUpperCase();
-      base = { ...base, visual: { ...base.visual, keyword: ctaKw } };
+      const variant = base.visual.layout_variant || (hashTopic(ctaKw) % 3 !== 2 ? 'photo' : 'text');
+      base = { ...base, visual: { ...base.visual, keyword: ctaKw, layout_variant: variant } };
     }
     const fixedText = replaceForbidden(truncateWords(base.text || '', i === 0 ? 12 : 40));
     return { ...base, text: fixedText };
@@ -869,7 +867,7 @@ Return ONLY valid JSON:
       "accent_word": "one word",
       "section_label": "label or null",
       "visual": {
-        "type": "cover_photo|code_block|stats_grid|diagram|steps_list|cta_slide|none",
+        "type": "cover_photo|code_block|stats_grid|diagram|steps_list|skill_card|big_quote|comparison|cta_slide|none",
         "gradient_hue": ${generateGradientHue(topic)},
         "photo_direction": "pose desc (cover_photo only)",
         "floating_elements": ["emoji1","emoji2","emoji3","emoji4","emoji5"],

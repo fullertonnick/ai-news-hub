@@ -150,3 +150,82 @@ export interface ResearchData {
   metrics: string[];
   full_research: string;
 }
+
+// ─── Content Dashboard Types ──────────────────────────────────────────────────
+
+export type Platform = 'instagram_carousel' | 'instagram_reel' | 'x' | 'linkedin' | 'skool';
+export type ContentStatus = 'draft' | 'scheduled' | 'published' | 'failed';
+
+export interface ContentItem {
+  id: string;
+  platform: Platform;
+  title: string;
+  body: string;
+  status: ContentStatus;
+  scheduled_at?: string;
+  published_at?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface XPost {
+  id: string;
+  text: string;
+  char_count: number;
+  thread?: string[];       // for multi-tweet threads
+  status: ContentStatus;
+  scheduled_at?: string;
+  created_at: string;
+}
+
+export interface Idea {
+  id: string;
+  platform?: Platform;     // null = cross-platform
+  title: string;
+  description: string;
+  source: 'idea_engine' | 'manual' | 'news_feed';
+  status: 'new' | 'in_progress' | 'used' | 'archived';
+  tags: string[];
+  created_at: string;
+}
+
+export interface LinkedInCampaign {
+  id: string;
+  name: string;
+  status: 'active' | 'paused' | 'completed';
+  search_url: string;
+  sequence: LinkedInAction[];
+  daily_limit: number;
+  prospects_count: number;
+  connected_count: number;
+  created_at: string;
+}
+
+export interface LinkedInAction {
+  action: 'view_profile' | 'connect' | 'message' | 'inmail' | 'follow';
+  delay_days: number;
+  template?: string;
+}
+
+export interface LinkedInProspect {
+  id: string;
+  campaign_id: string;
+  profile_url: string;
+  name: string;
+  headline?: string;
+  company?: string;
+  current_step: number;
+  status: 'pending' | 'connected' | 'messaged' | 'replied' | 'skipped';
+  next_action_at?: string;
+}
+
+// ─── Dashboard Navigation ─────────────────────────────────────────────────────
+
+export interface NavItem {
+  label: string;
+  href: string;
+  icon: string;
+  badge?: number;
+  disabled?: boolean;
+}

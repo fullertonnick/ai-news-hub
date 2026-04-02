@@ -53,6 +53,7 @@ export default function CarouselGenerator({ topic, onClose }: Props) {
   const [bgProgress, setBgProgress] = useState(0);
   const [bgWarning, setBgWarning] = useState('');
   const exportRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const genCounterRef = useRef(0); // Race condition guard — increments on each generate
 
   // ── Imagen 3 helpers ────────────────────────────────────────────────────────
 
@@ -113,6 +114,8 @@ export default function CarouselGenerator({ topic, onClose }: Props) {
   }, [topic]);
 
   const doGenerate = useCallback(async () => {
+    // Increment generation counter — if another generate fires, this run's results are discarded
+    const thisGen = ++genCounterRef.current;
     setLoading(true); setError(''); setBgWarning('');
     try {
       // Step 1: Generate text content
@@ -122,6 +125,7 @@ export default function CarouselGenerator({ topic, onClose }: Props) {
       });
       const d = await r.json();
       if (!d.slides?.length) throw new Error('No slides');
+      if (thisGen !== genCounterRef.current) return; // stale — discard
 
       // Step 2: Show preview with loading state (text content visible immediately)
       const textSlides: CarouselSlide[] = d.slides;
@@ -139,6 +143,7 @@ export default function CarouselGenerator({ topic, onClose }: Props) {
       const kw = d.keyword || '';
 
       const bgImages = await generateAllBackgrounds(topic, category, kw);
+      if (thisGen !== genCounterRef.current) return; // stale — discard
 
       const failCount = bgImages.filter(b => !b).length;
       if (failCount > 0) setBgWarning(`${failCount} background(s) used dark fallback`);
@@ -155,6 +160,7 @@ export default function CarouselGenerator({ topic, onClose }: Props) {
 
       setImagesLoading(false);
     } catch (err) {
+      if (thisGen !== genCounterRef.current) return; // stale — ignore error too
       console.error('Generation error:', err);
       setError('Generation failed. Try again.');
       setLoading(false);

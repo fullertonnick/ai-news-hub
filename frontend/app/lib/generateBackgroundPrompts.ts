@@ -1,4 +1,4 @@
-export type TopicCategory = 'claude-code' | 'make-automation' | 'ai-agents' | 'business-ai' | 'general';
+export type TopicCategory = 'claude-code' | 'make-automation' | 'ai-agents' | 'business-ai';
 
 export interface SlideBackgroundPrompts {
   cover: string;
@@ -26,9 +26,6 @@ const COVER_PROMPTS: Record<TopicCategory, string> = {
 
   'business-ai':
     'Dark luxury executive office at night, floor-to-ceiling windows showing blurred city skyline, warm orange ambient lighting from architectural fixtures, premium dark wood and glass surfaces, single laptop on minimal desk, deep shadows, high contrast, cinematic color grade, no people, no text, 4K ultra detailed',
-
-  'general':
-    'Dark cinematic creative studio at night, warm orange accent lighting, deep shadows, professional atmosphere, minimal desk setup with glowing screen, bokeh depth of field, teal-orange color grade, anamorphic lens, no people, no text, 4K',
 };
 
 // ─── Position 2 Prompts (concept / hook slide) ────────────────────────────────
@@ -45,9 +42,6 @@ const SLIDE2_PROMPTS: Record<TopicCategory, string> = {
 
   'business-ai':
     'Dark minimal business aesthetic, single illuminated orange geometric shape on near-black background, professional, premium, depth and shadow, no text, no faces, 4K',
-
-  'general':
-    'Dark abstract orange light trails on near-black background, long exposure photography aesthetic, minimal, depth of field, professional, no text, 4K',
 };
 
 // ─── Position 3 Prompt (evidence / stats slide) ───────────────────────────────
@@ -72,7 +66,7 @@ export function generateBackgroundPrompts(
   topicCategory: TopicCategory,
   keyword: string
 ): SlideBackgroundPrompts {
-  const cat = topicCategory in COVER_PROMPTS ? topicCategory : 'general';
+  const cat = topicCategory in COVER_PROMPTS ? topicCategory : 'business-ai';
   return {
     cover:  COVER_PROMPTS[cat],
     slide2: SLIDE2_PROMPTS[cat],

@@ -200,10 +200,10 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
         {/* Gradient fade left — keeps text readable */}
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 32%, rgba(17,17,17,0.88) 52%, rgba(17,17,17,0.40) 72%, rgba(17,17,17,0.08) 100%)`, zIndex: 2 }} />
         {/* Subtle orange glow on left */}
-        <div style={{ position: 'absolute', left: 0, top: 0, width: '60%', height: '100%', background: 'radial-gradient(ellipse 80% 60% at 25% 50%, rgba(255,113,7,0.09) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', left: 0, top: 0, width: '60%', height: '100%', background: 'radial-gradient(ellipse 80% 60% at 25% 50%, rgba(255,113,7,0.09) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 3 }} />
 
         {/* Left content column */}
-        <div style={{ position: 'absolute', left: `${PH}px`, right: `${W * 0.52}px`, top: 0, bottom: `${80 * sc}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: `${22 * sc}px` }}>
+        <div style={{ position: 'absolute', left: `${PH}px`, right: `${W * 0.52}px`, top: 0, bottom: `${80 * sc}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: `${22 * sc}px`, zIndex: 4 }}>
           <div style={{ fontSize: `${40 * sc}px`, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em' }}>
             {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
           </div>
@@ -215,9 +215,9 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
         </div>
 
         {/* Footer */}
-        <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${PH}px`, right: `${PH}px`, borderTop: '1px solid rgba(255,255,255,0.10)', paddingTop: `${12 * sc}px`, display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: `${12 * sc}px`, fontWeight: 500 }}>@thenickcornelius</span>
-          <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: `${12 * sc}px`, fontWeight: 500 }}>{Brand.brand.save_cta}</span>
+        <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${PH}px`, right: `${PH}px`, borderTop: `1px solid ${Brand.colors.divider}`, paddingTop: `${12 * sc}px`, display: 'flex', justifyContent: 'space-between', zIndex: 4 }}>
+          <span style={{ color: Brand.colors.text_muted, fontSize: `${12 * sc}px`, fontWeight: 500 }}>@thenickcornelius</span>
+          <span style={{ color: Brand.colors.text_muted, fontSize: `${12 * sc}px`, fontWeight: 500 }}>{Brand.brand.save_cta}</span>
         </div>
       </div>
     );
@@ -511,7 +511,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                         <div style={{ fontSize: `${18 * sc}px`, fontWeight: 700, color: Brand.colors.text_primary }}>{v.name}</div>
                         <div style={{ fontSize: `${12 * sc}px`, color: Brand.colors.text_muted, marginTop: `${2 * sc}px` }}>{v.source}</div>
                       </div>
-                      <div style={{ marginLeft: 'auto', background: '#3a3a3a', borderRadius: `${6 * sc}px`, padding: `${4 * sc}px ${10 * sc}px`, fontSize: `${10 * sc}px`, color: Brand.colors.text_muted, fontWeight: 500, textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>{v.category}</div>
+                      <div style={{ marginLeft: 'auto', background: Brand.colors.bg_surface, borderRadius: `${6 * sc}px`, padding: `${4 * sc}px ${10 * sc}px`, fontSize: `${10 * sc}px`, color: Brand.colors.text_muted, fontWeight: 500, textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>{v.category}</div>
                     </div>
                   </div>
                   {v.description && <p style={{ fontSize: `${13 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5, margin: 0, textAlign: 'center' }}>{v.description}</p>}
