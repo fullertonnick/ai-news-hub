@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { label: 'Instagram Scripts', href: '/dashboard/instagram-scripts', icon: Video },
   { label: 'YouTube',          href: '/dashboard/youtube',           icon: Youtube },
   { label: 'Idea Engine',      href: '/dashboard/ideas',            icon: Lightbulb },
-  { label: 'LinkedIn',         href: '/dashboard/linkedin',         icon: Linkedin, disabled: true },
+  { label: 'LinkedIn',         href: '/dashboard/linkedin',         icon: Linkedin },
   { label: 'Skool',            href: '/dashboard/skool',            icon: MessageSquare, disabled: true },
   { label: 'Settings',         href: '/dashboard/settings',         icon: Settings },
 ];
