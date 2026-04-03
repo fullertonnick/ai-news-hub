@@ -1,7 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { NEGATIVE_PROMPT } from '../../app/lib/generateBackgroundPrompts';
 
-const TIMEOUT_MS = 55_000; // 55s — below Vercel Pro's 60s limit
+// Tell Vercel to allow up to 60s for this function (requires Pro plan)
+export const config = { maxDuration: 60 };
+
+const TIMEOUT_MS = 55_000; // 55s — below Vercel's 60s limit
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

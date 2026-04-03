@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+export const config = { maxDuration: 60 };
+
 // ─── Forbidden Words ──────────────────────────────────────────────────────────
 
 const FORBIDDEN: Record<string, string> = {

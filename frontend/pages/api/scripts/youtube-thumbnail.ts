@@ -1,4 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+
+export const config = { maxDuration: 60 };
 import { NEGATIVE_PROMPT } from '../../../app/lib/generateBackgroundPrompts';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

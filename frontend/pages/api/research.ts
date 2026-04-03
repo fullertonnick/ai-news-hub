@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+export const config = { maxDuration: 60 };
+
 function fallback(topic: string) {
   return {
     topic,
