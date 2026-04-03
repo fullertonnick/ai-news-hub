@@ -111,7 +111,7 @@ Return ONLY valid JSON:
   "full_research": "3-4 paragraphs of deep context: what this technology/concept actually does, why it matters RIGHT NOW, the business case with real numbers, and what separates the businesses winning vs losing with it"
 }`;
 
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

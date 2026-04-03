@@ -39,7 +39,7 @@ CRITICAL RULES:
 Return the script as plain text, each sentence on its own line. Add [HOOK], [PROBLEM], [SOLUTION], [PROOF], [CTA] section labels. Return ONLY the script text in JSON: {"script": "..."}`;
 
   try {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
