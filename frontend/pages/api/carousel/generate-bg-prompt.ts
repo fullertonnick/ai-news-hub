@@ -43,7 +43,7 @@ STYLE REQUIREMENTS (SimpliScale brand):
 - Dark, cinematic, professional
 - Primary accent: warm orange (#FF7107) and amber tones
 - Near-black backgrounds (#111111 base)
-- Aspect ratio: 4:5 portrait
+- Aspect ratio: 3:4 portrait
 - Bokeh depth of field, cinematic lens
 - Premium, modern, tech-forward aesthetic
 - No text, no typography, no letters, no numbers

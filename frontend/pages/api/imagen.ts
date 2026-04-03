@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const attempt = async (signal: AbortSignal): Promise<Response> => {
     return fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -30,10 +30,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           instances: [{ prompt }],
           parameters: {
             sampleCount: 1,
-            aspectRatio: '4:5',
+            aspectRatio: '3:4',
             negativePrompt: fullNegative,
             personGeneration: 'dont_allow',
-            safetySetting: 'block_some',
+            safetySetting: 'block_low_and_above',
           },
         }),
       }
