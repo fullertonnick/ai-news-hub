@@ -19,74 +19,110 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const apiKey = process.env.GEMINI_API_KEY;
   const category = detectCategory(topic);
 
-  const prompt = `You are Nick Cornelius (@thenickcornelius) — direct AI business educator. $70K+/month from KingCaller AI ($50K) + SimpliScale ($20K). Former $55K/year pharma chemist → 7-figure entrepreneur in 4 years. 40+ employees, location-independent.
+  const prompt = `You are writing Instagram carousel slides for Nick Cornelius (@thenickcornelius / SimpliScale).
 
-You create Instagram carousels for the SimpliScale brand. Your voice is: direct, no-fluff, high-energy, authority-driven, peer-to-peer. You never position as a guru — always entrepreneur sharing with entrepreneurs. You speak only from direct experience.
+NICK'S PROFILE: Former $55K/year pharmaceutical chemist → 7-figure entrepreneur in 4 years. Runs KingCaller AI ($50K/mo) and SimpliScale ($20K/mo). 40+ employees, location-independent. Teaches business owners to implement AI and automation — from direct experience, never theory.
 
-Create a ${style === 'use_case_list' ? '5-slide USE CASE' : style === 'prompt_reveal' ? '5-slide PROMPT REVEAL' : '5-slide BREAKDOWN'} Instagram carousel about: "${topic}"
+TOPIC: "${topic}"
+CATEGORY: ${category}
+FORMAT: ${style}
+${research_context?.full_research ? `\nRESEARCH:\n${research_context.full_research.slice(0, 3000)}` : ''}
 
-Category: ${category}
-${research_context?.full_research ? `Research context:\n${research_context.full_research.slice(0, 2000)}` : ''}
+═══════════════════════════════════════════════════════
+COPY STYLE — EDUCATION-FIRST, PRACTICAL, TECHNICAL
+═══════════════════════════════════════════════════════
 
-BRAND VOICE RULES:
-- Headlines: 3-7 words max, punchy. One accent word per headline gets highlighted orange.
-- Body: 15-40 words per slide max. Less is more.
-- NEVER use: leverage, utilize, synergy, game-changer, revolutionary, paradigm, cutting-edge
-- Specific numbers always — never vague claims
-- Sound like a smart friend giving insider info
-- Every sentence must serve conversion or education
+Write like you're teaching a capable business owner exactly HOW to do something — not selling them on WHY they should care. Every slide must teach, reveal, or demonstrate. Zero filler.
 
-SLIDE STRUCTURE:
-Slide 1 (COVER): Bold scroll-stopping headline (4-8 words). Use one of these formulas:
-  - "Stop [Old Behavior]. [Tool] Does It In [Time]."
-  - "How I [Result] Using Only [Tool]"
-  - "The [AI Thing] Nobody Is Talking About"
-  - "[Number] [Tool] [Things] That [Transform] in [Timeframe]"
+VOICE RULES:
+• Direct and practical — "Here's how this works" not "This could potentially help"
+• Show the EXACT process, tool, or prompt — don't describe it vaguely
+• Use specific numbers from real scenarios (hours saved, revenue impact, cost reduction)
+• Sound like a technical friend giving you the actual playbook, not a marketer
+• Short sentences. Max 12 words each. Many under 6 words.
+• One clear takeaway per slide — if you can't summarize the slide in 5 words, it's too complex
+• Never use: leverage, utilize, synergy, game-changer, revolutionary, paradigm, cutting-edge, hack
+• Never hedge: no "might", "could", "probably", "I think"
 
-Slides 2-4 (CONTENT): Each slide has ONE clear idea. Suggest a visual_type for each:
-  - code_block: for prompts, commands, technical content
-  - stats_grid: for data/metrics (4 stats with icon, value, label)
-  - steps_list: for numbered action steps (3 steps with title + description)
-  - diagram: for workflows/processes (3 nodes: input → process → output)
-  - big_quote: for a powerful standalone quote
-  - comparison: for before/after (5 items each side)
-  - skill_card: for featuring a specific tool
-  - checklist: for a list of items with checkmarks
-  - none: for text-only slides
+SLIDE COPY PATTERNS THAT WORK:
 
-Slide 5 (CTA): "Want [specific deliverable]?" format.
-  - Choose a KEYWORD: the main tool/subject (max 8 chars, ALL CAPS)
-  - Never use stop words as keyword (WILL, HOW, THE, etc.)
-  - Tool names always win: claude → CLAUDE, make.com → MAKE
+Cover slide patterns:
+  "I [did specific thing] using [specific tool]. Here's the exact setup."
+  "[Number] [specific tools/prompts/steps] that replaced [expensive/slow thing]"
+  "The [tool] setup that runs [business function] while I sleep"
+  "How [tool] handles [boring task] in [timeframe] — step by step"
 
-Also generate:
-- Instagram caption: strong hook, 4 bullets with →, CTA with keyword, 📌 save, 20 hashtags
-- The keyword for the CTA
+Content slide patterns:
+  "Step 1: [Specific action verb + what exactly to do]"
+  "[Before state] → [Tool/Action] → [After state with number]"
+  "Most people [wrong approach]. Here's what actually works:"
+  "The prompt: [Show the actual prompt or command, verbatim]"
+  "Result: [Specific metric] in [specific timeframe]"
 
-Return ONLY valid JSON:
+CTA slide patterns:
+  "Want the exact [template/prompt pack/blueprint]?"
+  "I packaged this into a [specific deliverable]. Comment [KEYWORD]."
+
+═══════════════════════════════════════════════════════
+STRUCTURE — 5 SLIDES
+═══════════════════════════════════════════════════════
+
+SLIDE 1 (COVER): 4-8 word hook. Must create curiosity about a SPECIFIC outcome or reveal. Not generic motivation. Include what tool/system and what result.
+
+SLIDE 2 (THE HOOK): Set up the problem OR reveal the key insight. 15-30 words max. Make the reader feel "I need to know this." Include one surprising data point or contrarian truth.
+
+SLIDE 3 (THE MEAT): The actual HOW. Show the process, the prompt, the workflow, or the data. This is the slide people screenshot. 20-40 words. Be technical but clear. Suggest the right visual_type:
+  - code_block: if showing a prompt, command, or template
+  - steps_list: if showing a numbered process (3 steps max)
+  - stats_grid: if showing measurable results (4 metrics)
+  - diagram: if showing a workflow (input → process → output)
+  - comparison: if showing before/after (5 items each)
+  - checklist: if showing a list of requirements or features
+  - skill_card: if featuring a specific tool with rating
+  - big_quote: if one powerful statement carries the slide
+
+SLIDE 4 (THE PROOF): Results, implementation timeline, or the "what happens next" step. 15-30 words. Specific numbers. Show that this isn't theory — it's been done. Or: give the next action step.
+
+SLIDE 5 (CTA): "Want the exact [deliverable]?" + keyword. Keep it to one sentence + the keyword.
+
+KEYWORD: Pick the most memorable tool name or action word from the topic. Max 8 chars. ALL CAPS. Tool names win: CLAUDE, MAKE, AGENT, etc. NEVER use stop words (THE, HOW, WILL, etc).
+
+CAPTION: Write a strong Instagram caption:
+  - Hook: 1 sentence that stops the scroll (match cover energy)
+  - 4 bullets starting with → that preview each slide's value
+  - CTA: Comment "[KEYWORD]" and I'll send you the [specific deliverable] 🔥
+  - 📌 Save this before you lose it
+  - 15-20 relevant hashtags
+
+═══════════════════════════════════════════════════════
+
+Return ONLY valid JSON (no markdown, no backticks wrapping the JSON):
 {
   "slides": [
-    { "text": "slide copy", "accent_word": "one word", "section_label": "optional label or null", "visual_type": "cover_photo|code_block|stats_grid|etc." }
+    { "text": "slide copy here", "accent_word": "single highest-impact word", "section_label": null, "visual_type": "cover_photo" },
+    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "none|code_block|stats_grid|etc" },
+    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "..." },
+    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "..." },
+    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "cta_slide" }
   ],
-  "caption": "full Instagram caption",
-  "keyword": "KEYWORD",
-  "category": "${category}"
-}
-
-CRITICAL: slides[0].visual_type MUST be "cover_photo". slides[4].visual_type MUST be "cta_slide". Generate exactly 5 slides.`;
+  "caption": "full caption",
+  "keyword": "KEYWORD"
+}`;
 
   if (!apiKey) {
-    // Fallback — hardcoded
+    // Fallback — education-first, practical copy
+    const toolName = /claude/i.test(topic) ? 'Claude Code' : /make/i.test(topic) ? 'Make.com' : /agent/i.test(topic) ? 'AI Agents' : 'AI';
+    const kw = /claude/i.test(topic) ? 'CLAUDE' : /make/i.test(topic) ? 'MAKE' : /agent/i.test(topic) ? 'AGENT' : 'GUIDE';
     return res.json({
       slides: [
-        { id: uid(), text: `Stop Guessing. ${topic.split(/\s+/).slice(0, 2).join(' ')} Handles It.`, accent_word: 'Handles', visual_type: 'cover_photo', backgroundStatus: 'pending' },
-        { id: uid(), text: `Most business owners waste 10+ hours a week on tasks AI can handle in minutes. Here's the system that changes everything.`, accent_word: 'system', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `The results speak for themselves. Real numbers from real businesses.`, accent_word: 'results', visual_type: 'stats_grid', backgroundStatus: 'pending' },
-        { id: uid(), text: `Start implementing this week — step by step:`, accent_word: 'week', visual_type: 'steps_list', section_label: '— Your Action Plan —', backgroundStatus: 'pending' },
-        { id: uid(), text: 'Want the Full Implementation Guide?', accent_word: 'Full', visual_type: 'cta_slide', backgroundStatus: 'pending' },
+        { id: uid(), text: `I automated ${topic.split(/\s+/).slice(0, 3).join(' ').toLowerCase()} with ${toolName}. Here's the exact setup.`, accent_word: 'exact', visual_type: 'cover_photo', backgroundStatus: 'pending' },
+        { id: uid(), text: `Most people overcomplicate this. The entire system is 3 steps and takes under 2 hours to build. No code required.`, accent_word: 'overcomplicate', visual_type: 'none', backgroundStatus: 'pending' },
+        { id: uid(), text: `Step 1: Map your highest-volume repeating task.\nStep 2: Build the trigger + 3 core modules.\nStep 3: Test with one real scenario before scaling.`, accent_word: 'trigger', visual_type: 'steps_list', section_label: '— The Build —', backgroundStatus: 'pending' },
+        { id: uid(), text: `Result: 12 hrs/week saved. 94% fewer manual errors. ROI positive in 8 days. Running 24/7 since March.`, accent_word: 'saved', visual_type: 'stats_grid', backgroundStatus: 'pending' },
+        { id: uid(), text: `Want the exact blueprint + templates?`, accent_word: 'exact', visual_type: 'cta_slide', backgroundStatus: 'pending' },
       ],
-      caption: `Your competitors are already using ${topic}. Here's the playbook.\n\n→ The system that replaces manual work\n→ Real numbers from businesses using it\n→ Step-by-step implementation guide\n→ The one mistake to avoid\n\nComment "GUIDE" and I'll send you the complete guide 🔥\n\n📌 Save this before you lose it`,
-      keyword: 'GUIDE',
+      caption: `I just automated ${topic.toLowerCase()} — and the setup took less than 2 hours.\n\nHere's everything I used:\n\n→ The 3-step build process (no code)\n→ The exact modules and triggers\n→ Real results: 12 hrs/week saved, 94% fewer errors\n→ How to test before you scale\n\nComment "${kw}" and I'll send you the complete blueprint + templates 🔥\n\n📌 Save this before you lose it\n\n#aiautomation #${toolName.replace(/[.\s]/g, '').toLowerCase()} #automation #aiforbusiness #nocode #businessautomation #solopreneur #agencyowner #scaleyourbusiness #simpliscale #thenickcornelius #productivitytools #workflowautomation #businessgrowth #entrepreneurship`,
+      keyword: kw,
       category,
     });
   }
@@ -107,12 +143,9 @@ CRITICAL: slides[0].visual_type MUST be "cover_photo". slides[4].visual_type MUS
       if (match) text = match[1];
     }
     const parsed = JSON.parse(text.trim());
-
-    // Add IDs and backgroundStatus to each slide
     const slides = (parsed.slides || []).map((s: any) => ({
       ...s, id: uid(), backgroundStatus: 'pending' as const,
     }));
-
     return res.json({ slides, caption: parsed.caption || '', keyword: parsed.keyword || 'GUIDE', category });
   } catch (err) {
     console.error('Generate copy error:', err);
