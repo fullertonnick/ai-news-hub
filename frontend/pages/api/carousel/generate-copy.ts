@@ -19,109 +19,120 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const apiKey = process.env.GEMINI_API_KEY;
   const category = detectCategory(topic);
 
-  const prompt = `You are writing Instagram carousel slides for Nick Cornelius (@thenickcornelius / SimpliScale).
-
-NICK'S PROFILE: Former $55K/year pharmaceutical chemist → 7-figure entrepreneur in 4 years. Runs KingCaller AI ($50K/mo) and SimpliScale ($20K/mo). 40+ employees, location-independent. Teaches business owners to implement AI and automation — from direct experience, never theory.
+  // ─── Tyler Germain-style prompt ─────────────────────────────────────────────
+  const prompt = `You are writing an Instagram carousel for Nick Cornelius (@thenickcornelius).
 
 TOPIC: "${topic}"
-CATEGORY: ${category}
-FORMAT: ${style}
 ${research_context?.full_research ? `\nRESEARCH:\n${research_context.full_research.slice(0, 3000)}` : ''}
 
 ═══════════════════════════════════════════════════════
-COPY STYLE — EDUCATION-FIRST, PRACTICAL, TECHNICAL
+STYLE REFERENCE: TYLER GERMAIN (@itstylergermain)
 ═══════════════════════════════════════════════════════
 
-Write like you're teaching a capable business owner exactly HOW to do something — not selling them on WHY they should care. Every slide must teach, reveal, or demonstrate. Zero filler.
+Study this example carousel by Tyler Germain. Your output must match this EXACT writing style:
 
-VOICE RULES:
-• Direct and practical — "Here's how this works" not "This could potentially help"
-• Show the EXACT process, tool, or prompt — don't describe it vaguely
-• Use specific numbers from real scenarios (hours saved, revenue impact, cost reduction)
-• Sound like a technical friend giving you the actual playbook, not a marketer
-• Short sentences. Max 12 words each. Many under 6 words.
-• One clear takeaway per slide — if you can't summarize the slide in 5 words, it's too complex
-• Never use: leverage, utilize, synergy, game-changer, revolutionary, paradigm, cutting-edge, hack
-• Never hedge: no "might", "could", "probably", "I think"
+COVER: "How to Build an AI Operating System (that runs your business for you...)"
 
-SLIDE COPY PATTERNS THAT WORK:
+SLIDE 2: "Level 1: Claude Chat.
+You open a browser, type a question, get an answer. No memory. No context. You start from zero every single time.
+This is where 99% of people stop."
 
-Cover slide patterns:
-  "I [did specific thing] using [specific tool]. Here's the exact setup."
-  "[Number] [specific tools/prompts/steps] that replaced [expensive/slow thing]"
-  "The [tool] setup that runs [business function] while I sleep"
-  "How [tool] handles [boring task] in [timeframe] — step by step"
+SLIDE 3: "Level 2: Claude Code with a CLAUDE.md.
+Now Claude knows who you are, what you do, and how you like things done. It remembers your rules, your tone, your preferences.
+You stop repeating yourself."
 
-Content slide patterns:
-  "Step 1: [Specific action verb + what exactly to do]"
-  "[Before state] → [Tool/Action] → [After state with number]"
-  "Most people [wrong approach]. Here's what actually works:"
-  "The prompt: [Show the actual prompt or command, verbatim]"
-  "Result: [Specific metric] in [specific timeframe]"
+SLIDE 4: "Level 3: Claude Code with skills.
+Each skill is a focused expert. One writes ads. One designs emails. One builds websites.
+You're not prompting anymore. You're delegating."
 
-CTA slide patterns:
-  "Want the exact [template/prompt pack/blueprint]?"
-  "I packaged this into a [specific deliverable]. Comment [KEYWORD]."
+SLIDE 5: "Level 4: Multiple Claude Code instances, each with different skills.
+One handles marketing. Another handles sales. Another handles operations.
+You now have a team. But you're still the one starting every session."
+
+SLIDE 6: "Level 5: A harness connecting all of them.
+Heartbeats. Mission control. Agent-to-agent communication. Skill discovery. Agents that find and use each other's skills automatically.
+This is an AI operating system."
+
+CTA: "Want to skip straight to Level 5?
+I teach all of this inside AI Innovators. Comment 'AIOS' for an invite."
 
 ═══════════════════════════════════════════════════════
-STRUCTURE — 5 SLIDES
+WHAT MAKES THIS STYLE WORK — COPY THESE PATTERNS:
 ═══════════════════════════════════════════════════════
 
-SLIDE 1 (COVER): 4-8 word hook. Must create curiosity about a SPECIFIC outcome or reveal. Not generic motivation. Include what tool/system and what result.
+1. PROGRESSIVE STRUCTURE: Each slide builds on the previous. "Level 1 → Level 2 → Level 3..." or "Step 1 → Step 2 → Step 3..." — a journey, not random tips.
 
-SLIDE 2 (THE HOOK): Set up the problem OR reveal the key insight. 15-30 words max. Make the reader feel "I need to know this." Include one surprising data point or contrarian truth.
+2. CONVERSATIONAL NARRATIVE: Reads like you're explaining to one smart friend. "You open a browser, type a question, get an answer." Second person, present tense.
 
-SLIDE 3 (THE MEAT): The actual HOW. Show the process, the prompt, the workflow, or the data. This is the slide people screenshot. 20-40 words. Be technical but clear. Suggest the right visual_type:
-  - code_block: if showing a prompt, command, or template
-  - steps_list: if showing a numbered process (3 steps max)
-  - stats_grid: if showing measurable results (4 metrics)
-  - diagram: if showing a workflow (input → process → output)
-  - comparison: if showing before/after (5 items each)
-  - checklist: if showing a list of requirements or features
-  - skill_card: if featuring a specific tool with rating
-  - big_quote: if one powerful statement carries the slide
+3. SHORT PUNCHY SENTENCES: Many under 6 words. "No memory. No context." "You stop repeating yourself." Fragment sentences for impact.
 
-SLIDE 4 (THE PROOF): Results, implementation timeline, or the "what happens next" step. 15-30 words. Specific numbers. Show that this isn't theory — it's been done. Or: give the next action step.
+4. EACH SLIDE ENDS WITH A KICKER: The last sentence is the emotional payoff or realization. "This is where 99% of people stop." "You're not prompting anymore. You're delegating." "This is an AI operating system."
 
-SLIDE 5 (CTA): "Want the exact [deliverable]?" + keyword. Keep it to one sentence + the keyword.
+5. CONCRETE OVER ABSTRACT: "One writes ads. One designs emails. One builds websites." NOT "AI can help with various business tasks."
 
-KEYWORD: Pick the most memorable tool name or action word from the topic. Max 8 chars. ALL CAPS. Tool names win: CLAUDE, MAKE, AGENT, etc. NEVER use stop words (THE, HOW, WILL, etc).
+6. NO MARKETING SPEAK: Zero buzzwords. No "revolutionary", "game-changing", "leverage". Plain language that a 14-year-old would understand.
 
-CAPTION: Write a strong Instagram caption:
-  - Hook: 1 sentence that stops the scroll (match cover energy)
-  - 4 bullets starting with → that preview each slide's value
-  - CTA: Comment "[KEYWORD]" and I'll send you the [specific deliverable] 🔥
-  - 📌 Save this before you lose it
-  - 15-20 relevant hashtags
+7. BUILDS TENSION: Each level reveals something bigger. The reader feels "I need to get to the next level."
+
+8. ACCENT WORD: One key phrase per slide gets highlighted (underlined in orange). It's the concept being introduced — "Claude Chat", "CLAUDE.md", "skills", "Multiple Claude Code instances", "harness connecting all of them".
 
 ═══════════════════════════════════════════════════════
+YOUR TASK
+═══════════════════════════════════════════════════════
 
-Return ONLY valid JSON (no markdown, no backticks wrapping the JSON):
+Write a 7-slide carousel about "${topic}" using Nick's perspective (he runs KingCaller AI + SimpliScale, $70K+/month, former pharma chemist).
+
+SLIDE 1 (COVER): Big bold title + subtitle in parentheses. The title names the concept. The subtitle teases the outcome.
+
+SLIDES 2-6 (CONTENT): Progressive levels/steps. Each slide:
+- Opens with "Level X:" or "Step X:" + the key concept (this becomes accent_word)
+- 2-4 sentences of conversational explanation (concrete, specific, second person)
+- Ends with a kicker line that creates anticipation for the next slide
+- visual_type: "none" (pure text on dark background — this is the style)
+
+SLIDE 7 (CTA):
+- Question that references the highest level: "Want to skip straight to Level X?"
+- One-line offer: "I teach all of this inside [Automation Academy / SimpliScale]."
+- "Comment '[KEYWORD]' for [invite/access/the blueprint]."
+
+KEYWORD: Pick from the topic. Max 8 chars. ALL CAPS. Tool names win.
+
+CAPTION: Write conversational Instagram caption:
+- Hook matching the cover energy
+- 4 bullets with → previewing each level
+- "Comment [KEYWORD] and I'll send you [specific thing] 🔥"
+- "📌 Save this before you lose it"
+- 15-20 hashtags
+
+Return ONLY valid JSON (no markdown wrapping):
 {
   "slides": [
-    { "text": "slide copy here", "accent_word": "single highest-impact word", "section_label": null, "visual_type": "cover_photo" },
-    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "none|code_block|stats_grid|etc" },
-    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "..." },
-    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "..." },
-    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "cta_slide" }
+    { "text": "slide copy", "accent_word": "key phrase to highlight", "section_label": null, "visual_type": "cover_photo" },
+    { "text": "Level 1: ...", "accent_word": "...", "section_label": null, "visual_type": "none" },
+    { "text": "Level 2: ...", "accent_word": "...", "section_label": null, "visual_type": "none" },
+    { "text": "Level 3: ...", "accent_word": "...", "section_label": null, "visual_type": "none" },
+    { "text": "Level 4: ...", "accent_word": "...", "section_label": null, "visual_type": "none" },
+    { "text": "Level 5: ...", "accent_word": "...", "section_label": null, "visual_type": "none" },
+    { "text": "CTA text", "accent_word": "...", "section_label": null, "visual_type": "cta_slide" }
   ],
   "caption": "full caption",
   "keyword": "KEYWORD"
 }`;
 
   if (!apiKey) {
-    // Fallback — education-first, practical copy
-    const toolName = /claude/i.test(topic) ? 'Claude Code' : /make/i.test(topic) ? 'Make.com' : /agent/i.test(topic) ? 'AI Agents' : 'AI';
-    const kw = /claude/i.test(topic) ? 'CLAUDE' : /make/i.test(topic) ? 'MAKE' : /agent/i.test(topic) ? 'AGENT' : 'GUIDE';
+    // Tyler Germain-style fallback
+    const kw = /claude/i.test(topic) ? 'CLAUDE' : /make/i.test(topic) ? 'MAKE' : /agent/i.test(topic) ? 'AGENT' : 'BUILD';
     return res.json({
       slides: [
-        { id: uid(), text: `I automated ${topic.split(/\s+/).slice(0, 3).join(' ').toLowerCase()} with ${toolName}. Here's the exact setup.`, accent_word: 'exact', visual_type: 'cover_photo', backgroundStatus: 'pending' },
-        { id: uid(), text: `Most people overcomplicate this. The entire system is 3 steps and takes under 2 hours to build. No code required.`, accent_word: 'overcomplicate', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `Step 1: Map your highest-volume repeating task.\nStep 2: Build the trigger + 3 core modules.\nStep 3: Test with one real scenario before scaling.`, accent_word: 'trigger', visual_type: 'steps_list', section_label: '— The Build —', backgroundStatus: 'pending' },
-        { id: uid(), text: `Result: 12 hrs/week saved. 94% fewer manual errors. ROI positive in 8 days. Running 24/7 since March.`, accent_word: 'saved', visual_type: 'stats_grid', backgroundStatus: 'pending' },
-        { id: uid(), text: `Want the exact blueprint + templates?`, accent_word: 'exact', visual_type: 'cta_slide', backgroundStatus: 'pending' },
+        { id: uid(), text: `How to ${topic.split(/\s+/).slice(0, 5).join(' ')}\n\n(the system that runs itself...)`, accent_word: topic.split(/\s+/)[0], visual_type: 'cover_photo', backgroundStatus: 'pending' },
+        { id: uid(), text: `Level 1: The manual version.\n\nYou do everything yourself. Every task, every follow-up, every report. You're fast, but you're the bottleneck.\n\nNothing runs without you.`, accent_word: 'manual version', visual_type: 'none', backgroundStatus: 'pending' },
+        { id: uid(), text: `Level 2: One AI tool.\n\nYou find one tool that handles one task. It's faster than you. It doesn't forget. It doesn't sleep.\n\nBut it only does one thing.`, accent_word: 'One AI tool', visual_type: 'none', backgroundStatus: 'pending' },
+        { id: uid(), text: `Level 3: Connected tools.\n\nNow your tools talk to each other. A new lead triggers onboarding. Onboarding triggers a Slack message. The message triggers a follow-up.\n\nYou built a machine.`, accent_word: 'Connected tools', visual_type: 'none', backgroundStatus: 'pending' },
+        { id: uid(), text: `Level 4: AI making decisions.\n\nThe system doesn't just run. It thinks. It scores leads. It routes conversations. It escalates problems.\n\nYou're not managing tasks anymore. You're managing outcomes.`, accent_word: 'AI making decisions', visual_type: 'none', backgroundStatus: 'pending' },
+        { id: uid(), text: `Level 5: The system runs itself.\n\nIt monitors its own performance. It flags what's broken. It suggests what to build next.\n\nYou check in once a day. Everything else is handled.`, accent_word: 'runs itself', visual_type: 'none', backgroundStatus: 'pending' },
+        { id: uid(), text: `Want to skip straight to Level 5?\n\nI built this exact system for my businesses. Comment "${kw}" and I'll send you the blueprint.`, accent_word: 'Level 5', visual_type: 'cta_slide', backgroundStatus: 'pending' },
       ],
-      caption: `I just automated ${topic.toLowerCase()} — and the setup took less than 2 hours.\n\nHere's everything I used:\n\n→ The 3-step build process (no code)\n→ The exact modules and triggers\n→ Real results: 12 hrs/week saved, 94% fewer errors\n→ How to test before you scale\n\nComment "${kw}" and I'll send you the complete blueprint + templates 🔥\n\n📌 Save this before you lose it\n\n#aiautomation #${toolName.replace(/[.\s]/g, '').toLowerCase()} #automation #aiforbusiness #nocode #businessautomation #solopreneur #agencyowner #scaleyourbusiness #simpliscale #thenickcornelius #productivitytools #workflowautomation #businessgrowth #entrepreneurship`,
+      caption: `Most people are stuck at Level 1.\n\nThey do everything manually. Every task, every follow-up, every report.\n\nHere's the 5-level system I used to go from doing everything myself to checking in once a day:\n\n→ Level 1: Manual everything (this is where most stop)\n→ Level 2: One AI tool doing one job\n→ Level 3: Tools connected into a machine\n→ Level 4: AI making decisions for you\n→ Level 5: The system runs itself\n\nComment "${kw}" and I'll send you the full blueprint 🔥\n\n📌 Save this before you lose it\n\n#aiautomation #automation #aiforbusiness #nocode #businessautomation #solopreneur #agencyowner #scaleyourbusiness #simpliscale #thenickcornelius #productivitytools #workflowautomation #businessgrowth #entrepreneurship #claudecode`,
       keyword: kw,
       category,
     });
@@ -146,7 +157,7 @@ Return ONLY valid JSON (no markdown, no backticks wrapping the JSON):
     const slides = (parsed.slides || []).map((s: any) => ({
       ...s, id: uid(), backgroundStatus: 'pending' as const,
     }));
-    return res.json({ slides, caption: parsed.caption || '', keyword: parsed.keyword || 'GUIDE', category });
+    return res.json({ slides, caption: parsed.caption || '', keyword: parsed.keyword || 'BUILD', category });
   } catch (err) {
     console.error('Generate copy error:', err);
     return res.status(500).json({ error: 'Copy generation failed' });
