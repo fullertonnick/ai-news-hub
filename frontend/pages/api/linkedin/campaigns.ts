@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-const VPS_URL = process.env.VPS_URL || 'http://217.216.91.68:3001';
-const VPS_SECRET = process.env.VPS_SECRET || '';
+const VPS_URL = process.env.VPS_URL || 'http://217.216.91.68:3002';
+const VPS_SECRET = process.env.VPS_SECRET || 'simpliscale-vps-2026-secret';
 
 async function proxyToVPS(path: string, method: string, body?: any) {
   const r = await fetch(`${VPS_URL}/api/linkedin${path}`, {
