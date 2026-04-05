@@ -46,29 +46,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    let response = await attempt(controller.signal);
+    // Try up to 3 times (API sometimes returns empty predictions intermittently)
+    let imageBase64: string | undefined;
+    let lastError: string = '';
 
-    // Retry once on rate limit with 2s backoff
-    if (response.status === 429) {
-      await new Promise(r => setTimeout(r, 2000));
-      response = await attempt(controller.signal);
+    for (let i = 0; i < 3; i++) {
+      let response = await attempt(controller.signal);
+
+      // Retry once on rate limit with 2s backoff
+      if (response.status === 429) {
+        await new Promise(r => setTimeout(r, 2000));
+        response = await attempt(controller.signal);
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Imagen 4 API error (attempt ${i + 1}):`, errorText);
+        lastError = `api_error_${response.status}`;
+        // If 400, don't retry — it's a prompt issue
+        if (response.status === 400) {
+          return res.status(400).json({ error: 'Invalid prompt', details: 'The image generation service rejected this prompt. Try rewording it.' });
+        }
+        continue;
+      }
+
+      const data = await response.json();
+      imageBase64 = data?.predictions?.[0]?.bytesBase64Encoded;
+
+      if (imageBase64) break;
+
+      // Empty response — log and retry
+      const reason = data?.predictions?.[0]?.safetyAttributes ? 'safety_filter' : 'empty_response';
+      console.error(`Imagen 4 ${reason} (attempt ${i + 1}):`, JSON.stringify(data).slice(0, 500));
+      lastError = reason;
+      await new Promise(r => setTimeout(r, 1000));
     }
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Imagen 4 API error:', errorText);
-      // Don't leak raw API error details to client
-      return res.status(response.status).json({ error: 'Imagen 4 generation failed' });
-    }
-
-    const data = await response.json();
-    const imageBase64 = data?.predictions?.[0]?.bytesBase64Encoded;
 
     if (!imageBase64) {
-      // Safety filter or empty response — log internally, sanitize for client
-      const reason = data?.predictions?.[0]?.safetyAttributes ? 'safety_filter' : 'empty_response';
-      console.error(`Imagen 4 ${reason}:`, JSON.stringify(data));
-      return res.status(500).json({ error: 'No image generated', reason });
+      return res.status(500).json({ error: 'No image generated after 3 attempts', reason: lastError });
     }
 
     return res.status(200).json({
