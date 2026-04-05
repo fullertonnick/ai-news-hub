@@ -34,11 +34,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
         body: JSON.stringify({
-          instances: [{ prompt }],
+          instances: [{ prompt: `${prompt}. ${NEGATIVE_PROMPT.split(',').slice(0, 8).map(s => `no ${s.trim()}`).join(', ')}` }],
           parameters: {
             sampleCount: 1,
             aspectRatio: '16:9',
-            negativePrompt: NEGATIVE_PROMPT,
             personGeneration: 'dont_allow',
             safetySetting: 'block_low_and_above',
           },

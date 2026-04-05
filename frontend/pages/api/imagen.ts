@@ -19,8 +19,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
 
-  // Single source of truth — import from generateBackgroundPrompts
-  const fullNegative = negative_prompt ? `${NEGATIVE_PROMPT}, ${negative_prompt}` : NEGATIVE_PROMPT;
+  // Imagen 4.0 dropped negativePrompt support — bake negatives into main prompt instead
+  const fullPrompt = `${prompt}. ${NEGATIVE_PROMPT.split(',').slice(0, 8).map(s => `no ${s.trim()}`).join(', ')}`;
 
   const attempt = async (signal: AbortSignal): Promise<Response> => {
     return fetch(
@@ -30,11 +30,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         headers: { 'Content-Type': 'application/json' },
         signal,
         body: JSON.stringify({
-          instances: [{ prompt }],
+          instances: [{ prompt: fullPrompt }],
           parameters: {
             sampleCount: 1,
             aspectRatio: '3:4',
-            negativePrompt: fullNegative,
             personGeneration: 'dont_allow',
             safetySetting: 'block_low_and_above',
           },
@@ -57,9 +56,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Imagen 3 API error:', errorText);
+      console.error('Imagen 4 API error:', errorText);
       // Don't leak raw API error details to client
-      return res.status(response.status).json({ error: 'Imagen 3 generation failed' });
+      return res.status(response.status).json({ error: 'Imagen 4 generation failed' });
     }
 
     const data = await response.json();
@@ -68,7 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!imageBase64) {
       // Safety filter or empty response — log internally, sanitize for client
       const reason = data?.predictions?.[0]?.safetyAttributes ? 'safety_filter' : 'empty_response';
-      console.error(`Imagen 3 ${reason}:`, JSON.stringify(data));
+      console.error(`Imagen 4 ${reason}:`, JSON.stringify(data));
       return res.status(500).json({ error: 'No image generated', reason });
     }
 
@@ -78,10 +77,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   } catch (err: any) {
     if (err?.name === 'AbortError') {
-      console.error('Imagen 3 timeout after', TIMEOUT_MS, 'ms');
+      console.error('Imagen 4 timeout after', TIMEOUT_MS, 'ms');
       return res.status(504).json({ error: 'Image generation timed out' });
     }
-    console.error('Imagen 3 fetch error:', err);
+    console.error('Imagen 4 fetch error:', err);
     return res.status(500).json({ error: 'Internal server error' });
   } finally {
     clearTimeout(timeout);
