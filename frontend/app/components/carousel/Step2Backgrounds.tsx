@@ -3,25 +3,49 @@ import { useCallback, useState, useMemo } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
 import { Loader2, RefreshCw, Check, ChevronDown, ChevronUp, Image } from 'lucide-react';
 
-// ─── Bulletproof prompts for the 3 background slots ─────────────────────────
-// Cover: unique cinematic scene for the topic
-// Middle: premium futuristic grid — SAME across all middle slides
-// CTA: unique dramatic atmosphere
+// ─── Prompt builders ─────────────────────────────────────────────────────────
+// Cover + CTA = FINISHED products with text rendered by Imagen
+// Middle = background-only (text overlaid by React)
 
-const COVER_PROMPT_BASE =
-  'Cinematic photograph of a dark modern executive workspace at night. Ultrawide curved monitor with ambient blue and warm amber glow. Minimalist desk setup. Deep charcoal walls, shallow depth of field, soft bokeh. Volumetric light rays. Premium editorial tech photography. Studio lighting. High contrast. 8K hyperdetailed. Shot on ARRI Alexa, 35mm lens. No visible text anywhere, no faces, no people, no readable words on screens, no UI mockups.';
+function buildCoverPrompt(headline: string): string {
+  return `Instagram carousel cover slide. Portrait 3:4 ratio. Premium dark mode SaaS design.
+
+BACKGROUND: Near-black (#0A0A0A) background with subtle dark gray isometric grid lines. Soft volumetric orange (#FF7107) gradient glow in the bottom-left corner. Subtle cyan accent light in the top-right. Minimal floating geometric particles. Premium futuristic enterprise aesthetic.
+
+TEXT LAYOUT: The headline text "${headline}" must be rendered in large bold white sans-serif font (similar to Plus Jakarta Sans or Inter Black). The text should be positioned in the lower-third of the image, left-aligned with generous padding. The headline should be the dominant visual element — massive, impactful, filling at least 60% of the width.
+
+BRANDING: Small "@thenickcornelius" in thin white text at the bottom-left corner. Small "save for later" with a bookmark icon at the bottom-right corner. Both very subtle, small, not distracting.
+
+STYLE: This must look like it was designed in Figma by a senior product designer. Clean, modern, premium. Dark mode. Think Linear, Vercel, or Raycast marketing materials. The text must be perfectly crisp and readable.
+
+CRITICAL: Render the headline text EXACTLY as written. Do not add, remove, or change any words. The text must be sharp, legible, and the focal point of the image. No faces, no people, no photographs.`;
+}
+
+function buildCTAPrompt(ctaText: string, keyword: string): string {
+  return `Instagram carousel CTA (call-to-action) slide. Portrait 3:4 ratio. Premium dark mode SaaS design.
+
+BACKGROUND: Near-black (#0A0A0A) background with subtle dark gray isometric grid lines matching the content slides. Soft warm orange (#FF7107) radial glow emanating from center, creating a subtle spotlight effect. Minimal geometric accents. Same premium futuristic enterprise aesthetic as the rest of the carousel.
+
+TEXT LAYOUT:
+- Main text: "${ctaText}" in bold white sans-serif font, centered vertically in the upper portion of the image. Medium-large size.
+- Below the main text: a small thin orange horizontal line divider (accent separator).
+- Below the divider: "Comment" in regular white text, then "${keyword}" inside a solid rounded orange (#FF7107) pill/badge with black text inside, then "I'll send it over" in regular white text. All on the same line, centered.
+- A small downward arrow "↓" below the CTA line in orange.
+
+BRANDING: Small "@thenickcornelius" bottom-left. Small "save for later" with bookmark icon bottom-right. Both subtle and small.
+
+STYLE: Must look like a premium SaaS product page CTA section. Clean, modern, dark mode. Figma-quality design. Text must be perfectly crisp and readable. Same visual language as the content slides (grid background, orange accents).
+
+CRITICAL: Render ALL text EXACTLY as specified. The keyword "${keyword}" must appear inside an orange rounded rectangle pill. Do not change any words. No faces, no people, no photographs.`;
+}
 
 const MIDDLE_PROMPT =
-  'Abstract premium SaaS product hero background. Pure near-black background with subtle isometric grid pattern in thin dark gray lines. Minimal geometric floating elements. Soft volumetric orange and cyan gradient accent lights in the upper corners. Depth and atmosphere with very subtle particles. Clean, futuristic, enterprise software aesthetic like Linear or Vercel dashboards. Premium UI design inspiration. Ready for text overlay with plenty of negative space. Dark mode aesthetic. 8K ultra minimal. No text, no typography, no letters, no numbers, no UI elements, no icons, no faces.';
-
-const CTA_PROMPT =
-  'Dramatic cinematic dark stage. Single intense warm orange spotlight beam from directly above illuminating center of frame. Deep black surrounding darkness with subtle volumetric fog. Premium theatrical atmosphere. High contrast light to shadow. Editorial commercial photography. Shot on Hasselblad. 8K ultra detailed. No text, no typography, no letters, no faces, no people, no objects in center.';
+  'Abstract premium SaaS product hero background. Pure near-black (#0A0A0A) background with subtle isometric grid pattern in thin dark gray lines. Minimal geometric floating elements. Soft volumetric orange (#FF7107) and cyan gradient accent lights in the upper corners. Depth and atmosphere with very subtle particles. Clean, futuristic, enterprise software aesthetic like Linear, Vercel, or Raycast dashboards. Premium UI design inspiration. Ready for text overlay with plenty of negative space. Dark mode aesthetic. 8K ultra minimal. No text, no typography, no letters, no numbers, no UI elements, no icons, no faces, no people.';
 
 interface BgSlot {
   id: 'cover' | 'middle' | 'cta';
   label: string;
   description: string;
-  basePrompt: string;
   imageUrl: string;
   prompt: string;
   status: 'pending' | 'generating' | 'done' | 'error';
@@ -30,35 +54,36 @@ interface BgSlot {
 
 export default function Step2Backgrounds() {
   const store = useCarouselStore();
-  const { slides, topic } = store;
+  const { slides, keyword } = store;
 
-  // Build cover prompt with topic context
-  const coverPromptWithTopic = useMemo(
-    () => `${COVER_PROMPT_BASE} Subtle visual nod to: ${topic.slice(0, 80)}.`,
-    [topic]
-  );
-
-  // Derive the 3 slots from the slide data (which stores backgrounds per-slide)
   const coverSlide = slides[0];
   const ctaSlide = slides[slides.length - 1];
   const firstMiddle = slides[1];
 
+  // Build dynamic prompts from actual slide text
+  const coverPrompt = useMemo(
+    () => coverSlide ? buildCoverPrompt(coverSlide.text) : '',
+    [coverSlide?.text]
+  );
+  const ctaPrompt = useMemo(
+    () => ctaSlide ? buildCTAPrompt(ctaSlide.text, keyword || 'BUILD') : '',
+    [ctaSlide?.text, keyword]
+  );
+
   const slots: BgSlot[] = useMemo(() => [
     {
       id: 'cover',
-      label: 'Cover Slide',
-      description: 'Unique cinematic scene for slide 1',
-      basePrompt: coverPromptWithTopic,
+      label: 'Cover Slide (finished product)',
+      description: 'Complete cover with headline rendered — no post-editing needed',
       imageUrl: coverSlide?.backgroundImage || '',
-      prompt: coverSlide?.backgroundPrompt || coverPromptWithTopic,
+      prompt: coverSlide?.backgroundPrompt || coverPrompt,
       status: (coverSlide?.backgroundStatus as any) || 'pending',
       loading: coverSlide ? store.bgLoading[coverSlide.id] || false : false,
     },
     {
       id: 'middle',
-      label: 'Content Slides (shared)',
-      description: `Same premium background on all ${Math.max(0, slides.length - 2)} middle slides`,
-      basePrompt: MIDDLE_PROMPT,
+      label: 'Content Slides (shared background)',
+      description: `Premium grid background applied to all ${Math.max(0, slides.length - 2)} middle slides — text overlaid on top`,
       imageUrl: firstMiddle?.backgroundImage || '',
       prompt: firstMiddle?.backgroundPrompt || MIDDLE_PROMPT,
       status: (firstMiddle?.backgroundStatus as any) || 'pending',
@@ -66,33 +91,33 @@ export default function Step2Backgrounds() {
     },
     {
       id: 'cta',
-      label: 'CTA Slide',
-      description: 'Dramatic spotlight for the final slide',
-      basePrompt: CTA_PROMPT,
+      label: 'CTA Slide (finished product)',
+      description: 'Complete CTA with keyword pill rendered — no post-editing needed',
       imageUrl: ctaSlide?.backgroundImage || '',
-      prompt: ctaSlide?.backgroundPrompt || CTA_PROMPT,
+      prompt: ctaSlide?.backgroundPrompt || ctaPrompt,
       status: (ctaSlide?.backgroundStatus as any) || 'pending',
       loading: ctaSlide ? store.bgLoading[ctaSlide.id] || false : false,
     },
-  ], [slides, coverSlide, ctaSlide, firstMiddle, coverPromptWithTopic, store.bgLoading]);
+  ], [slides, coverSlide, ctaSlide, firstMiddle, coverPrompt, ctaPrompt, store.bgLoading]);
 
   const [expandedPrompt, setExpandedPrompt] = useState<'cover' | 'middle' | 'cta' | null>(null);
 
-  // Which slides get which background
   const slideIdsForSlot = useCallback((slotId: 'cover' | 'middle' | 'cta'): string[] => {
     if (slotId === 'cover') return coverSlide ? [coverSlide.id] : [];
     if (slotId === 'cta') return ctaSlide ? [ctaSlide.id] : [];
-    // middle = all slides between first and last
     return slides.slice(1, -1).map(s => s.id);
   }, [slides, coverSlide, ctaSlide]);
 
+  const getDefaultPrompt = useCallback((slotId: 'cover' | 'middle' | 'cta'): string => {
+    if (slotId === 'cover') return coverPrompt;
+    if (slotId === 'cta') return ctaPrompt;
+    return MIDDLE_PROMPT;
+  }, [coverPrompt, ctaPrompt]);
+
   const generateSlot = useCallback(async (slotId: 'cover' | 'middle' | 'cta', customPrompt?: string) => {
-    const slot = slots.find(s => s.id === slotId);
-    if (!slot) return;
-    const prompt = customPrompt || slot.prompt || slot.basePrompt;
+    const prompt = customPrompt || getDefaultPrompt(slotId);
     const slideIds = slideIdsForSlot(slotId);
 
-    // Set loading + generating status for all affected slides
     slideIds.forEach(id => {
       store.setBgLoading(id, true);
       store.setSlideBackgroundStatus(id, 'generating');
@@ -106,7 +131,6 @@ export default function Step2Backgrounds() {
       });
       const d = await r.json();
       if (d.dataUrl) {
-        // Apply the same image to all slides in this slot
         slideIds.forEach(id => store.setSlideBackground(id, d.dataUrl));
       } else {
         console.error(`Imagen failed for ${slotId}:`, d);
@@ -118,7 +142,7 @@ export default function Step2Backgrounds() {
     }
 
     slideIds.forEach(id => store.setBgLoading(id, false));
-  }, [slots, slideIdsForSlot, store]);
+  }, [slideIdsForSlot, getDefaultPrompt, store]);
 
   const generateAll = useCallback(async () => {
     await Promise.all([
@@ -128,15 +152,16 @@ export default function Step2Backgrounds() {
     ]);
   }, [generateSlot]);
 
-  const allDone = slots.every(s => s.status === 'done');
+  // Check actual slide data — not just the 3 slots
+  const allDone = slides.every(s => s.backgroundStatus === 'done');
   const anyGenerating = slots.some(s => s.loading);
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-bold text-white">Generate Backgrounds</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Only 3 backgrounds needed — cover, shared middle, and CTA. Middle slides all use the same premium background.</p>
+          <h3 className="text-sm font-bold text-white">Generate Slides</h3>
+          <p className="text-xs text-gray-500 mt-0.5">Cover and CTA are finished products with text rendered in. Middle slides share one premium background.</p>
         </div>
         <button onClick={generateAll} disabled={anyGenerating}
           className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
@@ -145,18 +170,28 @@ export default function Step2Backgrounds() {
         </button>
       </div>
 
-      {/* 3 slot cards */}
       <div className="space-y-3">
         {slots.map(slot => {
           const expanded = expandedPrompt === slot.id;
+          const isFinished = slot.id === 'cover' || slot.id === 'cta';
           return (
-            <div key={slot.id} className="rounded-xl bg-white/[0.03] border border-white/10 overflow-hidden">
+            <div key={slot.id} className={`rounded-xl border overflow-hidden ${isFinished ? 'bg-brand-orange/[0.03] border-brand-orange/20' : 'bg-white/[0.03] border-white/10'}`}>
               <div className="flex">
                 <div className="flex-1 p-4 border-r border-white/5">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[10px] font-bold text-brand-orange uppercase tracking-wider">{slot.label}</span>
+                    {isFinished && <span className="text-[9px] bg-brand-orange/20 text-brand-orange px-1.5 py-0.5 rounded-full">FINAL</span>}
                   </div>
                   <p className="text-xs text-gray-400 leading-relaxed">{slot.description}</p>
+                  {slot.id === 'cover' && coverSlide && (
+                    <p className="text-xs text-white mt-2 font-medium">"{coverSlide.text}"</p>
+                  )}
+                  {slot.id === 'cta' && ctaSlide && (
+                    <div className="mt-2">
+                      <p className="text-xs text-white font-medium">"{ctaSlide.text}"</p>
+                      <p className="text-[10px] text-brand-orange mt-1">Keyword: {keyword || 'BUILD'}</p>
+                    </div>
+                  )}
                   {slot.id === 'middle' && slides.length > 2 && (
                     <p className="text-[10px] text-gray-600 mt-1">
                       Applied to slides {slides.slice(1, -1).map((_, i) => i + 2).join(', ')}
@@ -164,16 +199,16 @@ export default function Step2Backgrounds() {
                   )}
                 </div>
 
-                <div className="w-40 flex-shrink-0 relative bg-black flex items-center justify-center" style={{ aspectRatio: '4/5' }}>
+                <div className="w-44 flex-shrink-0 relative bg-black flex items-center justify-center" style={{ minHeight: 200 }}>
                   {slot.imageUrl ? (
-                    <img src={slot.imageUrl} alt="" className="w-full h-full object-cover" />
+                    <img src={slot.imageUrl} alt="" className="w-full h-full object-cover" style={{ aspectRatio: '3/4' }} />
                   ) : slot.loading ? (
                     <div className="flex flex-col items-center gap-2">
                       <Loader2 size={16} className="animate-spin text-brand-orange" />
-                      <span className="text-[10px] text-gray-500">Generating...</span>
+                      <span className="text-[10px] text-gray-500">{isFinished ? 'Rendering...' : 'Generating...'}</span>
                     </div>
                   ) : slot.status === 'error' ? (
-                    <span className="text-[10px] text-red-400 text-center px-2">Failed<br/>click regenerate</span>
+                    <span className="text-[10px] text-red-400 text-center px-2">Failed — click regenerate</span>
                   ) : (
                     <span className="text-[10px] text-gray-700">Pending</span>
                   )}
@@ -201,7 +236,7 @@ export default function Step2Backgrounds() {
                       slideIds.forEach(id => store.setSlideBackgroundPrompt(id, e.target.value));
                     }}
                     className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-xs text-gray-300 leading-relaxed resize-none focus:outline-none focus:border-brand-orange/30 font-mono"
-                    rows={5} />
+                    rows={6} />
                   <button onClick={() => generateSlot(slot.id, slot.prompt)} disabled={slot.loading}
                     className="mt-2 text-xs text-brand-orange hover:text-orange-400 flex items-center gap-1 disabled:opacity-40">
                     <RefreshCw size={11} /> Regenerate with edited prompt
@@ -216,7 +251,7 @@ export default function Step2Backgrounds() {
       <button onClick={() => { store.approve('backgrounds'); store.setStep(3); }}
         disabled={!allDone}
         className="w-full bg-green-500/20 hover:bg-green-500/30 disabled:opacity-30 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-        <Check size={14} /> Approve Backgrounds & Continue to Cover
+        <Check size={14} /> Approve & Continue
       </button>
     </div>
   );
