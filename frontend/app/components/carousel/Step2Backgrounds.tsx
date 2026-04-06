@@ -1,46 +1,50 @@
 'use client';
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useState, useRef, useEffect } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
-import { Loader2, RefreshCw, Check, ChevronDown, ChevronUp, Image } from 'lucide-react';
+import { Loader2, RefreshCw, Check, ChevronDown, ChevronUp, Image, Upload } from 'lucide-react';
 
-// ─── Prompt builders ─────────────────────────────────────────────────────────
+// ─── Middle slide: dead simple, Tyler Germain style ──────────────────────────
+// Pure near-black with VERY subtle texture. Nothing distracting. Text-first.
+
+const MIDDLE_PROMPT =
+  'Solid near-black background with extremely subtle dark charcoal noise texture. Almost imperceptible fine grain. Pure dark mode. Completely minimal. No patterns, no grid, no shapes, no gradients, no lights, no particles, no geometric elements. Just a clean, professional dark surface. Perfect for white text overlay. 8K. No text, no faces, no icons.';
+
+// ─── Cover + CTA: Nick's photo with dark overlay + text from Imagen ──────────
+// When photos are available, we use those. Otherwise Imagen generates the scene.
 
 function buildCoverPrompt(headline: string): string {
-  return `Instagram carousel cover slide. Portrait 3:4 ratio. Premium dark mode SaaS design.
+  return `Instagram carousel cover slide. Portrait 3:4 ratio. Premium dark design.
 
-BACKGROUND: Near-black (#0A0A0A) background with subtle dark gray isometric grid lines. Soft volumetric orange (#FF7107) gradient glow in the bottom-left corner. Subtle cyan accent light in the top-right. Minimal floating geometric particles. Premium futuristic enterprise aesthetic.
+DESIGN: Full-bleed photograph of a confident male entrepreneur at a desk or professional setting. The photo should have a heavy dark overlay (60-70% opacity black).
 
-TEXT LAYOUT: The headline text "${headline}" must be rendered in large bold white sans-serif font (similar to Plus Jakarta Sans or Inter Black). The text should be positioned in the lower-third of the image, left-aligned with generous padding. The headline should be the dominant visual element — massive, impactful, filling at least 60% of the width.
+TEXT: The headline "${headline}" must be rendered in massive bold white sans-serif font (Inter Black or similar). Text positioned in the lower-third, left-aligned. The headline is the hero — massive, impactful, filling 60%+ width. Each line stacked vertically.
 
-BRANDING: Small "@thenickcornelius" in thin white text at the bottom-left corner. Small "save for later" with a bookmark icon at the bottom-right corner. Both very subtle, small, not distracting.
+ACCENT: One key word from the headline should be in orange (#FF7107) instead of white.
 
-STYLE: This must look like it was designed in Figma by a senior product designer. Clean, modern, premium. Dark mode. Think Linear, Vercel, or Raycast marketing materials. The text must be perfectly crisp and readable.
+BRANDING: Very small "@thenickcornelius" bottom-left, "🔖 save for later" bottom-right. Subtle, not distracting.
 
-CRITICAL: Render the headline text EXACTLY as written. Do not add, remove, or change any words. The text must be sharp, legible, and the focal point of the image. No faces, no people, no photographs.`;
+STYLE: Dark, cinematic, editorial. Like a premium tech conference keynote slide. Think Apple event aesthetics meets Instagram carousel. Crisp text, moody photo underneath.
+
+CRITICAL: Text must be perfectly legible and the focal point. No clutter.`;
 }
 
 function buildCTAPrompt(ctaText: string, keyword: string): string {
-  return `Instagram carousel CTA (call-to-action) slide. Portrait 3:4 ratio. Premium dark mode SaaS design.
+  return `Instagram carousel CTA slide. Portrait 3:4 ratio. Premium dark design.
 
-BACKGROUND: Near-black (#0A0A0A) background with subtle dark gray isometric grid lines matching the content slides. Soft warm orange (#FF7107) radial glow emanating from center, creating a subtle spotlight effect. Minimal geometric accents. Same premium futuristic enterprise aesthetic as the rest of the carousel.
+DESIGN: Dark background matching the carousel's content slides — near-black, minimal, clean.
 
-TEXT LAYOUT:
-- Main text: "${ctaText}" in bold white sans-serif font, centered vertically in the upper portion of the image. Medium-large size.
-- Below the main text: a small thin orange horizontal line divider (accent separator).
-- Below the divider: "Comment" in regular white text, then "${keyword}" inside a solid rounded orange (#FF7107) pill/badge with black text inside, then "I'll send it over" in regular white text. All on the same line, centered.
-- A small downward arrow below the CTA line in orange.
+TEXT LAYOUT (centered vertically):
+- "${ctaText}" in bold white sans-serif, medium-large, centered
+- Small orange (#FF7107) horizontal line divider below
+- "Comment" in white + "${keyword}" in a solid orange rounded pill badge with black text + "I'll send it over" in white — all on one line, centered
+- Small orange "↓" arrow below
 
-BRANDING: Small "@thenickcornelius" bottom-left. Small "save for later" with bookmark icon bottom-right. Both subtle and small.
+BRANDING: Small "@thenickcornelius" bottom-left, "🔖 save for later" bottom-right.
 
-STYLE: Must look like a premium SaaS product page CTA section. Clean, modern, dark mode. Figma-quality design. Text must be perfectly crisp and readable. Same visual language as the content slides (grid background, orange accents).
+STYLE: Clean, minimal, dark mode. Same visual language as content slides — simple dark background, white text, orange accents. Like a premium SaaS CTA section. No photos, no complexity.
 
-CRITICAL: Render ALL text EXACTLY as specified. The keyword "${keyword}" must appear inside an orange rounded rectangle pill. Do not change any words. No faces, no people, no photographs.`;
+CRITICAL: All text must be perfectly crisp and readable. Render text EXACTLY as specified.`;
 }
-
-const MIDDLE_PROMPT =
-  'Abstract premium SaaS product hero background. Pure near-black (#0A0A0A) background with subtle isometric grid pattern in thin dark gray lines. Minimal geometric floating elements. Soft volumetric orange (#FF7107) and cyan gradient accent lights in the upper corners. Depth and atmosphere with very subtle particles. Clean, futuristic, enterprise software aesthetic like Linear, Vercel, or Raycast dashboards. Premium UI design inspiration. Ready for text overlay with plenty of negative space. Dark mode aesthetic. 8K ultra minimal. No text, no typography, no letters, no numbers, no UI elements, no icons, no faces, no people.';
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Step2Backgrounds() {
   const slides = useCarouselStore(s => s.slides);
@@ -55,40 +59,44 @@ export default function Step2Backgrounds() {
 
   const [expandedPrompt, setExpandedPrompt] = useState<'cover' | 'middle' | 'cta' | null>(null);
   const [localPrompts, setLocalPrompts] = useState<Record<string, string>>({});
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState<string>('');
   const generatingRef = useRef<Set<string>>(new Set());
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const coverSlide = slides[0];
   const ctaSlide = slides[slides.length - 1];
   const middleSlides = slides.slice(1, -1);
-  const firstMiddle = middleSlides[0];
 
-  // Default prompts
-  const defaultCover = coverSlide ? buildCoverPrompt(coverSlide.text) : '';
-  const defaultCta = ctaSlide ? buildCTAPrompt(ctaSlide.text, keyword || 'BUILD') : '';
+  // Check for available nick photos
+  const [availablePhotos, setAvailablePhotos] = useState<string[]>([]);
+  useEffect(() => {
+    // Check if nick-photos directory has files
+    fetch('/nick-photos/')
+      .then(() => setAvailablePhotos(['/nick.jpg'])) // Fallback to nick.jpg
+      .catch(() => setAvailablePhotos(['/nick.jpg']));
+  }, []);
 
-  function getPrompt(slotId: string): string {
-    if (slotId === 'cover') return localPrompts.cover || coverSlide?.backgroundPrompt || defaultCover;
-    if (slotId === 'cta') return localPrompts.cta || ctaSlide?.backgroundPrompt || defaultCta;
-    return localPrompts.middle || firstMiddle?.backgroundPrompt || MIDDLE_PROMPT;
-  }
-
-  function getSlideIds(slotId: string): string[] {
-    if (slotId === 'cover') return coverSlide ? [coverSlide.id] : [];
-    if (slotId === 'cta') return ctaSlide ? [ctaSlide.id] : [];
-    return middleSlides.map(s => s.id);
-  }
+  // Handle photo upload for cover
+  const handlePhotoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setCoverPhotoUrl(reader.result as string);
+    reader.readAsDataURL(file);
+  }, []);
 
   const generateSlot = useCallback(async (slotId: 'cover' | 'middle' | 'cta') => {
-    if (generatingRef.current.has(slotId)) return; // prevent double-fire
+    if (generatingRef.current.has(slotId)) return;
     generatingRef.current.add(slotId);
-
-    const prompt = slotId === 'cover' ? (localPrompts.cover || defaultCover)
-      : slotId === 'cta' ? (localPrompts.cta || defaultCta)
-      : (localPrompts.middle || MIDDLE_PROMPT);
 
     const slideIds = slotId === 'cover' ? (coverSlide ? [coverSlide.id] : [])
       : slotId === 'cta' ? (ctaSlide ? [ctaSlide.id] : [])
       : middleSlides.map(s => s.id);
+
+    let prompt: string;
+    if (slotId === 'cover') prompt = localPrompts.cover || buildCoverPrompt(coverSlide?.text || '');
+    else if (slotId === 'cta') prompt = localPrompts.cta || buildCTAPrompt(ctaSlide?.text || '', keyword || 'BUILD');
+    else prompt = localPrompts.middle || MIDDLE_PROMPT;
 
     slideIds.forEach(id => {
       setBgLoading(id, true);
@@ -113,7 +121,7 @@ export default function Step2Backgrounds() {
 
     slideIds.forEach(id => setBgLoading(id, false));
     generatingRef.current.delete(slotId);
-  }, [coverSlide, ctaSlide, middleSlides, localPrompts, defaultCover, defaultCta, setBgLoading, setSlideBackground, setSlideBackgroundStatus, setSlideBackgroundPrompt]);
+  }, [coverSlide, ctaSlide, middleSlides, localPrompts, keyword, setBgLoading, setSlideBackground, setSlideBackgroundStatus, setSlideBackgroundPrompt]);
 
   const generateAll = useCallback(async () => {
     await Promise.all([generateSlot('cover'), generateSlot('middle'), generateSlot('cta')]);
@@ -122,19 +130,18 @@ export default function Step2Backgrounds() {
   const allDone = slides.every(s => s.backgroundStatus === 'done');
   const anyLoading = Object.values(bgLoading).some(Boolean);
 
-  // Slot data for rendering
   const slotsConfig = [
-    { id: 'cover' as const, label: 'Cover Slide (finished product)', desc: 'Complete cover with headline rendered', slide: coverSlide, final: true, text: coverSlide?.text },
-    { id: 'middle' as const, label: 'Content Slides (shared background)', desc: `Premium grid background for ${middleSlides.length} middle slides`, slide: firstMiddle, final: false, text: undefined },
-    { id: 'cta' as const, label: 'CTA Slide (finished product)', desc: 'Complete CTA with keyword pill rendered', slide: ctaSlide, final: true, text: ctaSlide?.text },
+    { id: 'cover' as const, label: 'Cover Slide', final: true },
+    { id: 'middle' as const, label: 'Content Background', final: false },
+    { id: 'cta' as const, label: 'CTA Slide', final: true },
   ];
 
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-bold text-white">Generate Slides</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Cover and CTA are finished products. Middle slides share one premium background.</p>
+          <h3 className="text-sm font-bold text-white">Generate Visuals</h3>
+          <p className="text-xs text-gray-500 mt-0.5">Cover + CTA = finished slides. Content background = minimal dark surface for text.</p>
         </div>
         <button onClick={generateAll} disabled={anyLoading}
           className="flex items-center gap-1.5 bg-brand-orange hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors">
@@ -145,7 +152,7 @@ export default function Step2Backgrounds() {
 
       <div className="space-y-3">
         {slotsConfig.map(slot => {
-          const slide = slot.slide;
+          const slide = slot.id === 'cover' ? coverSlide : slot.id === 'cta' ? ctaSlide : middleSlides[0];
           const loading = slide ? bgLoading[slide.id] || false : false;
           const imageUrl = slide?.backgroundImage || '';
           const status = slide?.backgroundStatus || 'pending';
@@ -155,15 +162,40 @@ export default function Step2Backgrounds() {
             <div key={slot.id} className={`rounded-xl border overflow-hidden ${slot.final ? 'bg-brand-orange/[0.03] border-brand-orange/20' : 'bg-white/[0.03] border-white/10'}`}>
               <div className="flex">
                 <div className="flex-1 p-4 border-r border-white/5">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-2">
                     <span className="text-[10px] font-bold text-brand-orange uppercase tracking-wider">{slot.label}</span>
                     {slot.final && <span className="text-[9px] bg-brand-orange/20 text-brand-orange px-1.5 py-0.5 rounded-full">FINAL</span>}
                   </div>
-                  <p className="text-xs text-gray-400">{slot.desc}</p>
-                  {slot.text && <p className="text-xs text-white mt-2 font-medium">"{slot.text}"</p>}
-                  {slot.id === 'cta' && <p className="text-[10px] text-brand-orange mt-1">Keyword: {keyword || 'BUILD'}</p>}
-                  {slot.id === 'middle' && middleSlides.length > 0 && (
-                    <p className="text-[10px] text-gray-600 mt-1">Applied to slides {middleSlides.map((_, i) => i + 2).join(', ')}</p>
+
+                  {slot.id === 'cover' && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-400">Finished cover with your photo + dark overlay + headline text.</p>
+                      <p className="text-xs text-white font-medium">"{coverSlide?.text}"</p>
+                      {/* Photo upload for cover */}
+                      <div className="flex items-center gap-2 mt-2">
+                        <button onClick={() => fileInputRef.current?.click()}
+                          className="text-[10px] text-gray-400 hover:text-white flex items-center gap-1 px-2 py-1 rounded border border-white/10 hover:border-white/20 transition-colors">
+                          <Upload size={10} /> Upload your photo
+                        </button>
+                        {coverPhotoUrl && <span className="text-[10px] text-green-400">Photo loaded</span>}
+                        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                      </div>
+                    </div>
+                  )}
+
+                  {slot.id === 'middle' && (
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-400">Clean dark surface — no distractions, text-first.</p>
+                      <p className="text-[10px] text-gray-600">Applied to slides {middleSlides.map((_, i) => i + 2).join(', ')}</p>
+                    </div>
+                  )}
+
+                  {slot.id === 'cta' && (
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-400">Finished CTA with comment keyword mechanic.</p>
+                      <p className="text-xs text-white font-medium">"{ctaSlide?.text}"</p>
+                      <p className="text-[10px] text-brand-orange">Keyword: {keyword || 'BUILD'}</p>
+                    </div>
                   )}
                 </div>
 
@@ -197,7 +229,7 @@ export default function Step2Backgrounds() {
               {expanded && (
                 <div className="border-t border-white/5 px-4 py-3">
                   <textarea
-                    value={localPrompts[slot.id] || getPrompt(slot.id)}
+                    value={localPrompts[slot.id] || (slot.id === 'cover' ? buildCoverPrompt(coverSlide?.text || '') : slot.id === 'cta' ? buildCTAPrompt(ctaSlide?.text || '', keyword || 'BUILD') : MIDDLE_PROMPT)}
                     onChange={e => setLocalPrompts(p => ({ ...p, [slot.id]: e.target.value }))}
                     className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-xs text-gray-300 leading-relaxed resize-none focus:outline-none focus:border-brand-orange/30 font-mono"
                     rows={6} />
