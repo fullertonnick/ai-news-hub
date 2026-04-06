@@ -1,7 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import Replicate from 'replicate';
 
 export const config = { maxDuration: 60 };
-import { NEGATIVE_PROMPT } from '../../../app/lib/generateBackgroundPrompts';
+
+// Nick's physical description — consistent across all thumbnails
+const NICK_DESC = 'professional young man with curly brown hair and mustache, confident expression';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -9,57 +12,54 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { title, style = 'face-text' } = req.body;
   if (!title || typeof title !== 'string') return res.status(400).json({ error: 'title required' });
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
+  const replicateKey = process.env.REPLICATE_API_TOKEN;
+  if (!replicateKey) return res.status(500).json({ error: 'REPLICATE_API_TOKEN not configured' });
 
   const stylePrompts: Record<string, string> = {
-    'face-text':
-      `Dark cinematic background for YouTube thumbnail about "${title}", dramatic orange and teal lighting, professional studio atmosphere, space on left side for face cutout and right side for bold text, deep shadows, bokeh background, premium look, no text, no faces, no people, 4K`,
-    'dramatic':
-      `Dark dramatic cinematic scene representing "${title}", intense orange lighting from one side, deep shadows, high contrast, professional photography, moody atmosphere, tech/business aesthetic, no text, no faces, no people, 4K ultra detailed`,
-    'before-after':
-      `Dark split-screen background for YouTube thumbnail, left side dim and muted (old/struggling), right side bright orange and energetic (new/thriving), dramatic lighting contrast, professional, no text, no faces, no people, 4K`,
+    'face-text': `Professional YouTube thumbnail, 1280x720, ${NICK_DESC}, pointing finger at camera, bold text area at top reading "${title}", tech dashboard or AI graphics floating in background, orange and dark blue color scheme, studio lighting, high energy, viral YouTube style, 4K quality, highly detailed`,
+
+    'dramatic': `Professional YouTube thumbnail, 1280x720, ${NICK_DESC}, shocked surprised expression, eyes wide open, mouth slightly open, dramatic studio lighting from side, "${title}" in bold impact text at top, AI/automation graphics floating, orange and teal accents, dark background, money or growth charts floating, 4K professional quality`,
+
+    'before-after': `Professional YouTube thumbnail, 1280x720, split design, left side: stressed overwhelmed businessman at messy desk (muted gray tones), right side: ${NICK_DESC} relaxed and confident with laptop showing success dashboard (vibrant orange and blue tones), bold arrow pointing from left to right, text area at top for "${title}", professional quality, 4K`,
+
+    'teaching': `Professional YouTube thumbnail, 1280x720, ${NICK_DESC}, gesturing with hand while explaining, whiteboard or screen behind showing flowchart or diagram, professional studio setup, text area at top for "${title}", warm professional lighting, trustworthy educational vibe, orange accent colors, 4K quality`,
   };
 
   const prompt = stylePrompts[style] || stylePrompts['face-text'];
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 55000);
+  const negativePrompt = 'blurry, low quality, distorted face, ugly, deformed, bad anatomy, watermark, signature, extra fingers, extra limbs, disfigured, poorly drawn face, mutation';
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`,
+    const replicate = new Replicate({ auth: replicateKey });
+
+    const output = await replicate.run(
+      'stability-ai/sdxl:7762fd07cf82c948538e41f63f77d685e02b063e37e496e96eefd46c929f9bdc',
       {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          instances: [{ prompt: `${prompt}. ${NEGATIVE_PROMPT.split(',').slice(0, 8).map(s => `no ${s.trim()}`).join(', ')}` }],
-          parameters: {
-            sampleCount: 1,
-            aspectRatio: '16:9',
-            personGeneration: 'dont_allow',
-            safetySetting: 'block_low_and_above',
-          },
-        }),
+        input: {
+          prompt,
+          negative_prompt: negativePrompt,
+          width: 1280,
+          height: 720,
+          num_outputs: 1,
+          guidance_scale: 7.5,
+          num_inference_steps: 40,
+          scheduler: 'K_EULER',
+        },
       }
     );
 
-    if (!response.ok) {
-      console.error('Thumbnail API error:', await response.text());
-      return res.status(response.status).json({ error: 'Thumbnail generation failed' });
-    }
+    // Replicate returns an array of URLs
+    const imageUrl = Array.isArray(output) ? output[0] : null;
+    if (!imageUrl) return res.status(500).json({ error: 'No image generated' });
 
-    const data = await response.json();
-    const imageBase64 = data?.predictions?.[0]?.bytesBase64Encoded;
-    if (!imageBase64) return res.status(500).json({ error: 'No image generated' });
+    // Fetch the image and convert to base64 data URL
+    const imageResponse = await fetch(imageUrl as string);
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const base64 = Buffer.from(imageBuffer).toString('base64');
+    const mimeType = imageResponse.headers.get('content-type') || 'image/png';
 
-    return res.json({ dataUrl: `data:image/png;base64,${imageBase64}` });
+    return res.json({ dataUrl: `data:${mimeType};base64,${base64}` });
   } catch (err: any) {
-    if (err?.name === 'AbortError') return res.status(504).json({ error: 'Thumbnail generation timed out' });
-    console.error('Thumbnail error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
-  } finally {
-    clearTimeout(timeout);
+    console.error('Thumbnail generation error:', err);
+    return res.status(500).json({ error: 'Thumbnail generation failed', details: err?.message });
   }
 }

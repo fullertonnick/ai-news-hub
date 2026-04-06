@@ -22,7 +22,7 @@ export default function YouTubePage() {
 
   // Thumbnail state
   const [thumbTitle, setThumbTitle] = useState('');
-  const [thumbStyle, setThumbStyle] = useState<'face-text' | 'dramatic' | 'before-after'>('face-text');
+  const [thumbStyle, setThumbStyle] = useState<'face-text' | 'dramatic' | 'before-after' | 'teaching'>('face-text');
   const [thumbLoading, setThumbLoading] = useState(false);
   const [thumbImage, setThumbImage] = useState('');
 
@@ -158,7 +158,7 @@ export default function YouTubePage() {
             <div>
               <div className="text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">Style</div>
               <div className="flex flex-wrap gap-1.5">
-                {[{ id: 'face-text' as const, label: 'Face + Text' }, { id: 'dramatic' as const, label: 'Dramatic Scene' }, { id: 'before-after' as const, label: 'Before/After' }].map(s => (
+                {[{ id: 'face-text' as const, label: 'Face + Text' }, { id: 'dramatic' as const, label: 'Shocked React' }, { id: 'before-after' as const, label: 'Before/After' }, { id: 'teaching' as const, label: 'Teaching Pose' }].map(s => (
                   <button key={s.id} onClick={() => setThumbStyle(s.id)}
                     className={`text-xs px-3 py-1.5 rounded-full border transition-all ${thumbStyle === s.id ? 'border-red-500/40 bg-red-500/10 text-red-400' : 'border-white/10 text-gray-500 hover:text-white'}`}>
                     {s.label}
