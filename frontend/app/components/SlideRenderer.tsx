@@ -101,60 +101,85 @@ function Footer({ sc, light = false }: { sc: number; light?: boolean }) {
 
 // ─── FIX 2 + 4: Cover Template — full-bleed photo, structured floating icons ──
 
-// Themed AI floating icons with structured placement (not random scatter)
-const COVER_ICONS = [
-  { emoji: '🤖', size: 72, opacity: 0.92, pos: { top: '10%', left: '4%' } },
-  { emoji: '⚡', size: 80, opacity: 1.0,  pos: { top: '30%', left: '3%' } },
-  { emoji: '⚙️', size: 64, opacity: 0.82, pos: { top: '10%', right: '4%' } },
-  { emoji: '📈', size: 72, opacity: 0.88, pos: { top: '32%', right: '4%' } },
-  { emoji: '✅', size: 60, opacity: 0.80, pos: { bottom: '24%', left: '5%' } },
-  { emoji: '</>', size: 56, opacity: 0.78, pos: { bottom: '24%', right: '5%' } },
+// Topic-relevant sticker-style labels (not emojis — text badges with tech terms)
+const STICKER_LABELS = [
+  { text: 'AI', pos: { top: '8%', right: '6%' }, rotate: 4 },
+  { text: 'AUTOMATE', pos: { top: '22%', left: '4%' }, rotate: -3 },
+  { text: 'SCALE', pos: { top: '18%', right: '5%' }, rotate: 2 },
+  { text: 'BUILD', pos: { bottom: '32%', right: '6%' }, rotate: -2 },
 ];
+
+// Generate topic-relevant sticker labels from slide text
+function getTopicStickers(text: string): { text: string; pos: Record<string, string>; rotate: number }[] {
+  const t = text.toLowerCase();
+  const stickers: { text: string; pos: Record<string, string>; rotate: number }[] = [];
+
+  // Pick 3-4 relevant stickers based on topic keywords
+  if (/claude/i.test(t)) stickers.push({ text: 'CLAUDE', pos: { top: '8%', right: '5%' }, rotate: 3 });
+  if (/code/i.test(t)) stickers.push({ text: 'CODE', pos: { top: '20%', left: '4%' }, rotate: -2 });
+  if (/make\.com|make/i.test(t)) stickers.push({ text: 'MAKE.COM', pos: { top: '10%', right: '4%' }, rotate: 2 });
+  if (/automat/i.test(t)) stickers.push({ text: 'AUTOMATE', pos: { top: '22%', left: '4%' }, rotate: -3 });
+  if (/agent/i.test(t)) stickers.push({ text: 'AGENTS', pos: { top: '12%', right: '5%' }, rotate: 4 });
+  if (/ai\b/i.test(t)) stickers.push({ text: 'AI', pos: { top: '8%', right: '6%' }, rotate: 3 });
+  if (/scale|grow/i.test(t)) stickers.push({ text: 'SCALE', pos: { bottom: '30%', right: '5%' }, rotate: -2 });
+  if (/install|setup|vs.?code/i.test(t)) stickers.push({ text: 'VS CODE', pos: { top: '12%', right: '5%' }, rotate: 2 });
+  if (/workflow/i.test(t)) stickers.push({ text: 'WORKFLOW', pos: { top: '18%', left: '4%' }, rotate: -3 });
+  if (/prompt/i.test(t)) stickers.push({ text: 'PROMPTS', pos: { top: '10%', right: '5%' }, rotate: 3 });
+  if (/revenue|money|\$/i.test(t)) stickers.push({ text: 'REVENUE', pos: { bottom: '32%', right: '5%' }, rotate: -2 });
+
+  // Always include a generic if we have fewer than 2
+  if (stickers.length < 2) stickers.push({ text: 'AI', pos: { top: '8%', right: '6%' }, rotate: 3 });
+  if (stickers.length < 3) stickers.push({ text: 'BUILD', pos: { bottom: '30%', right: '5%' }, rotate: -2 });
+
+  return stickers.slice(0, 4);
+}
 
 function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: number; sc: number }) {
   const v = slide.visual as CoverPhotoVisual;
   const words = slide.text.split(/\s+/);
   const fontSize = Math.max(72 * sc, words.length <= 5 ? 92 * sc : words.length <= 7 ? 80 * sc : 70 * sc);
-  const hasImagen = !!slide.backgroundImage;
+  const hasPhoto = !!slide.backgroundImage;
+  const stickers = getTopicStickers(slide.text);
 
   return (
     <div style={{
       position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden',
       fontFamily: Brand.typography.font_family,
-      // Imagen 3: CSS background-image. Fallback: dark solid color.
-      ...(hasImagen
-        ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : { backgroundColor: '#1a1a1a' }),
+      backgroundColor: '#0A0A0A',
+      ...(hasPhoto ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center top' } : {}),
     }}>
 
-      {/* Fallback: nick.jpg full-bleed photo (only when no Imagen 3 image) */}
-      {!hasImagen && (
+      {/* Fallback: nick.jpg if no uploaded photo */}
+      {!hasPhoto && (
         <img src="/nick.jpg" alt=""
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
         />
       )}
 
-      {/* Dark overlay — heavier over Imagen 3 to ensure text contrast */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: hasImagen ? 'rgba(0,0,0,0.58)' : 'rgba(0,0,0,0.52)' }} />
+      {/* Dark overlay — strong for text readability */}
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)' }} />
 
-      {/* Readability gradient — text area at bottom */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.85) 100%)' }} />
+      {/* Bottom gradient — extra dark where text sits */}
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.85) 100%)' }} />
 
-      {/* CSS hue blooms — only when no Imagen 3 (Imagen provides its own atmosphere) */}
-      {!hasImagen && <>
-        <div style={{ position: 'absolute', bottom: '-15%', left: '-10%', width: '65%', height: '55%', background: `radial-gradient(ellipse, hsla(${v.gradient_hue ?? 25}, 80%, 45%, 0.30) 0%, transparent 70%)`, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: '-12%', right: '-10%', width: '50%', height: '45%', background: `radial-gradient(ellipse, hsla(${((v.gradient_hue ?? 25) + 40) % 360}, 60%, 35%, 0.18) 0%, transparent 65%)`, pointerEvents: 'none' }} />
-      </>}
-
-      {/* Themed floating icons — always shown, orange glow ties brand to image */}
-      {COVER_ICONS.map((icon, i) => (
+      {/* Topic-relevant sticker badges — rotated, semi-transparent */}
+      {stickers.map((sticker, i) => (
         <div key={i} style={{
-          position: 'absolute', ...icon.pos,
-          fontSize: `${icon.size * sc}px`, lineHeight: 1,
-          opacity: hasImagen ? icon.opacity * 0.75 : icon.opacity,
-          filter: `drop-shadow(0 0 ${16 * sc}px rgba(255,113,7,0.65))`,
+          position: 'absolute', ...sticker.pos,
+          transform: `rotate(${sticker.rotate}deg)`,
+          backgroundColor: 'rgba(255,113,7,0.12)',
+          border: `${1.5 * sc}px solid rgba(255,113,7,0.35)`,
+          borderRadius: `${6 * sc}px`,
+          padding: `${5 * sc}px ${12 * sc}px`,
+          fontSize: `${11 * sc}px`,
+          fontWeight: 800,
+          color: Brand.colors.accent_primary,
+          letterSpacing: '0.1em',
+          fontFamily: Brand.typography.font_family,
+          filter: `drop-shadow(0 0 ${10 * sc}px rgba(255,113,7,0.25))`,
           zIndex: 2,
-        }}>{icon.emoji}</div>
+          opacity: 0.8,
+        }}>{sticker.text}</div>
       ))}
 
       {/* Headline — starts at 60% down */}
