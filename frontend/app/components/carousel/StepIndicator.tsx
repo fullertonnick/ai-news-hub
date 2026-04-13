@@ -4,11 +4,9 @@ import { Check } from 'lucide-react';
 
 const STEPS: { num: PipelineStep; label: string; approvalKey?: string }[] = [
   { num: 1, label: 'Copy', approvalKey: 'copy' },
-  { num: 2, label: 'Backgrounds', approvalKey: 'backgrounds' },
-  { num: 3, label: 'Cover', approvalKey: 'cover' },
-  { num: 4, label: 'CTA', approvalKey: 'cta' },
-  { num: 5, label: 'Compose', approvalKey: 'compose' },
-  { num: 6, label: 'Export' },
+  { num: 2, label: 'Visuals', approvalKey: 'visuals' },
+  { num: 3, label: 'Edit' , approvalKey: 'edit' },
+  { num: 4, label: 'Export' },
 ];
 
 export default function StepIndicator() {
@@ -32,12 +30,11 @@ export default function StepIndicator() {
                 : approved ? 'bg-green-500/10 text-green-400 border border-green-500/20'
                 : reachable ? 'text-gray-500 hover:text-white border border-transparent'
                 : 'text-gray-700 border border-transparent cursor-not-allowed'
-              }`}
-            >
+              }`}>
               {approved ? <Check size={12} /> : <span className="w-4 h-4 rounded-full bg-white/5 flex items-center justify-center text-[10px]">{s.num}</span>}
-              <span className="hidden sm:inline">{s.label}</span>
+              {s.label}
             </button>
-            {i < STEPS.length - 1 && <div className="w-4 h-px bg-white/10 mx-0.5" />}
+            {i < STEPS.length - 1 && <div className="w-6 h-px bg-white/10 mx-1" />}
           </div>
         );
       })}

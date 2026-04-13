@@ -21,120 +21,94 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const apiKey = process.env.GEMINI_API_KEY;
   const category = detectCategory(topic);
 
-  // ─── Tyler Germain-style prompt ─────────────────────────────────────────────
-  const prompt = `You are writing an Instagram carousel for Nick Cornelius (@thenickcornelius).
+  const prompt = `You are writing an Instagram carousel for Nick Cornelius (@thenickcornelius), who runs AI automation businesses (KingCaller AI + SimpliScale, $70K+/month combined).
 
 TOPIC: "${topic}"
 ${research_context?.full_research ? `\nRESEARCH:\n${research_context.full_research.slice(0, 3000)}` : ''}
 
 ═══════════════════════════════════════════════════════
-STYLE REFERENCE: TYLER GERMAIN (@itstylergermain)
+WRITING STYLE — Tyler Germain (@itstylergermain)
 ═══════════════════════════════════════════════════════
 
-Study this example carousel by Tyler Germain. Your output must match this EXACT writing style:
-
-COVER: "How to Build an AI Operating System (that runs your business for you...)"
-
-SLIDE 2: "Level 1: Claude Chat.
-You open a browser, type a question, get an answer. No memory. No context. You start from zero every single time.
-This is where 99% of people stop."
-
-SLIDE 3: "Level 2: Claude Code with a CLAUDE.md.
-Now Claude knows who you are, what you do, and how you like things done. It remembers your rules, your tone, your preferences.
-You stop repeating yourself."
-
-SLIDE 4: "Level 3: Claude Code with skills.
-Each skill is a focused expert. One writes ads. One designs emails. One builds websites.
-You're not prompting anymore. You're delegating."
-
-SLIDE 5: "Level 4: Multiple Claude Code instances, each with different skills.
-One handles marketing. Another handles sales. Another handles operations.
-You now have a team. But you're still the one starting every session."
-
-SLIDE 6: "Level 5: A harness connecting all of them.
-Heartbeats. Mission control. Agent-to-agent communication. Skill discovery. Agents that find and use each other's skills automatically.
-This is an AI operating system."
-
-CTA: "Want to skip straight to Level 5?
-I teach all of this inside AI Innovators. Comment 'AIOS' for an invite."
+Rules:
+1. CONVERSATIONAL: Reads like explaining to one smart friend. Second person, present tense.
+2. SHORT PUNCHY SENTENCES: Many under 6 words. Fragment sentences for impact.
+3. EACH SLIDE ENDS WITH A KICKER: The last sentence is the emotional payoff.
+4. CONCRETE OVER ABSTRACT: "One writes ads. One designs emails." NOT "AI can help with various tasks."
+5. NO MARKETING SPEAK: Zero buzzwords. Plain language.
+6. ACCENT WORD: One key phrase per slide gets highlighted in orange.
 
 ═══════════════════════════════════════════════════════
-WHAT MAKES THIS STYLE WORK — COPY THESE PATTERNS:
+STRUCTURE — CHOOSE THE BEST FORMAT FOR THIS TOPIC
 ═══════════════════════════════════════════════════════
 
-1. PROGRESSIVE STRUCTURE: Each slide builds on the previous. "Level 1 → Level 2 → Level 3..." or "Step 1 → Step 2 → Step 3..." — a journey, not random tips.
+DO NOT default to "Level 1, Level 2, Level 3..." — that's only ONE possible format.
 
-2. CONVERSATIONAL NARRATIVE: Reads like you're explaining to one smart friend. "You open a browser, type a question, get an answer." Second person, present tense.
+Pick the structure that fits the topic best:
 
-3. SHORT PUNCHY SENTENCES: Many under 6 words. "No memory. No context." "You stop repeating yourself." Fragment sentences for impact.
+- **Steps/How-To**: "Step 1: ... Step 2: ... Step 3: ..." — for tutorials, processes
+- **List**: "Tool 1: ... Tool 2: ..." or "Tip 1: ... Tip 2: ..." — for collections, resources
+- **Progressive Levels**: "Level 1 → Level 5" — ONLY for topics about skill progression or maturity stages
+- **Before/After**: Problem → Discovery → New approach → Results — for transformation stories
+- **Myth-Busting**: "Everyone thinks X... Here's what's actually true..." — for contrarian takes
+- **Deep Dive**: Concept → How it works → Examples → Pro tips — for explaining one thing thoroughly
+- **Comparison**: "Tool A does X. Tool B does Y." — for versus content
 
-4. EACH SLIDE ENDS WITH A KICKER: The last sentence is the emotional payoff or realization. "This is where 99% of people stop." "You're not prompting anymore. You're delegating." "This is an AI operating system."
-
-5. CONCRETE OVER ABSTRACT: "One writes ads. One designs emails. One builds websites." NOT "AI can help with various business tasks."
-
-6. NO MARKETING SPEAK: Zero buzzwords. No "revolutionary", "game-changing", "leverage". Plain language that a 14-year-old would understand.
-
-7. BUILDS TENSION: Each level reveals something bigger. The reader feels "I need to get to the next level."
-
-8. ACCENT WORD: One key phrase per slide gets highlighted (underlined in orange). It's the concept being introduced — "Claude Chat", "CLAUDE.md", "skills", "Multiple Claude Code instances", "harness connecting all of them".
+Use 5-9 content slides (not always 5). The number of slides should match the topic — 3 tools = 3 slides, 7 tips = 7 slides.
 
 ═══════════════════════════════════════════════════════
 YOUR TASK
 ═══════════════════════════════════════════════════════
 
-Write a 7-slide carousel about "${topic}" using Nick's perspective (he runs KingCaller AI + SimpliScale, $70K+/month, former pharma chemist).
+Write a carousel about "${topic}".
 
-SLIDE 1 (COVER): Big bold title + subtitle in parentheses. The title names the concept. The subtitle teases the outcome.
+SLIDE 1 (COVER): Bold title + subtitle in parentheses.
+- visual_type: "cover_photo"
 
-SLIDES 2-6 (CONTENT): Progressive levels/steps. Each slide:
-- Opens with "Level X:" or "Step X:" + the key concept (this becomes accent_word)
-- 2-4 sentences of conversational explanation (concrete, specific, second person)
-- Ends with a kicker line that creates anticipation for the next slide
-- visual_type: "none" (pure text on dark background — this is the style)
+SLIDES 2-N (CONTENT): Pick the right structure. Each slide:
+- One clear idea
+- 2-4 sentences, conversational, concrete
+- Ends with a kicker line
+- visual_type: "none"
 
-SLIDE 7 (CTA):
-- Question that references the highest level: "Want to skip straight to Level X?"
-- One-line offer: "I teach all of this inside [Automation Academy / SimpliScale]."
-- "Comment '[KEYWORD]' for [invite/access/the blueprint]."
+LAST SLIDE (CTA):
+- Question referencing the content
+- "Comment '[KEYWORD]' and I'll send you [specific thing]"
+- visual_type: "cta_slide"
 
-KEYWORD: Pick from the topic. Max 8 chars. ALL CAPS. Tool names win.
+KEYWORD: From the topic. Max 8 chars. ALL CAPS.
 
-CAPTION: Write conversational Instagram caption:
-- Hook matching the cover energy
-- 4 bullets with → previewing each level
-- "Comment [KEYWORD] and I'll send you [specific thing] 🔥"
+CAPTION: Conversational Instagram caption:
+- Hook line matching the cover
+- Bullet points previewing the content
+- "Comment [KEYWORD] and I'll send you [thing] 🔥"
 - "📌 Save this before you lose it"
-- 15-20 hashtags
+- 10-15 hashtags
 
-Return ONLY valid JSON (no markdown wrapping):
+Return ONLY valid JSON (no markdown):
 {
   "slides": [
-    { "text": "slide copy", "accent_word": "key phrase to highlight", "section_label": null, "visual_type": "cover_photo" },
-    { "text": "Level 1: ...", "accent_word": "...", "section_label": null, "visual_type": "none" },
-    { "text": "Level 2: ...", "accent_word": "...", "section_label": null, "visual_type": "none" },
-    { "text": "Level 3: ...", "accent_word": "...", "section_label": null, "visual_type": "none" },
-    { "text": "Level 4: ...", "accent_word": "...", "section_label": null, "visual_type": "none" },
-    { "text": "Level 5: ...", "accent_word": "...", "section_label": null, "visual_type": "none" },
-    { "text": "CTA text", "accent_word": "...", "section_label": null, "visual_type": "cta_slide" }
+    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "cover_photo" },
+    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "none" },
+    ...more content slides as needed...
+    { "text": "CTA...", "accent_word": "...", "section_label": null, "visual_type": "cta_slide" }
   ],
-  "caption": "full caption",
+  "caption": "...",
   "keyword": "KEYWORD"
 }`;
 
   if (!apiKey) {
-    // Tyler Germain-style fallback
+    // Fallback without AI
     const kw = /claude/i.test(topic) ? 'CLAUDE' : /make/i.test(topic) ? 'MAKE' : /agent/i.test(topic) ? 'AGENT' : 'BUILD';
     return res.json({
       slides: [
-        { id: uid(), text: `How to ${topic.split(/\s+/).slice(0, 5).join(' ')}\n\n(the system that runs itself...)`, accent_word: topic.split(/\s+/)[0], visual_type: 'cover_photo', backgroundStatus: 'pending' },
-        { id: uid(), text: `Level 1: The manual version.\n\nYou do everything yourself. Every task, every follow-up, every report. You're fast, but you're the bottleneck.\n\nNothing runs without you.`, accent_word: 'manual version', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `Level 2: One AI tool.\n\nYou find one tool that handles one task. It's faster than you. It doesn't forget. It doesn't sleep.\n\nBut it only does one thing.`, accent_word: 'One AI tool', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `Level 3: Connected tools.\n\nNow your tools talk to each other. A new lead triggers onboarding. Onboarding triggers a Slack message. The message triggers a follow-up.\n\nYou built a machine.`, accent_word: 'Connected tools', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `Level 4: AI making decisions.\n\nThe system doesn't just run. It thinks. It scores leads. It routes conversations. It escalates problems.\n\nYou're not managing tasks anymore. You're managing outcomes.`, accent_word: 'AI making decisions', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `Level 5: The system runs itself.\n\nIt monitors its own performance. It flags what's broken. It suggests what to build next.\n\nYou check in once a day. Everything else is handled.`, accent_word: 'runs itself', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `Want to skip straight to Level 5?\n\nI built this exact system for my businesses. Comment "${kw}" and I'll send you the blueprint.`, accent_word: 'Level 5', visual_type: 'cta_slide', backgroundStatus: 'pending' },
+        { id: uid(), text: `${topic}\n\n(the complete breakdown...)`, accent_word: topic.split(/\s+/)[0], visual_type: 'cover_photo', backgroundStatus: 'pending' },
+        { id: uid(), text: `Here's what most people get wrong about ${topic.toLowerCase()}.\n\nThey overthink it. They read 50 articles. They watch tutorials for weeks.\n\nThen they never start.`, accent_word: 'get wrong', visual_type: 'none', backgroundStatus: 'pending' },
+        { id: uid(), text: `The simplest approach:\n\nPick one tool. Learn the basics. Build something real in the first hour.\n\nPerfect is the enemy of done.`, accent_word: 'simplest approach', visual_type: 'none', backgroundStatus: 'pending' },
+        { id: uid(), text: `Here's exactly what I did:\n\nSet it up in 20 minutes. Connected it to my existing workflow. Let it run for a week.\n\nThe results spoke for themselves.`, accent_word: 'exactly what I did', visual_type: 'none', backgroundStatus: 'pending' },
+        { id: uid(), text: `Want the exact setup I use?\n\nComment "${kw}" and I'll send you the blueprint.`, accent_word: kw, visual_type: 'cta_slide', backgroundStatus: 'pending' },
       ],
-      caption: `Most people are stuck at Level 1.\n\nThey do everything manually. Every task, every follow-up, every report.\n\nHere's the 5-level system I used to go from doing everything myself to checking in once a day:\n\n→ Level 1: Manual everything (this is where most stop)\n→ Level 2: One AI tool doing one job\n→ Level 3: Tools connected into a machine\n→ Level 4: AI making decisions for you\n→ Level 5: The system runs itself\n\nComment "${kw}" and I'll send you the full blueprint 🔥\n\n📌 Save this before you lose it\n\n#aiautomation #automation #aiforbusiness #nocode #businessautomation #solopreneur #agencyowner #scaleyourbusiness #simpliscale #thenickcornelius #productivitytools #workflowautomation #businessgrowth #entrepreneurship #claudecode`,
+      caption: `Most people overcomplicate ${topic.toLowerCase()}.\n\nHere's the simple version:\n\n→ What most get wrong\n→ The simplest approach\n→ My exact setup\n\nComment "${kw}" and I'll send you the full blueprint 🔥\n\n📌 Save this before you lose it\n\n#ai #automation #business #scale #simpliscale #thenickcornelius`,
       keyword: kw,
       category,
     });

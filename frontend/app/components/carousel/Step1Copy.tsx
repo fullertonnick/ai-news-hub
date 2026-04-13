@@ -132,7 +132,7 @@ export default function Step1Copy() {
           {/* Approve */}
           <button onClick={() => { store.approve('copy'); store.setStep(2); }}
             className="w-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-            <Check size={14} /> Approve Copy & Continue to Backgrounds
+            <Check size={14} /> Continue to Visuals
           </button>
         </div>
       )}

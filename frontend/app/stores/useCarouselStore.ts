@@ -1,31 +1,47 @@
 'use client';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { SlideVisual } from '../types';
+import type { SlideVisual, StickerOverlay } from '../types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type PipelineStep = 1 | 2 | 3 | 4 | 5 | 6;
+export type PipelineStep = 1 | 2 | 3 | 4;
 export type BgStatus = 'pending' | 'generating' | 'done' | 'skipped' | 'error';
+
+export interface TextOverlay {
+  id: string;
+  text: string;
+  x: number;          // % from left
+  y: number;          // % from top
+  fontSize: number;   // px at export scale
+  fontWeight: number;
+  color: string;
+  maxWidth: number;   // % of slide width
+  zIndex: number;
+  fontFamily?: string;
+}
 
 export interface SlideData {
   id: string;
   text: string;
   accent_word?: string;
   section_label?: string;
-  visual_type: string;         // suggested visual type: 'cover_photo' | 'code_block' | 'stats_grid' | etc.
-  visual?: SlideVisual;        // full visual data (populated during compose)
-  backgroundImage?: string;    // base64 data URL from Imagen 3
-  backgroundPrompt?: string;   // the Imagen prompt (editable by user)
+  visual_type: string;
+  visual?: SlideVisual;
+  backgroundImage?: string;
+  backgroundPrompt?: string;
   backgroundStatus: BgStatus;
+  stickers?: StickerOverlay[];
+  textOverlays?: TextOverlay[];
+  useTextOverlays?: boolean; // when true, SlideRenderer skips baked-in text
+  textOffsetX?: number; // % offset for the baked-in text block (0 = default position)
+  textOffsetY?: number;
 }
 
 interface Approvals {
   copy: boolean;
-  backgrounds: boolean;
-  cover: boolean;
-  cta: boolean;
-  compose: boolean;
+  visuals: boolean;
+  edit: boolean;
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────────
@@ -90,6 +106,18 @@ interface CarouselStore {
   setCoverPhotoEnabled: (e: boolean) => void;
   setCtaLayout: (l: 'photo' | 'text') => void;
 
+  // Actions — stickers
+  addSticker: (slideId: string, sticker: StickerOverlay) => void;
+  removeSticker: (slideId: string, stickerId: string) => void;
+  updateSticker: (slideId: string, stickerId: string, updates: Partial<StickerOverlay>) => void;
+
+  // Actions — text overlays
+  addTextOverlay: (slideId: string, overlay: TextOverlay) => void;
+  removeTextOverlay: (slideId: string, overlayId: string) => void;
+  updateTextOverlay: (slideId: string, overlayId: string, updates: Partial<TextOverlay>) => void;
+  setUseTextOverlays: (slideId: string, value: boolean) => void;
+  setTextOffset: (slideId: string, x: number, y: number) => void;
+
   // Reset
   reset: () => void;
 }
@@ -98,7 +126,7 @@ function uid() { return Date.now().toString(36) + Math.random().toString(36).sli
 
 const INITIAL: Pick<CarouselStore, 'currentStep' | 'approvals' | 'topic' | 'category' | 'style' | 'slides' | 'caption' | 'keyword' | 'copyLoading' | 'bgLoading' | 'coverPosition' | 'coverPhotoEnabled' | 'ctaLayout'> = {
   currentStep: 1,
-  approvals: { copy: false, backgrounds: false, cover: false, cta: false, compose: false },
+  approvals: { copy: false, visuals: false, edit: false },
   topic: '',
   category: '',
   style: 'tech_breakdown',
@@ -131,7 +159,7 @@ export const useCarouselStore = create<CarouselStore>()(
       updateSlideText: (id, text) => set(s => {
         const slides = s.slides.map(sl => sl.id === id ? { ...sl, text } : sl);
         // Revoke downstream approvals when copy changes
-        return { slides, approvals: { ...s.approvals, backgrounds: false, cover: false, cta: false, compose: false } };
+        return { slides, approvals: { ...s.approvals, visuals: false, edit: false } };
       }),
 
       updateSlideAccent: (id, word) => set(s => ({
@@ -189,8 +217,54 @@ export const useCarouselStore = create<CarouselStore>()(
       setCoverPhotoEnabled: (coverPhotoEnabled) => set({ coverPhotoEnabled }),
       setCtaLayout: (ctaLayout) => set({ ctaLayout }),
 
+      // ── Text Overlays ────────────────────────────────────────────────────
+      addTextOverlay: (slideId, overlay) => set(s => ({
+        slides: s.slides.map(sl => sl.id === slideId
+          ? { ...sl, textOverlays: [...(sl.textOverlays || []), overlay] }
+          : sl),
+      })),
+
+      removeTextOverlay: (slideId, overlayId) => set(s => ({
+        slides: s.slides.map(sl => sl.id === slideId
+          ? { ...sl, textOverlays: (sl.textOverlays || []).filter(t => t.id !== overlayId) }
+          : sl),
+      })),
+
+      updateTextOverlay: (slideId, overlayId, updates) => set(s => ({
+        slides: s.slides.map(sl => sl.id === slideId
+          ? { ...sl, textOverlays: (sl.textOverlays || []).map(t => t.id === overlayId ? { ...t, ...updates } : t) }
+          : sl),
+      })),
+
+      setUseTextOverlays: (slideId, value) => set(s => ({
+        slides: s.slides.map(sl => sl.id === slideId ? { ...sl, useTextOverlays: value } : sl),
+      })),
+
+      setTextOffset: (slideId, x, y) => set(s => ({
+        slides: s.slides.map(sl => sl.id === slideId ? { ...sl, textOffsetX: x, textOffsetY: y } : sl),
+      })),
+
+      // ── Stickers ────────────────────────────────────────────────────────
+      addSticker: (slideId, sticker) => set(s => ({
+        slides: s.slides.map(sl => sl.id === slideId
+          ? { ...sl, stickers: [...(sl.stickers || []), sticker] }
+          : sl),
+      })),
+
+      removeSticker: (slideId, stickerId) => set(s => ({
+        slides: s.slides.map(sl => sl.id === slideId
+          ? { ...sl, stickers: (sl.stickers || []).filter(st => st.id !== stickerId) }
+          : sl),
+      })),
+
+      updateSticker: (slideId, stickerId, updates) => set(s => ({
+        slides: s.slides.map(sl => sl.id === slideId
+          ? { ...sl, stickers: (sl.stickers || []).map(st => st.id === stickerId ? { ...st, ...updates } : st) }
+          : sl),
+      })),
+
       reset: () => set(INITIAL),
     }),
-    { name: 'simpliscale-carousel-pipeline' }
+    { name: 'simpliscale-carousel-pipeline', version: 8 }
   )
 );
