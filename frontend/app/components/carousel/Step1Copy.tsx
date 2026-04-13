@@ -7,7 +7,7 @@ const VISUAL_TYPES = ['cover_photo', 'code_block', 'stats_grid', 'diagram', 'ste
 
 export default function Step1Copy() {
   const store = useCarouselStore();
-  const { topic, style, slides, caption, keyword, copyLoading, approvals } = store;
+  const { topic, style, slides, caption, keyword, copyLoading, approvals, bgLoading } = store;
 
   const generateCopy = useCallback(async () => {
     if (!topic.trim()) return;
@@ -91,8 +91,10 @@ export default function Step1Copy() {
                     className="p-1 rounded hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ArrowUp size={12} /></button>
                   <button onClick={() => store.reorderSlide(slide.id, 'down')} disabled={i === slides.length - 1}
                     className="p-1 rounded hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ArrowDown size={12} /></button>
-                  <button onClick={() => regenerateSlide(slide.id)}
-                    className="p-1 rounded hover:bg-white/5 text-gray-600 hover:text-white"><RefreshCw size={12} /></button>
+                  <button onClick={() => regenerateSlide(slide.id)} disabled={!!bgLoading[slide.id]}
+                    className="p-1 rounded hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-40">
+                    {bgLoading[slide.id] ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                  </button>
                   <button onClick={() => store.removeSlide(slide.id)} disabled={slides.length <= 2}
                     className="p-1 rounded hover:bg-red-500/10 text-gray-600 hover:text-red-400 disabled:opacity-20"><Trash2 size={12} /></button>
                 </div>

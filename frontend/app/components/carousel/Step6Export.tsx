@@ -132,8 +132,8 @@ export default function Step6Export() {
         <RotateCcw size={14} /> Start New Carousel
       </button>
 
-      {/* Hidden export renders */}
-      <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none', opacity: 0 }}>
+      {/* Hidden export renders — off-screen so they don't flash, no opacity:0 so html-to-image captures content correctly */}
+      <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none' }}>
         {renderSlides.map((slide, i) => (
           <SlideRenderer key={i} ref={el => { exportRefs.current[i] = el; }} slide={slide} slideNumber={i + 1} totalSlides={slides.length} forExport />
         ))}

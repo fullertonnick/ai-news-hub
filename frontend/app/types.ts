@@ -35,10 +35,12 @@ export interface StepsListVisual {
 
 export interface CoverPhotoVisual {
   type: 'cover_photo';
-  photo_direction?: string;     // pose/vibe for Nick's photo
-  floating_elements?: string[]; // emoji icons to scatter around cover
-  subtext?: string;             // optional 10-word max supporting line
-  gradient_hue?: number;        // 0-360 hue for cover gradient overlay (deterministic per topic)
+  photo_direction?: string;                        // pose/vibe for Nick's photo
+  floating_elements?: string[];                    // emoji icons to scatter around cover
+  subtext?: string;                                // optional 10-word max supporting line
+  gradient_hue?: number;                           // 0-360 hue for cover gradient overlay (deterministic per topic)
+  position?: 'top' | 'middle' | 'bottom';         // vertical position of headline block (default: 'bottom')
+  photo_enabled?: boolean;                         // whether to show Nick's photo background (default: true)
 }
 
 export interface SkillCardVisual {

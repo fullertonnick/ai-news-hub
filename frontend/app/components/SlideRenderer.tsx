@@ -138,8 +138,13 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
   const v = slide.visual as CoverPhotoVisual;
   const words = slide.text.split(/\s+/);
   const fontSize = Math.max(72 * sc, words.length <= 5 ? 92 * sc : words.length <= 7 ? 80 * sc : 70 * sc);
-  const hasPhoto = !!slide.backgroundImage;
+  // photo_enabled defaults to true unless explicitly set to false
+  const photoEnabled = v.photo_enabled !== false;
+  const hasPhoto = !!slide.backgroundImage && photoEnabled;
+  const showFallbackPhoto = !hasPhoto && photoEnabled;
   const stickers = getTopicStickers(slide.text);
+  // Headline vertical start: top=10%, middle=35%, bottom=60% (default)
+  const headlineTopFraction = v.position === 'top' ? 0.10 : v.position === 'middle' ? 0.35 : 0.60;
 
   return (
     <div style={{
@@ -149,8 +154,8 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
       ...(hasPhoto ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center top' } : {}),
     }}>
 
-      {/* Fallback: nick.jpg if no uploaded photo */}
-      {!hasPhoto && (
+      {/* Fallback: nick.jpg if no uploaded photo and photo is enabled */}
+      {showFallbackPhoto && (
         <img src="/nick.jpg" alt=""
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
         />
@@ -182,8 +187,8 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
         }}>{sticker.text}</div>
       ))}
 
-      {/* Headline — starts at 60% down */}
-      <div style={{ position: 'absolute', top: `${H * 0.60}px`, bottom: `${120 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3 }}>
+      {/* Headline — vertical position controlled by v.position (default: bottom at 60%) */}
+      <div style={{ position: 'absolute', top: `${H * headlineTopFraction}px`, bottom: `${120 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3 }}>
         <div style={{ fontSize: `${fontSize}px`, fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: `${14 * sc}px` }}>
           {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
         </div>

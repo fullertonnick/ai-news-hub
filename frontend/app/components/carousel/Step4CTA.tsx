@@ -1,33 +1,45 @@
 'use client';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
-import { RefreshCw, Check, Loader2 } from 'lucide-react';
+import { RefreshCw, Check, Loader2, AlertCircle } from 'lucide-react';
 import SlideRenderer from '../SlideRenderer';
 
 export default function Step4CTA() {
   const store = useCarouselStore();
   const { slides, keyword, ctaLayout, bgLoading, topic, category } = store;
   const ctaSlide = slides[slides.length - 1];
+  const [bgError, setBgError] = useState(false);
   if (!ctaSlide) return null;
 
   const loading = bgLoading[ctaSlide.id] || false;
 
   const regenerateCtaBg = useCallback(async () => {
+    setBgError(false);
     store.setBgLoading(ctaSlide.id, true);
     try {
       const r = await fetch('/api/carousel/generate-bg-prompt', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic, slideText: ctaSlide.text, slideType: 'cta_slide', category }),
       });
+      if (!r.ok) throw new Error(`Prompt API ${r.status}`);
       const d = await r.json();
-      store.setSlideBackgroundPrompt(ctaSlide.id, d.prompt || '');
+      const prompt = d.prompt || '';
+      store.setSlideBackgroundPrompt(ctaSlide.id, prompt);
       const r2 = await fetch('/api/imagen', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: d.prompt, negative_prompt: '' }),
+        body: JSON.stringify({ prompt, negative_prompt: '' }),
       });
+      if (!r2.ok) throw new Error(`Imagen API ${r2.status}`);
       const d2 = await r2.json();
-      if (d2.dataUrl) store.setSlideBackground(ctaSlide.id, d2.dataUrl);
-    } catch {}
+      if (d2.dataUrl) {
+        store.setSlideBackground(ctaSlide.id, d2.dataUrl);
+      } else {
+        throw new Error('No image returned');
+      }
+    } catch (err) {
+      console.error('CTA bg generation failed:', err);
+      setBgError(true);
+    }
     store.setBgLoading(ctaSlide.id, false);
   }, [ctaSlide, topic, category, store]);
 
@@ -83,8 +95,13 @@ export default function Step4CTA() {
           <button onClick={regenerateCtaBg} disabled={loading}
             className="w-full flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium py-2.5 rounded-xl transition-colors disabled:opacity-40">
             {loading ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-            Regenerate CTA Background
+            {loading ? 'Generating...' : 'Regenerate CTA Background'}
           </button>
+          {bgError && (
+            <div className="flex items-center gap-1.5 text-xs text-red-400">
+              <AlertCircle size={12} /> Background generation failed — check API key or try again
+            </div>
+          )}
         </div>
       </div>
 

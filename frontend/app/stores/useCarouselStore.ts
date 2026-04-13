@@ -121,7 +121,7 @@ export const useCarouselStore = create<CarouselStore>()(
 
       approve: (key) => set(s => ({ approvals: { ...s.approvals, [key]: true } })),
 
-      setTopic: (topic) => set({ ...INITIAL, topic }), // reset pipeline on new topic
+      setTopic: (topic) => set(s => ({ ...INITIAL, topic, style: s.style })), // reset pipeline on new topic, preserve style
       setCategory: (category) => set({ category }),
       setStyle: (style) => set({ style }),
 

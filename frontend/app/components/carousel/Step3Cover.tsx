@@ -1,24 +1,27 @@
 'use client';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
-import { RefreshCw, Check, Loader2, User, Image } from 'lucide-react';
+import { RefreshCw, Check, Loader2, User, AlertCircle } from 'lucide-react';
 import SlideRenderer from '../SlideRenderer';
 
 export default function Step3Cover() {
   const store = useCarouselStore();
   const { slides, coverPosition, coverPhotoEnabled, bgLoading, topic, category } = store;
   const coverSlide = slides[0];
+  const [bgError, setBgError] = useState(false);
   if (!coverSlide) return null;
 
   const loading = bgLoading[coverSlide.id] || false;
 
   const regenerateCoverBg = useCallback(async () => {
+    setBgError(false);
     store.setBgLoading(coverSlide.id, true);
     try {
       const r = await fetch('/api/carousel/generate-bg-prompt', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic, slideText: coverSlide.text, slideType: 'cover_photo', category }),
       });
+      if (!r.ok) throw new Error(`Prompt API ${r.status}`);
       const d = await r.json();
       const prompt = d.prompt || '';
       store.setSlideBackgroundPrompt(coverSlide.id, prompt);
@@ -27,22 +30,33 @@ export default function Step3Cover() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, negative_prompt: '' }),
       });
+      if (!r2.ok) throw new Error(`Imagen API ${r2.status}`);
       const d2 = await r2.json();
-      if (d2.dataUrl) store.setSlideBackground(coverSlide.id, d2.dataUrl);
-    } catch {}
+      if (d2.dataUrl) {
+        store.setSlideBackground(coverSlide.id, d2.dataUrl);
+      } else {
+        throw new Error('No image returned');
+      }
+    } catch (err) {
+      console.error('Cover bg generation failed:', err);
+      setBgError(true);
+    }
     store.setBgLoading(coverSlide.id, false);
   }, [coverSlide, topic, category, store]);
 
   // Build a CarouselSlide object for SlideRenderer
+  // Pass position + photo_enabled so CoverTemplate actually responds to controls
   const renderSlide = {
     text: coverSlide.text,
     accent_word: coverSlide.accent_word,
     visual: {
       type: 'cover_photo' as const,
-      subtext: coverPhotoEnabled ? undefined : undefined,
       gradient_hue: 25,
+      position: coverPosition,
+      photo_enabled: coverPhotoEnabled,
     },
-    backgroundImage: coverSlide.backgroundImage,
+    // Only pass backgroundImage when photo is enabled
+    backgroundImage: coverPhotoEnabled ? coverSlide.backgroundImage : undefined,
   };
 
   return (
@@ -98,8 +112,13 @@ export default function Step3Cover() {
           <button onClick={regenerateCoverBg} disabled={loading}
             className="w-full flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium py-2.5 rounded-xl transition-colors disabled:opacity-40">
             {loading ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-            Regenerate Cover Background
+            {loading ? 'Generating...' : 'Regenerate Cover Background'}
           </button>
+          {bgError && (
+            <div className="flex items-center gap-1.5 text-xs text-red-400">
+              <AlertCircle size={12} /> Background generation failed — check API key or try again
+            </div>
+          )}
         </div>
       </div>
 
