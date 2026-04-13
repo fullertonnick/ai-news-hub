@@ -93,6 +93,20 @@ export type SlideVisual =
   | ChecklistVisual
   | NoneVisual;
 
+// ─── Sticker Overlay ─────────────────────────────────────────────────────────
+
+export interface StickerOverlay {
+  id: string;
+  src: string;
+  label: string;
+  x: number;
+  y: number;
+  width: number;
+  rotation: number;
+  opacity: number;
+  zIndex: number;
+}
+
 // ─── Carousel Slide ───────────────────────────────────────────────────────────
 
 export interface CarouselSlide {
@@ -103,6 +117,7 @@ export interface CarouselSlide {
   section_label?: string;     // e.g. "Step 1" or "— Skill 2 —"
   visual: SlideVisual;
   backgroundImage?: string;   // base64 data URL from Imagen 3 generation
+  stickers?: StickerOverlay[];
 }
 
 // ─── Quality Gate ─────────────────────────────────────────────────────────────
