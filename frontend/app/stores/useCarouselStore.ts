@@ -149,12 +149,17 @@ export const useCarouselStore = create<CarouselStore>()(
 
       approve: (key) => set(s => ({ approvals: { ...s.approvals, [key]: true } })),
 
-      setTopic: (topic) => set(s => ({ ...INITIAL, topic, style: s.style })), // reset pipeline on new topic, preserve style
+      setTopic: (topic) => set({ topic }), // just update the topic — reset happens on Generate
       setCategory: (category) => set({ category }),
       setStyle: (style) => set({ style }),
 
       // ── Slide editing ─────────────────────────────────────────────────────
-      setSlides: (slides) => set({ slides }),
+      // Reset all approvals whenever new slides are loaded (new copy generation clears prior state)
+      setSlides: (slides) => set({
+        slides,
+        approvals: { copy: false, visuals: false, edit: false },
+        bgLoading: {},
+      }),
 
       updateSlideText: (id, text) => set(s => {
         const slides = s.slides.map(sl => sl.id === id ? { ...sl, text } : sl);
