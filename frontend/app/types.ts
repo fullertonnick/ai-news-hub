@@ -93,6 +93,21 @@ export type SlideVisual =
   | ChecklistVisual
   | NoneVisual;
 
+// ─── Text Overlay (added in Step 3) ──────────────────────────────────────────
+
+export interface TextOverlay {
+  id: string;
+  text: string;
+  x: number;          // % from left
+  y: number;          // % from top
+  fontSize: number;   // px at 1080-scale
+  fontWeight: number;
+  color: string;
+  maxWidth: number;   // % of slide width
+  zIndex: number;
+  fontFamily?: string;
+}
+
 // ─── Sticker Overlay ─────────────────────────────────────────────────────────
 
 export interface StickerOverlay {
@@ -118,6 +133,10 @@ export interface CarouselSlide {
   visual: SlideVisual;
   backgroundImage?: string;   // base64 data URL from Imagen 3 generation
   stickers?: StickerOverlay[];
+  textOverlays?: TextOverlay[];
+  useTextOverlays?: boolean;  // when true, hide baked-in headline text
+  textOffsetX?: number;       // px offset at 1080-scale for the text block
+  textOffsetY?: number;
 }
 
 // ─── Quality Gate ─────────────────────────────────────────────────────────────

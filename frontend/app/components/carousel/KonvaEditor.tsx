@@ -20,9 +20,11 @@ function useKonvaImage(src: string): HTMLImageElement | null {
 }
 
 // ─── Single sticker ─────────────────────────────────────────────────────────
-function StickerNode({ sticker, stageW, stageH, isSelected, onSelect }: {
+function StickerNode({ sticker, stageW, stageH, isSelected, onSelect, onMouseEnter, onMouseLeave, onDragStart, onDragEnd }: {
   sticker: StickerOverlay; stageW: number; stageH: number;
   isSelected: boolean; onSelect: () => void;
+  onMouseEnter?: () => void; onMouseLeave?: () => void;
+  onDragStart?: () => void; onDragEnd?: () => void;
 }) {
   const img = useKonvaImage(sticker.src);
   if (!img) return null;
@@ -44,14 +46,20 @@ function StickerNode({ sticker, stageW, stageH, isSelected, onSelect }: {
       draggable
       onMouseDown={(e: any) => { e.cancelBubble = true; onSelect(); }}
       onTouchStart={(e: any) => { e.cancelBubble = true; onSelect(); }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       name={`sticker_${sticker.id}`}
     />
   );
 }
 
 // ─── Single text ────────────────────────────────────────────────────────────
-function TextNode({ overlay, stageW, stageH, onSelect }: {
+function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeave, onDragStart, onDragEnd }: {
   overlay: TextOverlay; stageW: number; stageH: number; onSelect: () => void;
+  onMouseEnter?: () => void; onMouseLeave?: () => void;
+  onDragStart?: () => void; onDragEnd?: () => void;
 }) {
   const pxW = (overlay.maxWidth / 100) * stageW;
   const fs = overlay.fontSize * (stageW / 1080);
@@ -75,6 +83,10 @@ function TextNode({ overlay, stageW, stageH, onSelect }: {
       draggable
       onMouseDown={(e: any) => { e.cancelBubble = true; onSelect(); }}
       onTouchStart={(e: any) => { e.cancelBubble = true; onSelect(); }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       name={`text_${overlay.id}`}
     />
   );
@@ -95,6 +107,7 @@ interface Props {
 export default function KonvaEditor({ stickers, textOverlays, selectedId, onSelect, onUpdateSticker, onUpdateTextOverlay, width, height }: Props) {
   const stageRef = useRef<any>(null);
   const trRef = useRef<any>(null);
+  const [cursor, setCursor] = useState<string>('default');
 
   // Attach transformer to selected node
   useEffect(() => {
@@ -117,6 +130,11 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
       tr.nodes([]);
     }
   }, [selectedId, stickers.length, textOverlays.length]);
+
+  const handleMouseEnterNode = useCallback(() => setCursor('grab'), []);
+  const handleMouseLeaveNode = useCallback(() => setCursor('default'), []);
+  const handleDragStartNode = useCallback(() => setCursor('grabbing'), []);
+  const handleDragEndNode = useCallback(() => setCursor('grab'), []);
 
   // Sync drag end back to store
   const handleDragEnd = useCallback((e: any) => {
@@ -168,7 +186,7 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
   return (
     <Stage ref={stageRef} width={width} height={height}
       onClick={handleStageClick} onTap={handleStageClick}
-      style={{ position: 'absolute', top: 0, left: 0, zIndex: 20, borderRadius: 12, cursor: 'default' }}>
+      style={{ position: 'absolute', top: 0, left: 0, zIndex: 20, borderRadius: 12, cursor }}>
       <Layer
         onDragEnd={handleDragEnd}
         onTransformEnd={handleTransformEnd}
@@ -176,11 +194,19 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
         {stickers.map(s => (
           <StickerNode key={s.id} sticker={s} stageW={width} stageH={height}
             isSelected={selectedId === s.id}
-            onSelect={() => onSelect(s.id)} />
+            onSelect={() => onSelect(s.id)}
+            onMouseEnter={handleMouseEnterNode}
+            onMouseLeave={handleMouseLeaveNode}
+            onDragStart={handleDragStartNode}
+            onDragEnd={handleDragEndNode} />
         ))}
         {textOverlays.map(t => (
           <TextNode key={t.id} overlay={t} stageW={width} stageH={height}
-            onSelect={() => onSelect(t.id)} />
+            onSelect={() => onSelect(t.id)}
+            onMouseEnter={handleMouseEnterNode}
+            onMouseLeave={handleMouseLeaveNode}
+            onDragStart={handleDragStartNode}
+            onDragEnd={handleDragEndNode} />
         ))}
         <Transformer
           ref={trRef}

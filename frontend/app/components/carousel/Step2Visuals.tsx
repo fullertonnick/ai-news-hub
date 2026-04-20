@@ -109,8 +109,8 @@ export default function Step2Visuals() {
             <span className="ml-auto text-[10px] text-gray-600 uppercase">{isFirst ? 'Cover' : isLast ? 'CTA' : slide.visual_type?.replace(/_/g, ' ') || 'Content'}</span>
           </div>
 
-          <div style={{ width: '100%', maxWidth: 360, aspectRatio: '4/5', position: 'relative', margin: '0 auto' }}>
-            <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 12, transform: 'scale(0.667)', transformOrigin: 'top left', width: 540, height: 675 }}>
+          <div style={{ width: '100%', maxWidth: 360, aspectRatio: '4/5', position: 'relative', margin: '0 auto', overflow: 'hidden', borderRadius: 12 }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, width: 540, height: 675, transform: 'scale(0.667)', transformOrigin: 'top left' }}>
               <SlideRenderer slide={renderSlide} slideNumber={currentIdx + 1} totalSlides={slides.length} />
             </div>
           </div>

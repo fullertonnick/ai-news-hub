@@ -4,7 +4,7 @@ import { Brand } from '../brand/simpliscale';
 import {
   CarouselSlide, CodeBlockVisual, StatsGridVisual, DiagramVisual,
   StepsListVisual, CoverPhotoVisual, SkillCardVisual, CTASlideVisual,
-  BigQuoteVisual, ComparisonVisual, ChecklistVisual,
+  BigQuoteVisual, ComparisonVisual, ChecklistVisual, TextOverlay,
 } from '../types';
 
 interface Props {
@@ -96,6 +96,69 @@ function Footer({ sc, light = false }: { sc: number; light?: boolean }) {
       <span style={{ color, fontSize: `${12 * sc}px`, fontWeight: 500, fontFamily: Brand.typography.font_family }}>@thenickcornelius</span>
       <span style={{ color, fontSize: `${12 * sc}px`, fontWeight: 500, fontFamily: Brand.typography.font_family }}>{Brand.brand.save_cta}</span>
     </div>
+  );
+}
+
+// ─── Overlay renderer (stickers + text overlays) — used by all slide types ───
+
+function RenderOverlays({ slide, W, H }: { slide: CarouselSlide; W: number; H: number }) {
+  const stickers = slide.stickers || [];
+  const textOverlays: TextOverlay[] = slide.textOverlays || [];
+  if (!stickers.length && !textOverlays.length) return null;
+  return (
+    <>
+      {stickers.map(s => {
+        const pxW = (s.width / 100) * W;
+        return (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={s.id}
+            src={s.src}
+            alt={s.label}
+            style={{
+              position: 'absolute',
+              left: `${(s.x / 100) * W}px`,
+              top: `${(s.y / 100) * H}px`,
+              width: `${pxW}px`,
+              transform: `translate(-50%, -50%) rotate(${s.rotation}deg)`,
+              opacity: s.opacity,
+              zIndex: s.zIndex ?? 10,
+              pointerEvents: 'none',
+              userSelect: 'none',
+            }}
+          />
+        );
+      })}
+      {textOverlays.map(t => {
+        const pxW = (t.maxWidth / 100) * W;
+        const fs = t.fontSize * (W / 1080);
+        return (
+          <div
+            key={t.id}
+            style={{
+              position: 'absolute',
+              left: `${(t.x / 100) * W}px`,
+              top: `${(t.y / 100) * H}px`,
+              width: `${pxW}px`,
+              transform: 'translate(-50%, -50%)',
+              color: t.color,
+              fontSize: `${fs}px`,
+              fontWeight: t.fontWeight,
+              fontFamily: t.fontFamily || Brand.typography.font_family,
+              textAlign: 'center',
+              lineHeight: 1.3,
+              wordBreak: 'break-word',
+              zIndex: t.zIndex ?? 10,
+              pointerEvents: 'none',
+              userSelect: 'none' as const,
+              textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+            }}
+          >
+            {t.text}
+          </div>
+        );
+      })}
+    </>
   );
 }
 
@@ -305,8 +368,9 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   // ── Cover slide ──
   if (slide.visual?.type === 'cover_photo') {
     return (
-      <div ref={ref} style={{ flexShrink: 0 }}>
+      <div ref={ref} style={{ position: 'relative', width: `${W}px`, height: `${H}px`, flexShrink: 0, overflow: 'hidden' }}>
         <CoverTemplate slide={slide} W={W} H={H} sc={sc} />
+        <RenderOverlays slide={slide} W={W} H={H} />
       </div>
     );
   }
@@ -314,8 +378,9 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   // ── CTA slide ──
   if (slide.visual?.type === 'cta_slide') {
     return (
-      <div ref={ref} style={{ flexShrink: 0 }}>
+      <div ref={ref} style={{ position: 'relative', width: `${W}px`, height: `${H}px`, flexShrink: 0, overflow: 'hidden' }}>
         <CTATemplate slide={slide} W={W} H={H} sc={sc} />
+        <RenderOverlays slide={slide} W={W} H={H} />
       </div>
     );
   }
@@ -330,6 +395,10 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   const fs = isBigQuote
     ? (chars > 120 ? 36 * sc : chars > 70 ? 44 * sc : 52 * sc)
     : (chars > 120 ? 30 * sc : chars > 80 ? 34 * sc : 40 * sc);
+
+  // Text block offset (set via Step 3 drag handle; stored in 1080-scale px)
+  const txOff = (slide.textOffsetX || 0) * sc;
+  const tyOff = (slide.textOffsetY || 0) * sc;
 
   return (
     <div ref={ref} style={{
@@ -363,18 +432,20 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
         <div style={{ position: 'absolute', top: `${-10 * sc}px`, left: `${44 * sc}px`, fontSize: `${160 * sc}px`, lineHeight: 1, color: Brand.colors.accent_primary, opacity: 0.12, fontFamily: 'Georgia, serif', fontWeight: 900, zIndex: 0, pointerEvents: 'none', userSelect: 'none' as const }}>"</div>
       )}
 
-      {/* ── FIX 3: Content — vertically centered, no header ── */}
+      {/* ── Content — vertically centered, no header ── */}
       <div style={{
         flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
         padding: `${PV}px ${PH}px`, paddingBottom: `${16 * sc}px`,
         position: 'relative', gap: `${22 * sc}px`,
-        overflow: 'hidden', minHeight: 0,
+        minHeight: 0,
+        ...(txOff || tyOff ? { transform: `translate(${txOff}px, ${tyOff}px)` } : {}),
       }}>
 
         {/* Section label */}
         {slide.section_label && <SectionLabel label={slide.section_label} sc={sc} />}
 
-        {/* Headline */}
+        {/* Headline — hidden when replaced by custom text overlays */}
+        {!slide.useTextOverlays && (
         <div style={{ flexShrink: 0 }}>
           {paras.map((p, i) => (
             <p key={i} style={{
@@ -387,6 +458,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
             </p>
           ))}
         </div>
+        )}
 
         {/* ── Visual ── */}
         {hasVis && (
@@ -612,10 +684,13 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
         )}
       </div>
 
-      {/* ── Footer — FIX 1: only handle reference here, no header anywhere ── */}
+      {/* ── Footer ── */}
       <div style={{ padding: `0 ${PH}px ${20 * sc}px`, flexShrink: 0, position: 'relative' }}>
         <Footer sc={sc} />
       </div>
+
+      {/* ── Stickers + text overlays (absolute, above everything) ── */}
+      <RenderOverlays slide={slide} W={W} H={H} />
     </div>
   );
 });

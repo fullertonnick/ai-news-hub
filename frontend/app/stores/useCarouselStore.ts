@@ -1,25 +1,14 @@
 'use client';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { SlideVisual, StickerOverlay } from '../types';
+import type { SlideVisual, StickerOverlay, TextOverlay } from '../types';
+
+export type { TextOverlay }; // re-export for consumers that import from the store
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type PipelineStep = 1 | 2 | 3 | 4;
 export type BgStatus = 'pending' | 'generating' | 'done' | 'skipped' | 'error';
-
-export interface TextOverlay {
-  id: string;
-  text: string;
-  x: number;          // % from left
-  y: number;          // % from top
-  fontSize: number;   // px at export scale
-  fontWeight: number;
-  color: string;
-  maxWidth: number;   // % of slide width
-  zIndex: number;
-  fontFamily?: string;
-}
 
 export interface SlideData {
   id: string;

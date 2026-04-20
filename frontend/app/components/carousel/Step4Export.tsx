@@ -18,13 +18,18 @@ export default function Step4Export() {
   // Build render slides
   const renderSlides: CarouselSlide[] = slides.map((s, i) => {
     const isFirst = i === 0, isLast = i === slides.length - 1;
-    const isMiddle = !isFirst && !isLast;
-    const hasOverlays = (s.textOverlays?.length || 0) > 0;
     let visual: any;
     if (isFirst) visual = { type: 'cover_photo', gradient_hue: 25, position: coverPosition };
     else if (isLast) visual = { type: 'cta_slide', keyword, layout_variant: ctaLayout };
     else visual = s.visual || { type: s.visual_type || 'none' };
-    return { text: s.text, accent_word: s.accent_word, section_label: s.section_label, visual, backgroundImage: s.backgroundImage, stickers: s.stickers, textOverlays: s.textOverlays, useTextOverlays: (isMiddle && hasOverlays) || s.useTextOverlays, textOffsetX: s.textOffsetX, textOffsetY: s.textOffsetY };
+    return {
+      text: s.text, accent_word: s.accent_word, section_label: s.section_label,
+      visual, backgroundImage: s.backgroundImage,
+      stickers: s.stickers, textOverlays: s.textOverlays,
+      // Only hide baked-in text when the user explicitly toggled the flag
+      useTextOverlays: s.useTextOverlays,
+      textOffsetX: s.textOffsetX, textOffsetY: s.textOffsetY,
+    };
   });
 
   const downloadSlide = useCallback(async (i: number) => {
