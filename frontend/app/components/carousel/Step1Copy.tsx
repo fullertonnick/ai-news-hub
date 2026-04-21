@@ -1,16 +1,18 @@
 'use client';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
-import { Loader2, Zap, RefreshCw, ArrowUp, ArrowDown, Trash2, Plus, Check } from 'lucide-react';
+import { Loader2, Zap, RefreshCw, ArrowUp, ArrowDown, Trash2, Plus, Check, AlertCircle } from 'lucide-react';
 
 const VISUAL_TYPES = ['cover_photo', 'code_block', 'stats_grid', 'diagram', 'steps_list', 'skill_card', 'big_quote', 'comparison', 'checklist', 'cta_slide', 'none'];
 
 export default function Step1Copy() {
   const store = useCarouselStore();
   const { topic, style, slides, caption, keyword, copyLoading, approvals, bgLoading } = store;
+  const [error, setError] = useState<string | null>(null);
 
   const generateCopy = useCallback(async () => {
     if (!topic.trim()) return;
+    setError(null);
     store.setCopyLoading(true);
     try {
       const r = await fetch('/api/carousel/generate-copy', {
@@ -18,13 +20,19 @@ export default function Step1Copy() {
         body: JSON.stringify({ topic, style }),
       });
       const d = await r.json();
-      if (d.slides?.length) {
+      if (d.error) {
+        setError(d.error);
+      } else if (d.slides?.length) {
         store.setSlides(d.slides);
         store.setCaption(d.caption || '');
         store.setKeyword(d.keyword || '');
         store.setCategory(d.category || '');
+      } else {
+        setError('No slides returned. Try rephrasing your topic.');
       }
-    } catch (e) { console.error('Copy generation failed:', e); }
+    } catch {
+      setError('Network error. Check your connection and try again.');
+    }
     store.setCopyLoading(false);
   }, [topic, style, store]);
 
@@ -43,7 +51,7 @@ export default function Step1Copy() {
         store.updateSlideText(slideId, d.text);
         if (d.accent_word) store.updateSlideAccent(slideId, d.accent_word);
       }
-    } catch (e) { console.error('Slide regen failed:', e); }
+    } catch { /* slide stays unchanged on regen failure */ }
     store.setBgLoading(slideId, false);
   }, [slides, topic, style, store]);
 
@@ -67,6 +75,14 @@ export default function Step1Copy() {
           {copyLoading ? <><Loader2 size={14} className="animate-spin" />Generating Copy...</> : <><Zap size={14} />{slides.length ? 'Regenerate All Copy' : 'Generate Copy'}</>}
         </button>
       </div>
+
+      {/* Error banner */}
+      {error && (
+        <div className="flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3">
+          <AlertCircle size={14} className="text-red-400 flex-shrink-0" />
+          <span className="text-sm text-red-400">{error}</span>
+        </div>
+      )}
 
       {/* Slide cards */}
       {slides.length > 0 && (

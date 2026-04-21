@@ -21,81 +21,100 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const apiKey = process.env.GEMINI_API_KEY;
   const category = detectCategory(topic);
 
-  const prompt = `You are writing an Instagram carousel for Nick Cornelius (@thenickcornelius), who runs AI automation businesses (KingCaller AI + SimpliScale, $70K+/month combined).
+  const prompt = `You are writing an Instagram carousel for Nick Cornelius (@thenickcornelius), who runs SimpliScale + KingCaller AI ($70K+/month combined). His audience: entrepreneurs, agency owners, and builders using AI to scale.
 
 TOPIC: "${topic}"
 ${research_context?.full_research ? `\nRESEARCH:\n${research_context.full_research.slice(0, 3000)}` : ''}
 
 ═══════════════════════════════════════════════════════
-WRITING STYLE — Tyler Germain (@itstylergermain)
+BULLSHIT TEST — every slide must pass all 3
 ═══════════════════════════════════════════════════════
+1. SPECIFICITY — Name the exact tool, number, time, or step. Not "a lot" → "3 hours". Not "AI" → "Claude 3.5". Not "faster" → "20x faster".
+2. NOVELTY — Say something the reader doesn't already know. Obvious = cut it. Counter-intuitive beats conventional wisdom every time.
+3. DENSITY — One key insight per slide. Every sentence must add information. If removing it loses nothing, cut it.
 
+═══════════════════════════════════════════════════════
+WRITING STYLE — Tyler Germain
+═══════════════════════════════════════════════════════
+- Second person, present tense. You are explaining to one smart friend.
+- Many sentences under 6 words. Fragments for impact.
+- Last sentence of each slide = the kicker. Make it land.
+- NEVER use: leverage, synergy, game-changer, seamless, empower, unlock, revolutionize, supercharge.
+- Concrete over abstract: "Claude reads your repo in 15s" NOT "AI understands your codebase."
+
+═══════════════════════════════════════════════════════
+ACCENT WORD — one key concept per slide, highlighted orange
+═══════════════════════════════════════════════════════
+The accent_word is the single most important concept on that slide.
 Rules:
-1. CONVERSATIONAL: Reads like explaining to one smart friend. Second person, present tense.
-2. SHORT PUNCHY SENTENCES: Many under 6 words. Fragment sentences for impact.
-3. EACH SLIDE ENDS WITH A KICKER: The last sentence is the emotional payoff.
-4. CONCRETE OVER ABSTRACT: "One writes ads. One designs emails." NOT "AI can help with various tasks."
-5. NO MARKETING SPEAK: Zero buzzwords. Plain language.
-6. ACCENT WORD: One key phrase per slide gets highlighted in orange.
+- It MUST appear verbatim somewhere in the slide text (exact match, case-insensitive)
+- Pick the phrase that carries the most weight — the insight, the number, the surprise
+- Examples: if the slide is about cutting 3 hours to 20 min → accent: "3 hours". If it's about memory persisting → accent: "memory". If it's about a specific tool → accent: the tool name.
+- NOT random adjectives. NOT the slide title repeated. THE CORE INSIGHT.
 
 ═══════════════════════════════════════════════════════
-STRUCTURE — CHOOSE THE BEST FORMAT FOR THIS TOPIC
+STRUCTURE — pick the one that fits the topic, NOT always Levels
 ═══════════════════════════════════════════════════════
+BANNED: "Level 1, Level 2, Level 3..." — only use this if the topic is explicitly about skill/maturity progression.
 
-DO NOT default to "Level 1, Level 2, Level 3..." — that's only ONE possible format.
+Available structures — pick whichever fits:
+• Steps: "Step 1 → Step N" — tutorials, setup guides, processes with a clear sequence
+• Numbered List: numbered items — tips, tools, examples (use section_label: "1.", "2.", etc.)
+• Before/After: Problem → Discovery → Change → Result — transformation stories
+• Myth-Busting: "Everyone thinks X... Reality: Y" — corrective takes, common mistakes
+• Deep Dive: Concept → Mechanism → Real example → How to use it — explaining ONE thing thoroughly
+• Comparison: "Option A vs Option B" — side-by-side, tradeoffs, which to use when
 
-Pick the structure that fits the topic best:
-
-- **Steps/How-To**: "Step 1: ... Step 2: ... Step 3: ..." — for tutorials, processes
-- **List**: "Tool 1: ... Tool 2: ..." or "Tip 1: ... Tip 2: ..." — for collections, resources
-- **Progressive Levels**: "Level 1 → Level 5" — ONLY for topics about skill progression or maturity stages
-- **Before/After**: Problem → Discovery → New approach → Results — for transformation stories
-- **Myth-Busting**: "Everyone thinks X... Here's what's actually true..." — for contrarian takes
-- **Deep Dive**: Concept → How it works → Examples → Pro tips — for explaining one thing thoroughly
-- **Comparison**: "Tool A does X. Tool B does Y." — for versus content
-
-Use 5-9 content slides (not always 5). The number of slides should match the topic — 3 tools = 3 slides, 7 tips = 7 slides.
+Slide count = content count. 5 steps = 5 slides. 7 tools = 7 slides. Do NOT pad or cut to hit a fixed number.
+Range: 5–9 total slides including cover and CTA.
 
 ═══════════════════════════════════════════════════════
-YOUR TASK
+SLIDE STRUCTURE
 ═══════════════════════════════════════════════════════
-
-Write a carousel about "${topic}".
-
-SLIDE 1 (COVER): Bold title + subtitle in parentheses.
+SLIDE 1 (COVER):
+- Short bold headline + (subtitle in parentheses that explains the payoff)
 - visual_type: "cover_photo"
+- section_label: null
 
-SLIDES 2-N (CONTENT): Pick the right structure. Each slide:
-- One clear idea
-- 2-4 sentences, conversational, concrete
-- Ends with a kicker line
+SLIDES 2–N (CONTENT):
+- One clear idea per slide
+- 2–4 punchy sentences, ends with a kicker
 - visual_type: "none"
+- section_label: matches your structure e.g. "Step 1", "Myth #1", "Before", "Tool 1", "01." — or null if no labels fit
 
 LAST SLIDE (CTA):
-- Question referencing the content
-- "Comment '[KEYWORD]' and I'll send you [specific thing]"
+- A question that naturally flows from the content
+- "Comment '[KEYWORD]' and I'll send you [specific, concrete thing]"
 - visual_type: "cta_slide"
+- section_label: null
 
-KEYWORD: From the topic. Max 8 chars. ALL CAPS.
+KEYWORD: Max 8 characters, ALL CAPS, memorable, derived from the topic core concept.
+Good: MEMORY, AGENTS, MAKE, CLAUDE, BUILD, HOOKS, CONTEXT
+Bad: LEARNAI, WORKFLOW2, TIPS123
 
-CAPTION: Conversational Instagram caption:
-- Hook line matching the cover
-- Bullet points previewing the content
-- "Comment [KEYWORD] and I'll send you [thing] 🔥"
+CAPTION (ready to paste into Instagram):
+- Line 1: hook that matches or reframes the cover
+- Empty line
+- 3–5 bullet lines with → previewing key insights
+- Empty line
+- "Comment [KEYWORD] and I'll send you [specific thing] 🔥"
 - "📌 Save this before you lose it"
-- 10-15 hashtags
+- Empty line
+- 10–15 relevant hashtags on one line
 
-Return ONLY valid JSON (no markdown):
+Return ONLY valid JSON, no markdown fences, no preamble:
 {
   "slides": [
-    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "cover_photo" },
-    { "text": "...", "accent_word": "...", "section_label": null, "visual_type": "none" },
-    ...more content slides as needed...
-    { "text": "CTA...", "accent_word": "...", "section_label": null, "visual_type": "cta_slide" }
+    { "text": "Claude Code memory system\\n\\n(how to give Claude a brain that never forgets)", "accent_word": "memory system", "section_label": null, "visual_type": "cover_photo" },
+    { "text": "By default, Claude forgets everything when you close the terminal.\\n\\nEvery new session starts from scratch. You re-explain your project. You re-set context. You waste 10 minutes every time.\\n\\nThere's a fix.", "accent_word": "forgets everything", "section_label": "The Problem", "visual_type": "none" },
+    { "text": "Claude Code reads a file called CLAUDE.md at the start of every session.\\n\\nPut anything in there and Claude knows it instantly. Project structure, tech stack, coding rules, your name.\\n\\nOne file. Zero re-explaining.", "accent_word": "CLAUDE.md", "section_label": "The Fix", "visual_type": "none" },
+    { "text": "Want the exact CLAUDE.md template I use for every client project?\\n\\nComment 'MEMORY' and I'll send it over.", "accent_word": "MEMORY", "section_label": null, "visual_type": "cta_slide" }
   ],
-  "caption": "...",
-  "keyword": "KEYWORD"
-}`;
+  "caption": "Claude forgets everything when you close the terminal.\\n\\nHere's the fix:\\n\\n→ Why default Claude has no memory\\n→ What CLAUDE.md actually does\\n→ What to put in yours\\n→ My exact template\\n\\nComment MEMORY and I'll send you my full CLAUDE.md template 🔥\\n\\n📌 Save this before you lose it\\n\\n#claudecode #ai #automation #aitools #artificialintelligence #developer #devtools #coding #simpliscale #thenickcornelius #productivity #softwareengineering",
+  "keyword": "MEMORY"
+}
+
+The example above is for a DIFFERENT topic — it shows format only. Now write the actual carousel for: "${topic}"`;
 
   if (!apiKey) {
     // Fallback without AI

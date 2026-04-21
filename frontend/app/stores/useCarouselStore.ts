@@ -259,6 +259,21 @@ export const useCarouselStore = create<CarouselStore>()(
 
       reset: () => set(INITIAL),
     }),
-    { name: 'simpliscale-carousel-pipeline', version: 8 }
+    {
+      name: 'simpliscale-carousel-pipeline',
+      version: 8,
+      migrate: (persisted: any, fromVersion: number) => {
+        // On version upgrade: preserve topic/category/slides when schema is compatible,
+        // otherwise reset to avoid crashes from stale shape.
+        if (fromVersion < 8) {
+          return {
+            ...INITIAL,
+            topic: persisted?.topic || '',
+            category: persisted?.category || '',
+          };
+        }
+        return persisted;
+      },
+    }
   )
 );

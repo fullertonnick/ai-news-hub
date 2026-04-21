@@ -1,18 +1,16 @@
 'use client';
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
-import { Loader2, RefreshCw, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, RefreshCw, Check, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import { NICK_PHOTOS } from '../../lib/nickPhotos';
 import SlideRenderer from '../SlideRenderer';
-import type { StickerOverlay } from '../../types';
-
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
 export default function Step2Visuals() {
   const store = useCarouselStore();
   const { slides, topic, category, keyword, coverPosition, ctaLayout } = store;
   const [currentIdx, setCurrentIdx] = useState(0);
   const [generating, setGenerating] = useState<Record<string, boolean>>({});
+  const [bgError, setBgError] = useState<Record<string, string>>({});
 
   const slide = slides[currentIdx];
   const isFirst = currentIdx === 0;
@@ -48,30 +46,44 @@ export default function Step2Visuals() {
     if (busyRef.current[slideId]) return;
     busyRef.current[slideId] = true;
     setGenerating(prev => ({ ...prev, [slideId]: true }));
+    setBgError(prev => ({ ...prev, [slideId]: '' }));
+    store.setSlideBackgroundStatus(slideId, 'generating');
     try {
       const pr = await fetch('/api/carousel/generate-bg-prompt', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic, slideText, slideType, category }),
       });
       const pd = await pr.json();
-      const prompt = pd.prompt || `Dark cinematic background, orange accents, no text, no faces`;
+      const prompt = pd.prompt || `Dark cinematic workspace, warm orange desk lamp glow, deep shadows, no text, no faces, bokeh`;
       store.setSlideBackgroundPrompt(slideId, prompt);
+
       const ir = await fetch('/api/imagen', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
       });
       const id = await ir.json();
-      if (id.dataUrl) store.setSlideBackground(slideId, id.dataUrl);
-    } catch {}
+      if (id.dataUrl) {
+        store.setSlideBackground(slideId, id.dataUrl);
+      } else {
+        const msg = id.error || 'Image generation returned no result';
+        setBgError(prev => ({ ...prev, [slideId]: msg }));
+        store.setSlideBackgroundStatus(slideId, 'error');
+      }
+    } catch {
+      setBgError(prev => ({ ...prev, [slideId]: 'Network error — try again' }));
+      store.setSlideBackgroundStatus(slideId, 'error');
+    }
     busyRef.current[slideId] = false;
     setGenerating(prev => ({ ...prev, [slideId]: false }));
   }, [topic, category, store]); // eslint-disable-line
 
-  // Generate ALL middle backgrounds
+  // Generate ALL middle backgrounds sequentially
   const generateAll = useCallback(async () => {
     for (const s of slides.slice(1, -1)) {
-      generateBg(s.id, s.text, s.visual_type || 'none');
-      await new Promise(r => setTimeout(r, 500));
+      if (!busyRef.current[s.id]) {
+        generateBg(s.id, s.text, s.visual_type || 'none');
+        await new Promise(r => setTimeout(r, 600));
+      }
     }
   }, [slides, generateBg]);
 
@@ -206,8 +218,13 @@ export default function Step2Visuals() {
               <button onClick={() => generateBg(slide.id, slide.text, slide.visual_type || 'none')} disabled={generating[slide.id]}
                 className="w-full flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium py-2.5 rounded-xl transition-colors disabled:opacity-40">
                 {generating[slide.id] ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-                {slide.backgroundImage ? 'Regenerate Background' : 'Generate Background'}
+                {generating[slide.id] ? 'Generating...' : slide.backgroundImage ? 'Regenerate Background' : 'Generate Background'}
               </button>
+              {bgError[slide.id] && (
+                <div className="flex items-center gap-1.5 text-[10px] text-red-400">
+                  <AlertCircle size={10} /> {bgError[slide.id]}
+                </div>
+              )}
             </>
           )}
         </div>

@@ -31,28 +31,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const guidance = slideTypeGuidance[slideType] || slideTypeGuidance.none;
 
-  const prompt = `Write an Imagen 3 image generation prompt for an Instagram carousel slide background image.
+  const prompt = `Write an Imagen 3 image generation prompt for an Instagram carousel slide background.
 
 SLIDE CONTEXT:
 - Topic: "${topic}"
 - Slide text: "${slideText.slice(0, 300)}"
 - Slide type: ${slideType}
-- Category: ${category}
+- Content category: ${category}
 
-GUIDANCE: ${guidance}
+VISUAL GUIDANCE FOR THIS SLIDE TYPE:
+${guidance}
 
-STYLE REQUIREMENTS (SimpliScale brand):
-- Dark, cinematic, professional
-- Primary accent: warm orange (#FF7107) and amber tones
-- Near-black backgrounds (#111111 base)
-- Aspect ratio: 3:4 portrait
-- Bokeh depth of field, cinematic lens
-- Premium, modern, tech-forward aesthetic
-- No text, no typography, no letters, no numbers
-- No faces, no people, no UI elements
-- Must work as a background WITH text overlaid on top
+YOUR JOB:
+Create a specific, vivid scene that is THEMATICALLY RELEVANT to the slide content above — not generic.
+Think: if someone glances at this image for 2 seconds, they should feel the topic even without reading the text.
 
-Return ONLY the prompt text — no JSON, no quotes, no explanation. Just the prompt.`;
+Examples of specific vs generic:
+- GENERIC: "dark cinematic background, orange accents" ← boring, could be anything
+- SPECIFIC (for a Claude Code slide): "dark developer workstation shot from above, mechanical keyboard illuminated by warm amber desk lamp, terminal window glowing on a second monitor, shallow depth of field, cinematic 35mm lens, deep shadows" ← feels like the topic
+
+ABSOLUTE RULES:
+- No text, no typography, no letters, no numbers, no words anywhere in the image
+- No faces, no people, no human figures, no hands
+- No UI elements, no screenshots, no icons with text
+- No logos or branded elements
+- Background must work with white text overlaid on top — keep it dark
+
+BRAND STYLE:
+- Near-black base (#111111)
+- Warm orange (#FF7107) and amber accents — used sparingly as lighting, glow, or subtle color
+- Cinematic lens quality, bokeh depth of field
+- 3:4 portrait aspect ratio
+- Premium, modern, high-contrast
+
+Return ONLY the image generation prompt text. No JSON, no quotes, no preamble. Just the prompt.`;
 
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
