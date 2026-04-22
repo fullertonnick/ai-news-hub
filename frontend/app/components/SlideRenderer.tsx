@@ -140,7 +140,7 @@ function RenderOverlays({ slide, W, H }: { slide: CarouselSlide; W: number; H: n
               left: `${(t.x / 100) * W}px`,
               top: `${(t.y / 100) * H}px`,
               width: `${pxW}px`,
-              transform: 'translate(-50%, -50%)',
+              transform: `translate(-50%, -50%)${t.rotation ? ` rotate(${t.rotation}deg)` : ''}`,
               color: t.color,
               fontSize: `${fs}px`,
               fontWeight: t.fontWeight,
@@ -432,12 +432,12 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
         <div style={{ position: 'absolute', top: `${-10 * sc}px`, left: `${44 * sc}px`, fontSize: `${160 * sc}px`, lineHeight: 1, color: Brand.colors.accent_primary, opacity: 0.12, fontFamily: 'Georgia, serif', fontWeight: 900, zIndex: 0, pointerEvents: 'none', userSelect: 'none' as const }}>"</div>
       )}
 
-      {/* ── Content — vertically centered, no header ── */}
+      {/* Content — vertically centered, with optional text offset */}
       <div style={{
         flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
         padding: `${PV}px ${PH}px`, paddingBottom: `${16 * sc}px`,
         position: 'relative', gap: `${22 * sc}px`,
-        minHeight: 0,
+        overflow: 'hidden', minHeight: 0,
         ...(txOff || tyOff ? { transform: `translate(${txOff}px, ${tyOff}px)` } : {}),
       }}>
 
@@ -689,7 +689,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
         <Footer sc={sc} />
       </div>
 
-      {/* ── Stickers + text overlays (absolute, above everything) ── */}
+      {/* Stickers + text overlays — rendered on top of everything */}
       <RenderOverlays slide={slide} W={W} H={H} />
     </div>
   );

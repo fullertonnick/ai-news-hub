@@ -197,7 +197,7 @@ export default function Step3Edit() {
         setCustomPrompt('');
         setShowPrompt(false);
       }
-    } catch {}
+    } catch (e) { console.error('AI visual generation failed:', e); }
     setGeneratingVisual(false);
   }, [slide, store, stickers.length]);
 
@@ -339,38 +339,32 @@ export default function Step3Edit() {
                 width={540}
                 height={675}
               />
-              {/* Draggable text region — sits ABOVE Konva so text drag wins. Internal coord space is 540x675. */}
+              {/* Draggable text handle — small badge in top-left of content area.
+                  Kept small so it doesn't block Konva sticker/overlay interactions. */}
               {currentIdx > 0 && currentIdx < slides.length - 1 && (
                 <div
                   onMouseDown={handleTextDragStart}
                   onTouchStart={handleTextDragStart}
                   style={{
                     position: 'absolute',
-                    // Text block is at padding 100 top, 60 sides, 160 bottom in 1080-scale
-                    // In 540-scale: 50 top, 30 sides, 80 bottom. Plus the offset (also in 1080 → /2).
-                    left: `${30 + (slide?.textOffsetX || 0) / 2}px`,
-                    top: `${50 + (slide?.textOffsetY || 0) / 2}px`,
-                    width: '480px',
-                    height: '545px',
+                    left: `${26 + (slide?.textOffsetX || 0) / 2}px`,
+                    top: `${28 + (slide?.textOffsetY || 0) / 2}px`,
+                    width: '72px',
+                    height: '20px',
                     cursor: 'move',
                     zIndex: 25,
-                    border: '2px dashed rgba(255,113,7,0.5)',
-                    borderRadius: 12,
-                    background: 'rgba(255,113,7,0.06)',
+                    background: 'rgba(0,0,0,0.75)',
+                    border: '1px solid rgba(255,113,7,0.6)',
+                    borderRadius: 5,
                     touchAction: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 3,
                   }}
-                  title="Drag to move slide text"
+                  title="Drag to reposition slide text"
                 >
-                  <div style={{
-                    position: 'absolute', top: 6, left: 10,
-                    fontSize: 13, fontWeight: 800, color: '#FF7107',
-                    letterSpacing: '0.04em', textTransform: 'uppercase',
-                    fontFamily: 'system-ui, sans-serif',
-                    pointerEvents: 'none',
-                    background: 'rgba(0,0,0,0.6)',
-                    padding: '2px 6px',
-                    borderRadius: 4,
-                  }}>↕ Drag text</div>
+                  <span style={{ fontSize: 8, fontWeight: 800, color: '#FF7107', letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: 'system-ui', pointerEvents: 'none' }}>↕ text</span>
                 </div>
               )}
             </div>

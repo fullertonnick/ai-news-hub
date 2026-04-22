@@ -93,19 +93,20 @@ export type SlideVisual =
   | ChecklistVisual
   | NoneVisual;
 
-// ─── Text Overlay (added in Step 3) ──────────────────────────────────────────
+// ─── Text Overlay (shared between store and renderer) ────────────────────────
 
 export interface TextOverlay {
   id: string;
   text: string;
-  x: number;          // % from left
-  y: number;          // % from top
-  fontSize: number;   // px at 1080-scale
+  x: number;          // % from left (center anchor)
+  y: number;          // % from top (center anchor)
+  fontSize: number;   // px at 1080-unit export scale
   fontWeight: number;
   color: string;
   maxWidth: number;   // % of slide width
   zIndex: number;
   fontFamily?: string;
+  rotation?: number;  // degrees
 }
 
 // ─── Sticker Overlay ─────────────────────────────────────────────────────────

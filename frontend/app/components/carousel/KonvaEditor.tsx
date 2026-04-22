@@ -70,6 +70,7 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
       y={(overlay.y / 100) * stageH}
       offsetX={pxW / 2}
       offsetY={fs / 2}
+      rotation={overlay.rotation || 0}
       text={overlay.text}
       fontSize={fs}
       fontStyle={overlay.fontWeight >= 700 ? 'bold' : 'normal'}
@@ -174,7 +175,7 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
       const t = textOverlays.find(t => t.id === id);
       if (t) {
         const newW = Math.round(Math.max(10, Math.min(100, t.maxWidth * scaleX)));
-        onUpdateTextOverlay(id, { maxWidth: newW, x: pctX, y: pctY });
+        onUpdateTextOverlay(id, { maxWidth: newW, rotation: rot, x: pctX, y: pctY });
       }
     }
   }, [stickers, textOverlays, width, height, onUpdateSticker, onUpdateTextOverlay]);

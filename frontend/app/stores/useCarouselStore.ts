@@ -9,7 +9,6 @@ export type { TextOverlay }; // re-export for consumers that import from the sto
 
 export type PipelineStep = 1 | 2 | 3 | 4;
 export type BgStatus = 'pending' | 'generating' | 'done' | 'skipped' | 'error';
-
 export interface SlideData {
   id: string;
   text: string;

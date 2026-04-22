@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
 import { Download, Package, Copy, Check, Loader2, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import SlideRenderer from '../SlideRenderer';
@@ -13,7 +13,19 @@ export default function Step4Export() {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [downloading, setDownloading] = useState<number | 'all' | 'zip' | null>(null);
   const [captionCopied, setCaptionCopied] = useState(false);
+  const [previewScale, setPreviewScale] = useState(0.74);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
   const exportRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const el = previewContainerRef.current;
+    if (!el) return;
+    const update = () => setPreviewScale(Math.min(el.offsetWidth / 540, 1));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Build render slides
   const renderSlides: CarouselSlide[] = slides.map((s, i) => {
@@ -97,10 +109,9 @@ export default function Step4Export() {
         <button onClick={() => setCurrentIdx(i => Math.max(0, i - 1))} disabled={currentIdx === 0}
           className="p-2 rounded-xl hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronLeft size={20} /></button>
         <div className="flex-1 flex justify-center">
-          <div style={{ width: '100%', maxWidth: 400, aspectRatio: '4/5', position: 'relative' }}>
+          <div ref={previewContainerRef} style={{ width: '100%', maxWidth: 400, aspectRatio: '4/5', position: 'relative' }}>
             <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 12 }}>
-              <div style={{ transform: 'scale(var(--sc, 0.74))', transformOrigin: 'top left', width: 540, height: 675 }}
-                ref={el => { if (el) { const w = el.parentElement?.parentElement?.offsetWidth || 400; el.style.setProperty('--sc', String(Math.min(w / 540, 1))); } }}>
+              <div style={{ transform: `scale(${previewScale})`, transformOrigin: 'top left', width: 540, height: 675 }}>
                 <SlideRenderer slide={renderSlides[currentIdx]} slideNumber={currentIdx + 1} totalSlides={slides.length} />
               </div>
             </div>
