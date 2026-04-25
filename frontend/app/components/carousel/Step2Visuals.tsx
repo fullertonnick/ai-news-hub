@@ -5,12 +5,27 @@ import { Loader2, RefreshCw, Check, ChevronLeft, ChevronRight, AlertCircle } fro
 import { NICK_PHOTOS } from '../../lib/nickPhotos';
 import SlideRenderer from '../SlideRenderer';
 
+async function proxyPhoto(url: string): Promise<string> {
+  try {
+    const r = await fetch('/api/image-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    const d = await r.json();
+    return d.dataUrl || url;
+  } catch {
+    return url;
+  }
+}
+
 export default function Step2Visuals() {
   const store = useCarouselStore();
   const { slides, topic, category, keyword, coverPosition, ctaLayout } = store;
   const [currentIdx, setCurrentIdx] = useState(0);
   const [generating, setGenerating] = useState<Record<string, boolean>>({});
   const [bgError, setBgError] = useState<Record<string, string>>({});
+  const [photoLoading, setPhotoLoading] = useState(false);
 
   const slide = slides[currentIdx];
   const isFirst = currentIdx === 0;
@@ -29,14 +44,34 @@ export default function Step2Visuals() {
     return Math.abs(h) % NICK_PHOTOS.length;
   });
 
-  // Auto-apply cover + CTA photos
+  // Auto-apply cover photo — proxy to data URL so html-to-image export works
   useEffect(() => {
     const c = slides[0];
-    if (c) { store.setSlideBackground(c.id, NICK_PHOTOS[coverPhotoIdx]); }
+    if (!c) return;
+    const slideId = c.id;
+    const rawUrl = NICK_PHOTOS[coverPhotoIdx];
+    // Set raw URL immediately so the preview shows fast
+    store.setSlideBackground(slideId, rawUrl);
+    let cancelled = false;
+    setPhotoLoading(true);
+    proxyPhoto(rawUrl).then(dataUrl => {
+      if (!cancelled) store.setSlideBackground(slideId, dataUrl);
+    }).finally(() => { if (!cancelled) setPhotoLoading(false); });
+    return () => { cancelled = true; };
   }, [coverPhotoIdx]); // eslint-disable-line
+
+  // Auto-apply CTA photo — proxy to data URL
   useEffect(() => {
     const c = slides[slides.length - 1];
-    if (c) { store.setSlideBackground(c.id, NICK_PHOTOS[ctaPhotoIdx]); }
+    if (!c) return;
+    const slideId = c.id;
+    const rawUrl = NICK_PHOTOS[ctaPhotoIdx];
+    store.setSlideBackground(slideId, rawUrl);
+    let cancelled = false;
+    proxyPhoto(rawUrl).then(dataUrl => {
+      if (!cancelled) store.setSlideBackground(slideId, dataUrl);
+    });
+    return () => { cancelled = true; };
   }, [ctaPhotoIdx]); // eslint-disable-line
 
   const busyRef = useRef<Record<string, boolean>>({});
@@ -102,7 +137,7 @@ export default function Step2Visuals() {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-white">Visuals</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Set backgrounds for each slide. Cover & CTA use your photos, content slides get AI backgrounds.</p>
+          <p className="text-xs text-gray-500 mt-0.5">Cover & CTA use your photos. Content slides get AI-generated backgrounds.</p>
         </div>
         <button onClick={generateAll} disabled={Object.values(generating).some(Boolean)}
           className="text-xs font-bold text-black bg-brand-orange hover:bg-orange-500 disabled:opacity-40 px-4 py-2 rounded-lg transition-colors">
@@ -165,9 +200,10 @@ export default function Step2Visuals() {
                   ))}
                 </div>
               </div>
-              <button onClick={() => setCoverPhotoIdx(i => (i + 1) % NICK_PHOTOS.length)}
-                className="w-full flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium py-2.5 rounded-xl transition-colors">
-                <RefreshCw size={12} /> Shuffle Photo
+              <button onClick={() => setCoverPhotoIdx(i => (i + 1) % NICK_PHOTOS.length)} disabled={photoLoading}
+                className="w-full flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium py-2.5 rounded-xl transition-colors disabled:opacity-40">
+                {photoLoading ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                {photoLoading ? 'Loading Photo...' : 'Shuffle Photo'}
               </button>
             </>
           )}

@@ -5,15 +5,15 @@ import { Download, Package, Copy, Check, Loader2, ChevronLeft, ChevronRight, Rot
 import SlideRenderer from '../SlideRenderer';
 import { toPng } from 'html-to-image';
 import type { CarouselSlide } from '../../types';
-import { Brand } from '../../brand/simpliscale';
 
 export default function Step4Export() {
   const store = useCarouselStore();
   const { slides, keyword, ctaLayout, caption, coverPosition } = store;
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [downloading, setDownloading] = useState<number | 'all' | 'zip' | null>(null);
+  const [downloading, setDownloading] = useState<number | 'zip' | null>(null);
   const [captionCopied, setCaptionCopied] = useState(false);
   const [previewScale, setPreviewScale] = useState(0.74);
+  const [proxyingImages, setProxyingImages] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const exportRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -27,6 +27,27 @@ export default function Step4Export() {
     return () => ro.disconnect();
   }, []);
 
+  // Safety net: proxy any external-URL backgrounds before first export
+  const ensureDataUrls = useCallback(async () => {
+    const external = slides.filter(s => s.backgroundImage && !s.backgroundImage.startsWith('data:'));
+    if (!external.length) return;
+    setProxyingImages(true);
+    await Promise.all(external.map(async s => {
+      try {
+        const r = await fetch('/api/image-proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: s.backgroundImage }),
+        });
+        const d = await r.json();
+        if (d.dataUrl) store.setSlideBackground(s.id, d.dataUrl);
+      } catch { /* leave as-is, export may still work for local files */ }
+    }));
+    // Let React flush the store update before we capture
+    await new Promise(r => setTimeout(r, 300));
+    setProxyingImages(false);
+  }, [slides, store]);
+
   // Build render slides
   const renderSlides: CarouselSlide[] = slides.map((s, i) => {
     const isFirst = i === 0, isLast = i === slides.length - 1;
@@ -38,13 +59,13 @@ export default function Step4Export() {
       text: s.text, accent_word: s.accent_word, section_label: s.section_label,
       visual, backgroundImage: s.backgroundImage,
       stickers: s.stickers, textOverlays: s.textOverlays,
-      // Only hide baked-in text when the user explicitly toggled the flag
       useTextOverlays: s.useTextOverlays,
       textOffsetX: s.textOffsetX, textOffsetY: s.textOffsetY,
     };
   });
 
   const downloadSlide = useCallback(async (i: number) => {
+    await ensureDataUrls();
     const el = exportRefs.current[i];
     if (!el) return;
     setDownloading(i);
@@ -53,9 +74,10 @@ export default function Step4Export() {
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
     } catch (e) { console.error('Export error', e); }
     setDownloading(null);
-  }, []);
+  }, [ensureDataUrls]);
 
   const downloadZip = useCallback(async () => {
+    await ensureDataUrls();
     setDownloading('zip');
     try {
       const JSZip = (await import('jszip')).default;
@@ -76,13 +98,15 @@ export default function Step4Export() {
       URL.revokeObjectURL(url);
     } catch (e) { console.error('ZIP error', e); }
     setDownloading(null);
-  }, [slides, caption, keyword, store.topic]);
+  }, [slides, caption, keyword, store.topic, ensureDataUrls]);
 
   const copyCaption = () => {
     navigator.clipboard.writeText(caption);
     setCaptionCopied(true);
     setTimeout(() => setCaptionCopied(false), 2000);
   };
+
+  const isBusy = downloading !== null || proxyingImages;
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-5">
@@ -92,14 +116,14 @@ export default function Step4Export() {
           <p className="text-xs text-gray-500 mt-0.5">{slides.length} slides ready. Download individually or as a ZIP package.</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => downloadSlide(currentIdx)} disabled={downloading !== null}
+          <button onClick={() => downloadSlide(currentIdx)} disabled={isBusy}
             className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors disabled:opacity-40">
-            {downloading === currentIdx ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />} This Slide
+            {downloading === currentIdx || proxyingImages ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />} This Slide
           </button>
-          <button onClick={downloadZip} disabled={downloading !== null}
+          <button onClick={downloadZip} disabled={isBusy}
             className="flex items-center gap-1.5 text-xs font-semibold text-white px-3 py-1.5 rounded-lg bg-brand-orange/20 border border-brand-orange/30 hover:bg-brand-orange/30 transition-colors disabled:opacity-40">
-            {downloading === 'zip' ? <Loader2 size={12} className="animate-spin" /> : <Package size={12} />}
-            {downloading === 'zip' ? 'Packaging...' : 'Download ZIP'}
+            {downloading === 'zip' || proxyingImages ? <Loader2 size={12} className="animate-spin" /> : <Package size={12} />}
+            {proxyingImages ? 'Preparing...' : downloading === 'zip' ? 'Packaging...' : 'Download ZIP'}
           </button>
         </div>
       </div>
@@ -150,7 +174,7 @@ export default function Step4Export() {
         <RotateCcw size={14} /> Start New Carousel
       </button>
 
-      {/* Hidden export renders — off-screen, no opacity (opacity:0 makes toPng capture transparent PNGs) */}
+      {/* Hidden export renders — off-screen at full 1080x1350 resolution */}
       <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none' }}>
         {renderSlides.map((slide, i) => (
           <SlideRenderer key={i} ref={el => { exportRefs.current[i] = el; }} slide={slide} slideNumber={i + 1} totalSlides={slides.length} forExport />

@@ -10,23 +10,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    // Fallback — generic dark cinematic prompt
     return res.json({
-      prompt: `Dark cinematic background for Instagram carousel about "${topic}", moody lighting, orange and amber accents, professional atmosphere, deep shadows, bokeh depth of field, no text, no faces, no people, 4K`,
+      prompt: `Dark cinematic background for Instagram carousel about "${topic}", moody lighting, warm orange and amber accents, professional atmosphere, deep shadows, bokeh depth of field, no text, no faces, no people, 4K portrait`,
     });
   }
 
   const slideTypeGuidance: Record<string, string> = {
-    cover_photo: 'This is the COVER slide — needs a dramatic, cinematic hero scene that captures attention. Show a workspace, environment, or abstract scene that represents the topic. Must have space at the bottom for a large bold headline.',
-    code_block: 'This slide shows code/prompts — background should be a dark tech environment. Think glowing screens, keyboard macro shots, terminal aesthetics. Very dark, minimal, good for text overlay.',
-    stats_grid: 'This slide shows data/statistics — background should be ultra minimal and dark. Subtle radial glow at center. Clean, professional, perfect for data cards on top.',
-    steps_list: 'This slide shows action steps — background should have directional energy, subtle motion feeling. Dark with directional orange light suggesting forward movement.',
-    diagram: 'This slide shows a workflow diagram — background should be abstract with subtle connection lines or network-like patterns. Dark, minimal, tech-forward.',
-    big_quote: 'This slide features a quote — background should be dramatic and atmospheric. Single light source creating mood. Theatrical, premium brand feeling.',
-    comparison: 'This slide shows before/after comparison — background should be dark and neutral, allowing the content cards to stand out. Minimal with subtle texture.',
-    skill_card: 'This slide features a specific tool — background should feel premium and tool-focused. Dark product photography aesthetic.',
-    cta_slide: 'This is the CTA slide — needs dramatic stage lighting. Single orange spotlight from above, deep black surround, premium brand atmosphere, theatrical.',
-    none: 'Text-only slide — dark atmospheric background with subtle warmth. Professional, clean, perfect for reading text.',
+    cover_photo: 'COVER SLIDE — dramatic, attention-grabbing hero scene. Wide establishing shot of a workspace, environment, or abstract scene that embodies the topic. Needs strong visual presence and space for headline text at the bottom.',
+    code_block: 'CODE SLIDE — dark developer environment. Close-up macro shots of mechanical keyboard keys lit by warm amber backlight, terminal screens glowing green or amber in darkness, depth of field blur. Very dark, minimal, techy.',
+    stats_grid: 'STATS SLIDE — ultra-minimal dark background. Very subtle radial glow at center, almost invisible texture. Think: dark product photography background. The data cards sit on top.',
+    steps_list: 'STEPS SLIDE — dark background with subtle directional energy suggesting forward movement or progression. Blurred motion lines, staircase composition, ascending diagonal light.',
+    diagram: 'DIAGRAM SLIDE — abstract dark background with subtle network or connection motifs. Think: circuit board macro, blurred fiber optic trails, or subtle hexagonal patterns. Minimal, tech-forward.',
+    big_quote: 'QUOTE SLIDE — dramatic single-source atmospheric lighting. Think: a single spotlight beam cutting through dark smoke, or a candle flame in darkness. Theatrical, moody, premium.',
+    comparison: 'COMPARISON SLIDE — dark neutral background, clean. Two subtle zones of different color temperature (cool blue left, warm orange right) hinting at before/after. Minimal so content cards stand out.',
+    skill_card: 'SKILL CARD SLIDE — premium dark product photography aesthetic. Dark vignette, soft center glow, luxury brand visual quality. Think: high-end tech product shot.',
+    cta_slide: 'CTA SLIDE — dramatic stage lighting. Single warm orange spotlight from above, deep black surround. Theatrical, premium, creates a sense of anticipation and action.',
+    none: 'TEXT SLIDE — atmospheric dark background with subtle warmth. Clean and professional, perfect for reading. Very subtle texture, no distracting elements.',
   };
 
   const guidance = slideTypeGuidance[slideType] || slideTypeGuidance.none;
@@ -34,37 +33,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const prompt = `Write an Imagen 3 image generation prompt for an Instagram carousel slide background.
 
 SLIDE CONTEXT:
-- Topic: "${topic}"
-- Slide text: "${slideText.slice(0, 300)}"
+- Overall topic: "${topic}"
+- This slide's text: "${slideText.slice(0, 300)}"
 - Slide type: ${slideType}
 - Content category: ${category}
 
-VISUAL GUIDANCE FOR THIS SLIDE TYPE:
+VISUAL REQUIREMENT FOR THIS SLIDE TYPE:
 ${guidance}
 
 YOUR JOB:
-Create a specific, vivid scene that is THEMATICALLY RELEVANT to the slide content above — not generic.
-Think: if someone glances at this image for 2 seconds, they should feel the topic even without reading the text.
+Extract 1-2 specific visual concepts directly from the slide text above, then build a scene around them.
+The image should make a viewer think of this exact slide's subject matter after 2 seconds — not just the general topic.
 
-Examples of specific vs generic:
-- GENERIC: "dark cinematic background, orange accents" ← boring, could be anything
-- SPECIFIC (for a Claude Code slide): "dark developer workstation shot from above, mechanical keyboard illuminated by warm amber desk lamp, terminal window glowing on a second monitor, shallow depth of field, cinematic 35mm lens, deep shadows" ← feels like the topic
+SPECIFICITY EXAMPLES:
+Topic "Claude Code memory" + slide about "CLAUDE.md file":
+→ BAD: "dark tech background with orange accents"
+→ GOOD: "dark desk setup with glowing terminal screen showing a text editor with blurred code, single amber desk lamp casting warm shadows on mechanical keyboard, shallow depth of field, cinematic 35mm"
 
-ABSOLUTE RULES:
-- No text, no typography, no letters, no numbers, no words anywhere in the image
-- No faces, no people, no human figures, no hands
-- No UI elements, no screenshots, no icons with text
-- No logos or branded elements
-- Background must work with white text overlaid on top — keep it dark
+Topic "Make.com automations" + slide about "webhook triggers":
+→ BAD: "automation background"
+→ GOOD: "dark server room corridor with warm amber floor LED strips, blurred motion of data center hardware, shallow depth of field, moody cinematic lighting, no text"
+
+ABSOLUTE RULES — violating any of these makes the image unusable:
+- NO text, NO typography, NO letters, NO numbers, NO words anywhere
+- NO faces, NO people, NO human figures, NO hands, NO body parts
+- NO UI elements, NO app screenshots, NO icons with text
+- NO logos, NO brand marks
+- Background must stay very dark (near #111111) so white text overlaid on it stays readable
 
 BRAND STYLE:
-- Near-black base (#111111)
-- Warm orange (#FF7107) and amber accents — used sparingly as lighting, glow, or subtle color
-- Cinematic lens quality, bokeh depth of field
+- Near-black base, very dark overall
+- Warm orange (#FF7107) and amber used sparingly — as lighting, glow, or accent color only
+- Cinematic lens quality, bokeh depth of field preferred
 - 3:4 portrait aspect ratio
 - Premium, modern, high-contrast
 
-Return ONLY the image generation prompt text. No JSON, no quotes, no preamble. Just the prompt.`;
+Return ONLY the image generation prompt text. No JSON, no quotes, no preamble. Just the prompt itself.`;
 
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
@@ -80,7 +84,7 @@ Return ONLY the image generation prompt text. No JSON, no quotes, no preamble. J
     return res.json({ prompt: generatedPrompt });
   } catch {
     return res.json({
-      prompt: `Dark cinematic background representing "${topic}", warm orange accent lighting, deep shadows, professional atmosphere, bokeh depth of field, no text, no faces, 4K`,
+      prompt: `Dark cinematic background representing "${topic}", warm orange accent lighting, deep shadows, professional atmosphere, bokeh depth of field, no text, no faces, 4K portrait`,
     });
   }
 }
