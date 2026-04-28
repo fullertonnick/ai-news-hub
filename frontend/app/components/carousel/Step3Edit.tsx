@@ -148,6 +148,7 @@ export default function Step3Edit() {
       section_label: s.section_label,
       visual,
       backgroundImage: s.backgroundImage,
+      useTextOverlays: s.useTextOverlays,
       textOffsetX: s.textOffsetX,
       textOffsetY: s.textOffsetY,
     };
@@ -321,53 +322,56 @@ export default function Step3Edit() {
             </div>
           )}
 
-          {/* Canvas area — internal coords are 540x675 (SlideRenderer preview), CSS-scaled to PW/PH */}
+          {/* Canvas area — SlideRenderer scaled inside, KonvaEditor at VISUAL size to fix hit detection */}
           <div style={{ width: PW, height: PH, position: 'relative', margin: '0 auto', borderRadius: 12, overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', inset: 0, transform: `scale(${PW / 540})`, transformOrigin: 'top left', width: 540, height: 675 }}>
-              {/* Base slide render */}
-              <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+            {/* Base slide render — scaled 540→360 via CSS transform (pointer-events off) */}
+            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+              <div style={{ transform: `scale(${PW / 540})`, transformOrigin: 'top left', width: 540, height: 675, pointerEvents: 'none' }}>
                 <SlideRenderer slide={renderSlide} slideNumber={currentIdx + 1} totalSlides={slides.length} />
               </div>
-              {/* Konva editor for stickers — same 540x675 coordinate space */}
-              <KonvaEditor
-                stickers={stickers}
-                textOverlays={textOverlays}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                onUpdateSticker={(id, u) => store.updateSticker(slide.id, id, u)}
-                onUpdateTextOverlay={(id, u) => store.updateTextOverlay(slide.id, id, u)}
-                width={540}
-                height={675}
-              />
-              {/* Draggable text handle — small badge in top-left of content area.
-                  Kept small so it doesn't block Konva sticker/overlay interactions. */}
-              {currentIdx > 0 && currentIdx < slides.length - 1 && (
-                <div
-                  onMouseDown={handleTextDragStart}
-                  onTouchStart={handleTextDragStart}
-                  style={{
-                    position: 'absolute',
-                    left: `${26 + (slide?.textOffsetX || 0) / 2}px`,
-                    top: `${28 + (slide?.textOffsetY || 0) / 2}px`,
-                    width: '72px',
-                    height: '20px',
-                    cursor: 'move',
-                    zIndex: 25,
-                    background: 'rgba(0,0,0,0.75)',
-                    border: '1px solid rgba(255,113,7,0.6)',
-                    borderRadius: 5,
-                    touchAction: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 3,
-                  }}
-                  title="Drag to reposition slide text"
-                >
-                  <span style={{ fontSize: 8, fontWeight: 800, color: '#FF7107', letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: 'system-ui', pointerEvents: 'none' }}>↕ text</span>
-                </div>
-              )}
             </div>
+            {/* Konva editor at VISUAL size (360×450) — not inside the scaled div.
+                Konva uses getBoundingClientRect() for hit detection; if it lived inside the
+                scale(0.667) wrapper its stage coords would be 1.5× off from mouse position. */}
+            <KonvaEditor
+              stickers={stickers}
+              textOverlays={textOverlays}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              onUpdateSticker={(id, u) => store.updateSticker(slide.id, id, u)}
+              onUpdateTextOverlay={(id, u) => store.updateTextOverlay(slide.id, id, u)}
+              width={PW}
+              height={PH}
+            />
+            {/* Draggable text handle — positioned in the 360×450 visual coordinate space.
+                PH_vis = 52*(PW/1080) ≈ 17px, PV_vis = 56*(PH/1350) ≈ 19px.
+                textOffset is stored in 1080-scale px → divide by 3 for 360-scale. */}
+            {currentIdx > 0 && currentIdx < slides.length - 1 && (
+              <div
+                onMouseDown={handleTextDragStart}
+                onTouchStart={handleTextDragStart}
+                style={{
+                  position: 'absolute',
+                  left: `${Math.round(52 * PW / 1080) + Math.round((slide?.textOffsetX || 0) * PW / 1080)}px`,
+                  top: `${Math.round(56 * PH / 1350) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
+                  width: '72px',
+                  height: '20px',
+                  cursor: 'move',
+                  zIndex: 25,
+                  background: 'rgba(0,0,0,0.75)',
+                  border: '1px solid rgba(255,113,7,0.6)',
+                  borderRadius: 5,
+                  touchAction: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 3,
+                }}
+                title="Drag to reposition slide text"
+              >
+                <span style={{ fontSize: 8, fontWeight: 800, color: '#FF7107', letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: 'system-ui', pointerEvents: 'none' }}>↕ text</span>
+              </div>
+            )}
           </div>
 
           {/* Thumbnails */}

@@ -1,7 +1,7 @@
 'use client';
 import { useRef, useCallback, useState, useEffect } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
-import { Download, Package, Copy, Check, Loader2, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { Download, Package, Copy, Check, Loader2, ChevronLeft, ChevronRight, RotateCcw, AlertCircle } from 'lucide-react';
 import SlideRenderer from '../SlideRenderer';
 import { toPng } from 'html-to-image';
 import type { CarouselSlide } from '../../types';
@@ -11,6 +11,7 @@ export default function Step4Export() {
   const { slides, keyword, ctaLayout, caption, coverPosition } = store;
   const [currentIdx, setCurrentIdx] = useState(0);
   const [downloading, setDownloading] = useState<number | 'zip' | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
   const [captionCopied, setCaptionCopied] = useState(false);
   const [previewScale, setPreviewScale] = useState(0.74);
   const [proxyingImages, setProxyingImages] = useState(false);
@@ -69,17 +70,26 @@ export default function Step4Export() {
     const el = exportRefs.current[i];
     if (!el) return;
     setDownloading(i);
+    setExportError(null);
     try {
+      // Wait for custom fonts to be available before capturing to avoid fallback fonts
+      await document.fonts.ready;
       const png = await toPng(el, { pixelRatio: 1, cacheBust: true });
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
-    } catch (e) { console.error('Export error', e); }
+    } catch (e) {
+      console.error('Export error', e);
+      setExportError('Export failed — check console for details. Try again or refresh the page.');
+    }
     setDownloading(null);
   }, [ensureDataUrls]);
 
   const downloadZip = useCallback(async () => {
     await ensureDataUrls();
     setDownloading('zip');
+    setExportError(null);
     try {
+      // Wait for custom fonts before any capture
+      await document.fonts.ready;
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       for (let i = 0; i < slides.length; i++) {
@@ -96,7 +106,10 @@ export default function Step4Export() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = `carousel-${store.topic.replace(/\s+/g, '-').toLowerCase().slice(0, 40)}.zip`; a.click();
       URL.revokeObjectURL(url);
-    } catch (e) { console.error('ZIP error', e); }
+    } catch (e) {
+      console.error('ZIP export error', e);
+      setExportError('ZIP export failed — try downloading slides individually.');
+    }
     setDownloading(null);
   }, [slides, caption, keyword, store.topic, ensureDataUrls]);
 
@@ -127,6 +140,14 @@ export default function Step4Export() {
           </button>
         </div>
       </div>
+
+      {/* Export error banner */}
+      {exportError && (
+        <div className="flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3">
+          <AlertCircle size={14} className="text-red-400 flex-shrink-0" />
+          <span className="text-sm text-red-400">{exportError}</span>
+        </div>
+      )}
 
       {/* Slide viewer */}
       <div className="flex items-center gap-4">
