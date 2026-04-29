@@ -48,10 +48,10 @@ Return JSON only: {"text": "new slide copy", "accent_word": "word"}`;
     });
     const d = await r.json();
     let text = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (text.includes('```')) {
-      const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (match) text = match[1];
-    }
+    const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fenceMatch) text = fenceMatch[1];
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) text = jsonMatch[0];
     const parsed = JSON.parse(text.trim());
     return res.json(parsed);
   } catch {

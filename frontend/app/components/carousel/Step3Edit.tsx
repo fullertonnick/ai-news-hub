@@ -84,6 +84,7 @@ export default function Step3Edit() {
   const [webResults, setWebResults] = useState<Array<{ url: string; thumbnail: string; title: string; source: string }>>([]);
   const [searchingWeb, setSearchingWeb] = useState(false);
   const [importingImage, setImportingImage] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const slide = slides[currentIdx];
   const stickers = slide?.stickers || [];
@@ -206,6 +207,7 @@ export default function Step3Edit() {
     if (!webQuery.trim()) return;
     setSearchingWeb(true);
     setWebResults([]);
+    setSearchError(null);
     try {
       const r = await fetch('/api/image-search', {
         method: 'POST',
@@ -213,9 +215,16 @@ export default function Step3Edit() {
         body: JSON.stringify({ query: webQuery }),
       });
       const d = await r.json();
-      if (d.images) setWebResults(d.images);
-      else if (d.error) console.error('Search error:', d.error, d.hint);
-    } catch (e) { console.error('Web search failed:', e); }
+      if (d.images?.length) {
+        setWebResults(d.images);
+      } else if (d.images?.length === 0) {
+        setSearchError('No images found — try a different query');
+      } else {
+        setSearchError(d.hint || d.error || 'Search unavailable — Google Custom Search API not configured');
+      }
+    } catch {
+      setSearchError('Search failed — check your connection');
+    }
     setSearchingWeb(false);
   }, [webQuery]);
 
@@ -265,7 +274,7 @@ export default function Step3Edit() {
             <button onClick={() => { setCurrentIdx(i => Math.min(slides.length - 1, i + 1)); setSelectedId(null); }} disabled={currentIdx === slides.length - 1} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronRight size={16} /></button>
             <div className="ml-auto flex gap-1.5">
               <button onClick={addText} className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-white border border-white/10 hover:border-white/20 px-2 py-1 rounded-lg"><Type size={10} /> Text</button>
-              <button onClick={() => { setShowWebSearch(!showWebSearch); setShowPrompt(false); }} className="flex items-center gap-1 text-[10px] text-white bg-white/10 hover:bg-white/20 border border-white/15 px-2 py-1 rounded-lg font-bold"><Search size={10} /> Web Image</button>
+              <button onClick={() => { setShowWebSearch(!showWebSearch); setShowPrompt(false); setSearchError(null); }} className="flex items-center gap-1 text-[10px] text-white bg-white/10 hover:bg-white/20 border border-white/15 px-2 py-1 rounded-lg font-bold"><Search size={10} /> Web Image</button>
               <button onClick={() => { setShowPrompt(!showPrompt); setShowWebSearch(false); }} className="flex items-center gap-1 text-[10px] text-black bg-brand-orange hover:bg-orange-500 px-2 py-1 rounded-lg font-bold"><Wand2 size={10} /> AI Visual</button>
             </div>
           </div>
@@ -316,8 +325,11 @@ export default function Step3Edit() {
                   ))}
                 </div>
               )}
-              {!searchingWeb && webResults.length === 0 && webQuery && (
-                <p className="text-[10px] text-gray-500">Press search or hit enter. Requires Google Custom Search API configured in env vars.</p>
+              {searchError && (
+                <p className="text-[10px] text-red-400 flex items-center gap-1"><span>⚠</span>{searchError}</p>
+              )}
+              {!searchingWeb && !searchError && webResults.length === 0 && webQuery && (
+                <p className="text-[10px] text-gray-500">Press Search or hit Enter.</p>
               )}
             </div>
           )}

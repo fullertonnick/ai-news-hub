@@ -174,10 +174,12 @@ The example above is for a DIFFERENT topic — it shows format only. Now write t
     });
     const d = await r.json();
     let text = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (text.includes('```')) {
-      const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (match) text = match[1];
-    }
+    // Strip markdown code fences that Gemini sometimes wraps JSON in
+    const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fenceMatch) text = fenceMatch[1];
+    // Also strip any leading/trailing non-JSON prose
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) text = jsonMatch[0];
     const parsed = JSON.parse(text.trim());
     const slides = (parsed.slides || []).map((s: any) => ({
       ...s, id: uid(), backgroundStatus: 'pending' as const,

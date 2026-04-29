@@ -44,13 +44,12 @@ export default function Step2Visuals() {
     return Math.abs(h) % NICK_PHOTOS.length;
   });
 
-  // Auto-apply cover photo — proxy to data URL so html-to-image export works
+  // Auto-apply cover photo — set raw URL immediately for fast preview, then upgrade to proxied data URL
   useEffect(() => {
     const c = slides[0];
     if (!c) return;
     const slideId = c.id;
     const rawUrl = NICK_PHOTOS[coverPhotoIdx];
-    // Set raw URL immediately so the preview shows fast
     store.setSlideBackground(slideId, rawUrl);
     let cancelled = false;
     setPhotoLoading(true);
@@ -73,8 +72,6 @@ export default function Step2Visuals() {
     });
     return () => { cancelled = true; };
   }, [ctaPhotoIdx]); // eslint-disable-line
-
-  const busyRef = useRef<Record<string, boolean>>({});
 
   // Generate middle slide background
   const generateBg = useCallback(async (slideId: string, slideText: string, slideType: string) => {
@@ -113,12 +110,12 @@ export default function Step2Visuals() {
     setGenerating(prev => ({ ...prev, [slideId]: false }));
   }, [topic, category, store]); // eslint-disable-line
 
-  // Generate ALL middle backgrounds sequentially
+  // Generate ALL middle backgrounds one-at-a-time (truly sequential to avoid rate limits)
   const generateAll = useCallback(async () => {
     for (const s of slides.slice(1, -1)) {
       if (!busyRef.current[s.id]) {
-        generateBg(s.id, s.text, s.visual_type || 'none');
-        await new Promise(r => setTimeout(r, 600));
+        await generateBg(s.id, s.text, s.visual_type || 'none');
+        await new Promise(r => setTimeout(r, 400));
       }
     }
   }, [slides, generateBg]);
