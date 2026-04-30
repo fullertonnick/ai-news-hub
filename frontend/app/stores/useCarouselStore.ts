@@ -22,7 +22,7 @@ export interface SlideData {
   stickers?: StickerOverlay[];
   textOverlays?: TextOverlay[];
   useTextOverlays?: boolean; // when true, SlideRenderer skips baked-in text
-  textOffsetX?: number; // % offset for the baked-in text block (0 = default position)
+  textOffsetX?: number; // 1080-scale px offset for the baked-in text block (0 = default)
   textOffsetY?: number;
 }
 

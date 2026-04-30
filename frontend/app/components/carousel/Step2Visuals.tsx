@@ -33,6 +33,8 @@ export default function Step2Visuals() {
   const isMiddle = !isFirst && !isLast;
 
   // Cover/CTA photo index
+  const busyRef = useRef<Record<string, boolean>>({});
+
   const [coverPhotoIdx, setCoverPhotoIdx] = useState(() => {
     const seed = (topic || '') + 'cover';
     let h = 0; for (let i = 0; i < seed.length; i++) { h = ((h << 5) - h) + seed.charCodeAt(i); h |= 0; }
