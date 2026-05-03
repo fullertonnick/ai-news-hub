@@ -6,6 +6,24 @@ import { NICK_PHOTOS } from '../../lib/nickPhotos';
 import SlideRenderer from '../SlideRenderer';
 
 async function proxyPhoto(url: string): Promise<string> {
+  // Local same-origin paths (e.g. /nick-photos/nick-1.jpg) are already accessible to
+  // html-to-image without a round-trip through the server proxy. The proxy runs server-side
+  // and cannot resolve relative URLs, so we skip it for local paths.
+  if (url.startsWith('/') && !url.startsWith('//')) {
+    try {
+      const r = await fetch(url);
+      if (!r.ok) return url;
+      const blob = await r.blob();
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => resolve(url);
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      return url;
+    }
+  }
   try {
     const r = await fetch('/api/image-proxy', {
       method: 'POST',

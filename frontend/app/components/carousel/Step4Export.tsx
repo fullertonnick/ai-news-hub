@@ -13,7 +13,9 @@ export default function Step4Export() {
   const [downloading, setDownloading] = useState<number | 'zip' | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   const [captionCopied, setCaptionCopied] = useState(false);
-  const [previewScale, setPreviewScale] = useState(0.74);
+  // Start at 0 so the preview is invisible until the ResizeObserver fires and computes
+  // the correct scale — prevents a jarring layout shift on first render.
+  const [previewScale, setPreviewScale] = useState(0);
   const [proxyingImages, setProxyingImages] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const exportRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -21,7 +23,10 @@ export default function Step4Export() {
   useEffect(() => {
     const el = previewContainerRef.current;
     if (!el) return;
-    const update = () => setPreviewScale(Math.min(el.offsetWidth / 540, 1));
+    const update = () => {
+      const w = el.offsetWidth || 400;
+      setPreviewScale(Math.min(w / 540, 1));
+    };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
@@ -155,8 +160,8 @@ export default function Step4Export() {
           className="p-2 rounded-xl hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronLeft size={20} /></button>
         <div className="flex-1 flex justify-center">
           <div ref={previewContainerRef} style={{ width: '100%', maxWidth: 400, aspectRatio: '4/5', position: 'relative' }}>
-            <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 12 }}>
-              <div style={{ transform: `scale(${previewScale})`, transformOrigin: 'top left', width: 540, height: 675 }}>
+            <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 12, opacity: previewScale > 0 ? 1 : 0, transition: 'opacity 0.15s' }}>
+              <div style={{ transform: `scale(${previewScale || 0.74})`, transformOrigin: 'top left', width: 540, height: 675 }}>
                 <SlideRenderer slide={renderSlides[currentIdx]} slideNumber={currentIdx + 1} totalSlides={slides.length} />
               </div>
             </div>
@@ -195,8 +200,10 @@ export default function Step4Export() {
         <RotateCcw size={14} /> Start New Carousel
       </button>
 
-      {/* Hidden export renders — off-screen at full 1080x1350 resolution */}
-      <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none' }}>
+      {/* Hidden export renders — absolutely positioned off-screen at full 1080×1350 resolution.
+          position:absolute (not fixed) is more reliable for html-to-image: fixed elements are
+          viewport-relative which can cause capture artifacts when the page is scrolled. */}
+      <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
         {renderSlides.map((slide, i) => (
           <SlideRenderer key={i} ref={el => { exportRefs.current[i] = el; }} slide={slide} slideNumber={i + 1} totalSlides={slides.length} forExport />
         ))}

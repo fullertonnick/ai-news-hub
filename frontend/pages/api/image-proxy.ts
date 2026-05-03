@@ -15,6 +15,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { url } = req.body;
   if (!url || typeof url !== 'string') return res.status(400).json({ error: 'url required' });
 
+  // Reject relative or protocol-relative URLs — this API runs server-side and
+  // cannot resolve relative paths or same-origin paths. Callers should fetch
+  // local assets directly from the browser instead.
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    return res.status(400).json({ error: 'Only absolute http/https URLs are supported' });
+  }
+
   try {
     const r = await fetch(url, {
       signal: AbortSignal.timeout(15000),

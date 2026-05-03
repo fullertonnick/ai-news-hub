@@ -110,6 +110,11 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
   const trRef = useRef<any>(null);
   const [cursor, setCursor] = useState<string>('default');
 
+  // Sort by zIndex ascending so Konva's paint order matches the CSS z-index used in SlideRenderer.
+  // Lower zIndex items are painted first (beneath), higher last (on top) — same as CSS stacking.
+  const sortedStickers = [...stickers].sort((a, b) => (a.zIndex ?? 10) - (b.zIndex ?? 10));
+  const sortedTextOverlays = [...textOverlays].sort((a, b) => (a.zIndex ?? 5) - (b.zIndex ?? 5));
+
   // Attach transformer to selected node
   useEffect(() => {
     const tr = trRef.current;
@@ -192,7 +197,7 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
         onDragEnd={handleDragEnd}
         onTransformEnd={handleTransformEnd}
       >
-        {stickers.map(s => (
+        {sortedStickers.map(s => (
           <StickerNode key={s.id} sticker={s} stageW={width} stageH={height}
             isSelected={selectedId === s.id}
             onSelect={() => onSelect(s.id)}
@@ -201,7 +206,7 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
             onDragStart={handleDragStartNode}
             onDragEnd={handleDragEndNode} />
         ))}
-        {textOverlays.map(t => (
+        {sortedTextOverlays.map(t => (
           <TextNode key={t.id} overlay={t} stageW={width} stageH={height}
             onSelect={() => onSelect(t.id)}
             onMouseEnter={handleMouseEnterNode}
