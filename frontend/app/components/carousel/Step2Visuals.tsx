@@ -64,9 +64,13 @@ export default function Step2Visuals() {
     return Math.abs(h) % NICK_PHOTOS.length;
   });
 
-  // Auto-apply cover photo — set raw URL immediately for fast preview, then upgrade to proxied data URL
+  // Use refs so the effects always see the current slide IDs without triggering on every slide change.
+  const slidesRef = useRef(slides);
+  useEffect(() => { slidesRef.current = slides; }, [slides]);
+
+  // Auto-apply cover photo — set raw URL immediately, then upgrade to proxied data URL
   useEffect(() => {
-    const c = slides[0];
+    const c = slidesRef.current[0];
     if (!c) return;
     const slideId = c.id;
     const rawUrl = NICK_PHOTOS[coverPhotoIdx];
@@ -77,10 +81,11 @@ export default function Step2Visuals() {
       if (!cancelled) store.setSlideBackground(slideId, dataUrl);
     }).finally(() => { if (!cancelled) setPhotoLoading(false); });
     return () => { cancelled = true; };
-  }, [coverPhotoIdx]); // eslint-disable-line
+  }, [coverPhotoIdx, store]);
 
   // Auto-apply CTA photo — proxy to data URL
   useEffect(() => {
+    const slides = slidesRef.current;
     const c = slides[slides.length - 1];
     if (!c) return;
     const slideId = c.id;
@@ -91,7 +96,7 @@ export default function Step2Visuals() {
       if (!cancelled) store.setSlideBackground(slideId, dataUrl);
     });
     return () => { cancelled = true; };
-  }, [ctaPhotoIdx]); // eslint-disable-line
+  }, [ctaPhotoIdx, store]);
 
   // Generate middle slide background
   const generateBg = useCallback(async (slideId: string, slideText: string, slideType: string) => {

@@ -30,45 +30,57 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const guidance = slideTypeGuidance[slideType] || slideTypeGuidance.none;
 
+  // Pull 1-2 concrete nouns from slide text to make the background scene specific
+  const slideWords = slideText.slice(0, 200).toLowerCase();
+  const conceptHints: string[] = [];
+  if (/terminal|code|file|editor|command|script|repo/.test(slideWords)) conceptHints.push('glowing terminal screen with blurred amber-lit code');
+  if (/workflow|automat|trigger|webhook|module|connect/.test(slideWords)) conceptHints.push('dark server room with warm amber floor LEDs, blurred hardware racks');
+  if (/agent|ai|model|claude|gemini|openai/.test(slideWords)) conceptHints.push('dark workspace with floating glowing neural network nodes, amber light traces');
+  if (/revenue|money|income|roi|cost|profit/.test(slideWords)) conceptHints.push('dark desk with warm amber lamp, blurred laptop screen glowing, bokeh financial atmosphere');
+  if (/client|onboard|meet|call|team/.test(slideWords)) conceptHints.push('dark professional meeting room, single overhead warm spotlight, empty modern chairs');
+  if (/email|message|slack|notification|inbox/.test(slideWords)) conceptHints.push('dark room with glowing amber phone screen bokeh, soft notification light trails');
+
+  const sceneHint = conceptHints.length > 0
+    ? `SCENE CONCEPT (derived from slide text): ${conceptHints[0]}`
+    : `SCENE: cinematic dark workspace with warm amber light source, deep shadows`;
+
   const prompt = `Write an Imagen 3 image generation prompt for an Instagram carousel slide background.
 
 SLIDE CONTEXT:
 - Overall topic: "${topic}"
-- This slide's text: "${slideText.slice(0, 300)}"
+- This slide's text: "${slideText.slice(0, 250)}"
 - Slide type: ${slideType}
-- Content category: ${category}
+- Category: ${category}
 
-VISUAL REQUIREMENT FOR THIS SLIDE TYPE:
+VISUAL REQUIREMENT:
 ${guidance}
 
-YOUR JOB:
-Extract 1-2 specific visual concepts directly from the slide text above, then build a scene around them.
-The image should make a viewer think of this exact slide's subject matter after 2 seconds — not just the general topic.
+${sceneHint}
 
-SPECIFICITY EXAMPLES:
-Topic "Claude Code memory" + slide about "CLAUDE.md file":
-→ BAD: "dark tech background with orange accents"
-→ GOOD: "dark desk setup with glowing terminal screen showing a text editor with blurred code, single amber desk lamp casting warm shadows on mechanical keyboard, shallow depth of field, cinematic 35mm"
+YOUR JOB: Extract 1-2 concrete visual concepts directly from the slide text, then build a cinematic dark scene around them. A viewer should subconsciously associate the image with this slide's subject after 2 seconds — not just the general topic.
 
-Topic "Make.com automations" + slide about "webhook triggers":
-→ BAD: "automation background"
-→ GOOD: "dark server room corridor with warm amber floor LED strips, blurred motion of data center hardware, shallow depth of field, moody cinematic lighting, no text"
+GOOD EXAMPLES:
+Topic "Claude Code memory" + slide about CLAUDE.md:
+→ "dark oak desk, glowing text editor on laptop screen showing blurred code files, single warm amber desk lamp, mechanical keyboard in foreground, shallow depth of field, cinematic 35mm lens"
 
-ABSOLUTE RULES — violating any of these makes the image unusable:
-- NO text, NO typography, NO letters, NO numbers, NO words anywhere
-- NO faces, NO people, NO human figures, NO hands, NO body parts
-- NO UI elements, NO app screenshots, NO icons with text
-- NO logos, NO brand marks
-- Background must stay very dark (near #111111) so white text overlaid on it stays readable
+Topic "Make.com automations" + slide about saving 20 hours per week:
+→ "dark server room corridor, amber LED floor strips casting warm glow on hardware racks, blurred motion, moody cinematic lighting, shallow depth of field, 3:4 portrait"
+
+ABSOLUTE RULES (breaking any makes the image unusable):
+- ZERO text, letters, numbers, words, typography anywhere in the image
+- ZERO faces, people, human figures, hands, or body parts
+- ZERO UI elements, app screenshots, phone screens with readable content
+- ZERO logos or brand marks
+- Background MUST be very dark (near #0A0A0A) — white text will overlay it
 
 BRAND STYLE:
-- Near-black base, very dark overall
-- Warm orange (#FF7107) and amber used sparingly — as lighting, glow, or accent color only
-- Cinematic lens quality, bokeh depth of field preferred
-- 3:4 portrait aspect ratio
-- Premium, modern, high-contrast
+- Near-black base throughout
+- Warm orange (#FF7107) and amber ONLY as: accent lighting, bokeh, glow, rim light
+- Cinematic lens quality — bokeh depth of field, 35mm feel
+- 3:4 portrait orientation
+- Premium, moody, high contrast
 
-Return ONLY the image generation prompt text. No JSON, no quotes, no preamble. Just the prompt itself.`;
+Return ONLY the prompt text. No JSON, no quotes, no explanation.`;
 
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
