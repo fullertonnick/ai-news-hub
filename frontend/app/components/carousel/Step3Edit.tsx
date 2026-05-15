@@ -405,18 +405,18 @@ export default function Step3Edit() {
         <div className="w-full lg:w-72 space-y-4">
           {/* Hide baked-in text toggle — content slides only (not cover or CTA) */}
           {currentIdx > 0 && currentIdx < slides.length - 1 && (
-            <label className="flex items-center gap-2.5 cursor-pointer select-none p-2.5 rounded-xl border border-white/5 bg-white/[0.02]">
-              <div
-                onClick={() => store.setUseTextOverlays(slide.id, !slide.useTextOverlays)}
-                className={`w-8 h-4 rounded-full transition-colors relative flex-shrink-0 ${slide.useTextOverlays ? 'bg-brand-orange' : 'bg-white/10'}`}
-              >
+            <button
+              onClick={() => store.setUseTextOverlays(slide.id, !slide.useTextOverlays)}
+              className="flex items-center gap-2.5 cursor-pointer select-none p-2.5 rounded-xl border border-white/5 bg-white/[0.02] w-full text-left"
+            >
+              <div className={`w-8 h-4 rounded-full transition-colors relative flex-shrink-0 ${slide.useTextOverlays ? 'bg-brand-orange' : 'bg-white/10'}`}>
                 <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${slide.useTextOverlays ? 'translate-x-4' : 'translate-x-0.5'}`} />
               </div>
               <span className="text-[10px] text-gray-400 leading-tight">
                 Hide baked-in text
                 <span className="block text-gray-600">Use custom text overlays only</span>
               </span>
-            </label>
+            </button>
           )}
 
           {/* Layers */}

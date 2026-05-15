@@ -33,26 +33,50 @@ export default function Step4Export() {
     return () => ro.disconnect();
   }, []);
 
-  // Safety net: proxy any external-URL backgrounds before first export
+  // Convert a non-data-URL image to a data URL for CORS-safe export.
+  // Local same-origin paths are fetched directly in the browser; external URLs go through the server proxy.
+  async function toDataUrl(url: string): Promise<string> {
+    if (url.startsWith('data:')) return url;
+    if (url.startsWith('/') && !url.startsWith('//')) {
+      // Local path — fetch directly from the browser (same-origin, no CORS issue)
+      try {
+        const r = await fetch(url);
+        if (!r.ok) return url;
+        const blob = await r.blob();
+        return new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => resolve(url);
+          reader.readAsDataURL(blob);
+        });
+      } catch { return url; }
+    }
+    // External URL — proxy through server to avoid CORS
+    try {
+      const r = await fetch('/api/image-proxy', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+      const d = await r.json();
+      return d.dataUrl || url;
+    } catch { return url; }
+  }
+
+  // Safety net: proxy any non-data-URL backgrounds before first export
   const ensureDataUrls = useCallback(async () => {
     const external = slides.filter(s => s.backgroundImage && !s.backgroundImage.startsWith('data:'));
     if (!external.length) return;
     setProxyingImages(true);
     await Promise.all(external.map(async s => {
       try {
-        const r = await fetch('/api/image-proxy', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: s.backgroundImage }),
-        });
-        const d = await r.json();
-        if (d.dataUrl) store.setSlideBackground(s.id, d.dataUrl);
-      } catch { /* leave as-is, export may still work for local files */ }
+        const dataUrl = await toDataUrl(s.backgroundImage!);
+        if (dataUrl.startsWith('data:')) store.setSlideBackground(s.id, dataUrl);
+      } catch { /* leave as-is */ }
     }));
-    // Let React flush the store update before we capture
+    // Let React flush store updates before capturing
     await new Promise(r => setTimeout(r, 300));
     setProxyingImages(false);
-  }, [slides, store]);
+  }, [slides, store]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Build render slides
   const renderSlides: CarouselSlide[] = slides.map((s, i) => {
@@ -73,7 +97,10 @@ export default function Step4Export() {
   const downloadSlide = useCallback(async (i: number) => {
     await ensureDataUrls();
     const el = exportRefs.current[i];
-    if (!el) return;
+    if (!el) {
+      setExportError('Slide element not ready — wait a moment and try again.');
+      return;
+    }
     setDownloading(i);
     setExportError(null);
     try {

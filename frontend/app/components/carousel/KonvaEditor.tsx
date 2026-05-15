@@ -217,6 +217,7 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
         <Transformer
           ref={trRef}
           rotateEnabled
+          keepRatio
           enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
           borderStroke="#FF7107"
           anchorStroke="#FF7107"

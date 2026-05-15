@@ -44,6 +44,11 @@ export default function Step2Visuals() {
   const [generating, setGenerating] = useState<Record<string, boolean>>({});
   const [bgError, setBgError] = useState<Record<string, string>>({});
   const [photoLoading, setPhotoLoading] = useState(false);
+  const [ctaPhotoLoading, setCtaPhotoLoading] = useState(false);
+
+  // Extract slide IDs so photo effects re-run when slides are regenerated (new IDs = new copy generation)
+  const coverSlideId = slides[0]?.id;
+  const ctaSlideId = slides[slides.length - 1]?.id;
 
   const slide = slides[currentIdx];
   const isFirst = currentIdx === 0;
@@ -68,43 +73,47 @@ export default function Step2Visuals() {
   const slidesRef = useRef(slides);
   useEffect(() => { slidesRef.current = slides; }, [slides]);
 
-  // Auto-apply cover photo — set raw URL immediately, then upgrade to proxied data URL
+  // Auto-apply cover photo — set raw URL immediately, then upgrade to proxied data URL.
+  // Use getState() for actions so `store` is not a reactive dependency (avoids re-render loop).
   useEffect(() => {
     const c = slidesRef.current[0];
     if (!c) return;
     const slideId = c.id;
     const rawUrl = NICK_PHOTOS[coverPhotoIdx];
-    store.setSlideBackground(slideId, rawUrl);
+    useCarouselStore.getState().setSlideBackground(slideId, rawUrl);
     let cancelled = false;
     setPhotoLoading(true);
     proxyPhoto(rawUrl).then(dataUrl => {
-      if (!cancelled) store.setSlideBackground(slideId, dataUrl);
+      if (!cancelled) useCarouselStore.getState().setSlideBackground(slideId, dataUrl);
     }).finally(() => { if (!cancelled) setPhotoLoading(false); });
     return () => { cancelled = true; };
-  }, [coverPhotoIdx, store]);
+  }, [coverPhotoIdx, coverSlideId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-apply CTA photo — proxy to data URL
   useEffect(() => {
-    const slides = slidesRef.current;
-    const c = slides[slides.length - 1];
+    const allSlides = slidesRef.current;
+    const c = allSlides[allSlides.length - 1];
     if (!c) return;
     const slideId = c.id;
     const rawUrl = NICK_PHOTOS[ctaPhotoIdx];
-    store.setSlideBackground(slideId, rawUrl);
+    useCarouselStore.getState().setSlideBackground(slideId, rawUrl);
     let cancelled = false;
+    setCtaPhotoLoading(true);
     proxyPhoto(rawUrl).then(dataUrl => {
-      if (!cancelled) store.setSlideBackground(slideId, dataUrl);
-    });
+      if (!cancelled) useCarouselStore.getState().setSlideBackground(slideId, dataUrl);
+    }).finally(() => { if (!cancelled) setCtaPhotoLoading(false); });
     return () => { cancelled = true; };
-  }, [ctaPhotoIdx, store]);
+  }, [ctaPhotoIdx, ctaSlideId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Generate middle slide background
+  // Generate middle slide background.
+  // Uses getState() for Zustand actions so the callback doesn't need `store` in deps,
+  // which would otherwise cause stale closures and excessive re-creations.
   const generateBg = useCallback(async (slideId: string, slideText: string, slideType: string) => {
     if (busyRef.current[slideId]) return;
     busyRef.current[slideId] = true;
     setGenerating(prev => ({ ...prev, [slideId]: true }));
     setBgError(prev => ({ ...prev, [slideId]: '' }));
-    store.setSlideBackgroundStatus(slideId, 'generating');
+    useCarouselStore.getState().setSlideBackgroundStatus(slideId, 'generating');
     try {
       const pr = await fetch('/api/carousel/generate-bg-prompt', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -112,7 +121,7 @@ export default function Step2Visuals() {
       });
       const pd = await pr.json();
       const prompt = pd.prompt || `Dark cinematic workspace, warm orange desk lamp glow, deep shadows, no text, no faces, bokeh`;
-      store.setSlideBackgroundPrompt(slideId, prompt);
+      useCarouselStore.getState().setSlideBackgroundPrompt(slideId, prompt);
 
       const ir = await fetch('/api/imagen', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -120,20 +129,20 @@ export default function Step2Visuals() {
       });
       const id = await ir.json();
       if (id.dataUrl) {
-        store.setSlideBackground(slideId, id.dataUrl);
+        useCarouselStore.getState().setSlideBackground(slideId, id.dataUrl);
       } else {
         const msg = id.error || 'Image generation returned no result';
         setBgError(prev => ({ ...prev, [slideId]: msg }));
-        store.setSlideBackgroundStatus(slideId, 'error');
+        useCarouselStore.getState().setSlideBackgroundStatus(slideId, 'error');
       }
     } catch (e) {
       console.error('Background generation failed:', e);
       setBgError(prev => ({ ...prev, [slideId]: 'Network error — try again' }));
-      store.setSlideBackgroundStatus(slideId, 'error');
+      useCarouselStore.getState().setSlideBackgroundStatus(slideId, 'error');
     }
     busyRef.current[slideId] = false;
     setGenerating(prev => ({ ...prev, [slideId]: false }));
-  }, [topic, category, store]); // eslint-disable-line
+  }, [topic, category]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Generate ALL middle backgrounds one-at-a-time (truly sequential to avoid rate limits)
   const generateAll = useCallback(async () => {
@@ -254,9 +263,10 @@ export default function Step2Visuals() {
                   ))}
                 </div>
               </div>
-              <button onClick={() => setCtaPhotoIdx(i => (i + 1) % NICK_PHOTOS.length)}
-                className="w-full flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium py-2.5 rounded-xl transition-colors">
-                <RefreshCw size={12} /> Shuffle Photo
+              <button onClick={() => setCtaPhotoIdx(i => (i + 1) % NICK_PHOTOS.length)} disabled={ctaPhotoLoading}
+                className="w-full flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium py-2.5 rounded-xl transition-colors disabled:opacity-40">
+                {ctaPhotoLoading ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                {ctaPhotoLoading ? 'Loading Photo...' : 'Shuffle Photo'}
               </button>
             </>
           )}
