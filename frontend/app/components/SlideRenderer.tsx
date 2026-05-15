@@ -162,15 +162,7 @@ function RenderOverlays({ slide, W, H }: { slide: CarouselSlide; W: number; H: n
   );
 }
 
-// ─── FIX 2 + 4: Cover Template — full-bleed photo, structured floating icons ──
-
-// Topic-relevant sticker-style labels (not emojis — text badges with tech terms)
-const STICKER_LABELS = [
-  { text: 'AI', pos: { top: '8%', right: '6%' }, rotate: 4 },
-  { text: 'AUTOMATE', pos: { top: '22%', left: '4%' }, rotate: -3 },
-  { text: 'SCALE', pos: { top: '18%', right: '5%' }, rotate: 2 },
-  { text: 'BUILD', pos: { bottom: '32%', right: '6%' }, rotate: -2 },
-];
+// ─── Cover Template — full-bleed photo, floating topic badges ────────────────
 
 // Generate topic-relevant sticker labels from slide text
 function getTopicStickers(text: string): { text: string; pos: Record<string, string>; rotate: number }[] {
