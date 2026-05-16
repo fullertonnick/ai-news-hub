@@ -161,7 +161,7 @@ export default function Step2Visuals() {
   if (isFirst) visual = { type: 'cover_photo', gradient_hue: 25, position: coverPosition };
   else if (isLast) visual = { type: 'cta_slide', keyword, layout_variant: ctaLayout };
   else visual = slide.visual || { type: slide.visual_type || 'none' };
-  const renderSlide = { text: slide.text, accent_word: slide.accent_word, section_label: slide.section_label, visual, backgroundImage: slide.backgroundImage, stickers: slide.stickers, textOverlays: slide.textOverlays, textOffsetX: slide.textOffsetX, textOffsetY: slide.textOffsetY };
+  const renderSlide = { text: slide.text, accent_word: slide.accent_word, section_label: slide.section_label, visual, backgroundImage: slide.backgroundImage, stickers: slide.stickers, textOverlays: slide.textOverlays, useTextOverlays: slide.useTextOverlays, textOffsetX: slide.textOffsetX, textOffsetY: slide.textOffsetY };
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-5">

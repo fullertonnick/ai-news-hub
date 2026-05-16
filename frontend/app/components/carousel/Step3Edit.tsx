@@ -159,7 +159,11 @@ export default function Step3Edit() {
     if (!slide) return;
     const s: StickerOverlay = { id: uid(), src: bs.src, label: bs.label, x: 50, y: 40, width: 20, rotation: 0, opacity: 1, zIndex: 10 + stickers.length };
     store.addSticker(slide.id, s);
-    setSelectedId(s.id);
+    // Defer selection — sticker images (SVG data URIs) load async. The Konva node
+    // won't exist until useKonvaImage resolves, so the Transformer can't attach yet.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setSelectedId(s.id));
+    });
   }, [slide, store, stickers.length]);
 
   const addText = useCallback(() => {
@@ -179,7 +183,9 @@ export default function Step3Edit() {
     reader.onload = () => {
       const s: StickerOverlay = { id: uid(), src: reader.result as string, label: file.name.replace(/\.\w+$/, ''), x: 50, y: 40, width: 30, rotation: 0, opacity: 1, zIndex: 10 + stickers.length };
       store.addSticker(slide.id, s);
-      setSelectedId(s.id);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setSelectedId(s.id));
+      });
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -195,7 +201,9 @@ export default function Step3Edit() {
       if (d.dataUrl) {
         const s: StickerOverlay = { id: uid(), src: d.dataUrl, label: prompt ? 'Custom Visual' : 'AI Visual', x: 50, y: 55, width: 60, rotation: 0, opacity: 0.9, zIndex: 10 + stickers.length };
         store.addSticker(slide.id, s);
-        setSelectedId(s.id);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => setSelectedId(s.id));
+        });
         setCustomPrompt('');
         setShowPrompt(false);
       }
@@ -241,7 +249,9 @@ export default function Step3Edit() {
       if (d.dataUrl) {
         const s: StickerOverlay = { id: uid(), src: d.dataUrl, label: img.title.slice(0, 30) || 'Web Image', x: 50, y: 55, width: 60, rotation: 0, opacity: 1, zIndex: 10 + stickers.length };
         store.addSticker(slide.id, s);
-        setSelectedId(s.id);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => setSelectedId(s.id));
+        });
         setShowWebSearch(false);
         setWebResults([]);
         setWebQuery('');

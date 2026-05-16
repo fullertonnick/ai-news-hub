@@ -115,7 +115,9 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
   const sortedStickers = [...stickers].sort((a, b) => (a.zIndex ?? 10) - (b.zIndex ?? 10));
   const sortedTextOverlays = [...textOverlays].sort((a, b) => (a.zIndex ?? 5) - (b.zIndex ?? 5));
 
-  // Attach transformer to selected node
+  // Attach transformer to selected node.
+  // Retries once after 150ms because sticker images (SVG data URIs) load async —
+  // the Konva node won't exist until useKonvaImage resolves onload.
   useEffect(() => {
     const tr = trRef.current;
     const stage = stageRef.current;
@@ -126,21 +128,26 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
       return;
     }
 
-    // Find node by name
-    const name = `sticker_${selectedId}`;
-    const name2 = `text_${selectedId}`;
-    const node = stage.findOne(`.${name}`) || stage.findOne(`.${name2}`);
-    if (node) {
-      tr.nodes([node]);
-    } else {
-      tr.nodes([]);
-    }
+    const attach = () => {
+      const node = stage.findOne(`.sticker_${selectedId}`) || stage.findOne(`.text_${selectedId}`);
+      if (node) {
+        tr.nodes([node]);
+      } else {
+        tr.nodes([]);
+      }
+    };
+
+    attach();
+    // Retry in case the image is still loading (SVG data URIs fire onload async)
+    const timer = setTimeout(attach, 150);
+    return () => clearTimeout(timer);
   }, [selectedId, stickers.length, textOverlays.length]);
 
   const handleMouseEnterNode = useCallback(() => setCursor('grab'), []);
   const handleMouseLeaveNode = useCallback(() => setCursor('default'), []);
   const handleDragStartNode = useCallback(() => setCursor('grabbing'), []);
-  const handleDragEndNode = useCallback(() => setCursor('grab'), []);
+  // Reset to default after drag — mouse may have moved off the node during drag
+  const handleDragEndNode = useCallback(() => setCursor('default'), []);
 
   // Sync drag end back to store
   const handleDragEnd = useCallback((e: any) => {
