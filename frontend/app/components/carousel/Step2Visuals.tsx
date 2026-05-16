@@ -154,6 +154,20 @@ export default function Step2Visuals() {
     }
   }, [slides, generateBg]);
 
+  // Auto-generate middle backgrounds on first mount when none exist yet.
+  // Runs once — `hasAutoStarted` prevents re-triggering if slides update.
+  const hasAutoStarted = useRef(false);
+  useEffect(() => {
+    if (hasAutoStarted.current) return;
+    const middle = slides.slice(1, -1);
+    if (!middle.length) return;
+    if (!middle.some(s => !s.backgroundImage)) return; // all already have images
+    hasAutoStarted.current = true;
+    // Small delay so cover/CTA photo effects finish first
+    const t = setTimeout(generateAll, 600);
+    return () => clearTimeout(t);
+  }, [slides, generateAll]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!slide) return <div className="p-6"><p className="text-sm text-gray-400">No slides. Generate copy first.</p></div>;
 
   // Build render slide for preview

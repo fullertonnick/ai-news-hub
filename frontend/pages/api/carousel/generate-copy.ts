@@ -20,6 +20,8 @@ function stripForbidden(text: string): string {
   return r;
 }
 
+const VALID_VISUAL_TYPES = new Set(['cover_photo', 'code_block', 'stats_grid', 'diagram', 'steps_list', 'skill_card', 'big_quote', 'comparison', 'checklist', 'cta_slide', 'none']);
+
 function detectCategory(topic: string): string {
   const t = topic.toLowerCase();
   if (/claude(?!\s*van|\s*monet)/i.test(t) || /anthropic|mcp\b|claude code/.test(t)) return 'claude-code';
@@ -243,10 +245,19 @@ Now write a completely original carousel about: "${topic}"`;
 
     const slides = (parsed.slides || []).map((s: any) => {
       const cleanText = stripForbidden(s.text || '');
+      // Normalize section_label: null/"null"/"none" → undefined; strip "Level X" prefix
+      const rawLabel: string | null | undefined = s.section_label;
+      const sectionLabel = (rawLabel && rawLabel !== 'null' && rawLabel !== 'none')
+        ? rawLabel.replace(/^level\s+\d+\s*[:.]?\s*/i, '').trim() || undefined
+        : undefined;
+      // Ensure visual_type is a known value
+      const vt = VALID_VISUAL_TYPES.has(s.visual_type) ? s.visual_type : 'none';
       return {
         ...s,
         text: cleanText,
         accent_word: fixAccentWord(cleanText, s.accent_word),
+        section_label: sectionLabel,
+        visual_type: vt,
         id: uid(),
         backgroundStatus: 'pending' as const,
       };

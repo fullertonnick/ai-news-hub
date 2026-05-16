@@ -44,6 +44,7 @@ Return JSON only: {"text": "new slide copy", "accent_word": "word"}`;
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.85, maxOutputTokens: 500 },
+        thinkingConfig: { thinkingBudget: 0 },
       }),
     });
     const d = await r.json();

@@ -92,6 +92,7 @@ Return ONLY the prompt text. No JSON, no quotes, no explanation.`;
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 500 },
+        thinkingConfig: { thinkingBudget: 0 },
       }),
     });
     const d = await r.json();
