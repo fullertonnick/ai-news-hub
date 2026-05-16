@@ -222,23 +222,23 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
       {/* Bottom gradient — extra dark where text sits */}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.85) 100%)' }} />
 
-      {/* Topic-relevant sticker badges — rotated, semi-transparent */}
+      {/* Topic-relevant sticker badges — bold orange pills, clearly visible */}
       {stickers.map((sticker, i) => (
         <div key={i} style={{
           position: 'absolute', ...sticker.pos,
           transform: `rotate(${sticker.rotate}deg)`,
-          backgroundColor: 'rgba(255,113,7,0.12)',
-          border: `${1.5 * sc}px solid rgba(255,113,7,0.35)`,
-          borderRadius: `${6 * sc}px`,
-          padding: `${5 * sc}px ${12 * sc}px`,
-          fontSize: `${11 * sc}px`,
+          backgroundColor: 'rgba(255,113,7,0.22)',
+          border: `${2 * sc}px solid rgba(255,113,7,0.65)`,
+          borderRadius: `${8 * sc}px`,
+          padding: `${8 * sc}px ${18 * sc}px`,
+          fontSize: `${13 * sc}px`,
           fontWeight: 800,
           color: Brand.colors.accent_primary,
-          letterSpacing: '0.1em',
+          letterSpacing: '0.12em',
           fontFamily: Brand.typography.font_family,
-          filter: `drop-shadow(0 0 ${10 * sc}px rgba(255,113,7,0.25))`,
+          filter: `drop-shadow(0 0 ${14 * sc}px rgba(255,113,7,0.45))`,
           zIndex: 2,
-          opacity: 0.8,
+          opacity: 0.95,
         }}>{sticker.text}</div>
       ))}
 
@@ -383,10 +383,14 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   const hasVis = slide.visual?.type !== 'none' && !!slide.visual?.type;
   const hasImagen = !!slide.backgroundImage;
   const paras = (slide.text || '').split('\n\n').filter(Boolean);
-  const chars = (slide.text || '').length;
-  const fs = isBigQuote
-    ? (chars > 120 ? 36 * sc : chars > 70 ? 44 * sc : 52 * sc)
-    : (chars > 120 ? 30 * sc : chars > 80 ? 34 * sc : 40 * sc);
+  const headline = paras[0] || slide.text || '';
+  const bodyParas = paras.length >= 3 ? paras.slice(1, -1) : paras.length === 2 ? [paras[1]] : [];
+  const kicker = paras.length >= 3 ? paras[paras.length - 1] : null;
+  const headlineLen = headline.length;
+  // Tyler Germain spec: headlines 48-52px bold at export (44px for long headlines)
+  const headlineFs = isBigQuote
+    ? (headlineLen > 120 ? 36 * sc : headlineLen > 70 ? 44 * sc : 52 * sc)
+    : (headlineLen > 60 ? 44 * sc : headlineLen > 40 ? 48 * sc : 52 * sc);
 
   // Text block offset (set via Step 3 drag handle; stored in 1080-scale px)
   const txOff = (slide.textOffsetX || 0) * sc;
@@ -409,15 +413,10 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
       {/* Subtle top gradient wash — only when no Imagen 3 */}
       {!hasImagen && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '25%', background: `linear-gradient(to bottom, rgba(255,113,7,0.025), transparent)`, pointerEvents: 'none' }} />}
 
-      {/* ── Step 4 accent system ── */}
-      {/* Slide 2: 3px left border */}
-      {slideNumber === 2 && (
-        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${3 * sc}px`, background: Brand.colors.accent_primary, zIndex: 4 }} />
-      )}
-      {/* Slides 3+: subtle radial glow */}
-      {slideNumber >= 3 && (
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(255,113,7,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      )}
+      {/* Orange left border accent — all content slides (Tyler Germain signature) */}
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${4 * sc}px`, background: Brand.colors.accent_primary, zIndex: 4 }} />
+      {/* Subtle orange radial glow */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(255,113,7,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
       {/* Big quote decorative mark — background element */}
       {isBigQuote && (
@@ -436,19 +435,49 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
         {/* Section label */}
         {slide.section_label && <SectionLabel label={slide.section_label} sc={sc} />}
 
-        {/* Headline — hidden when replaced by custom text overlays */}
+        {/* Tyler Germain layout: headline → orange divider → body → kicker */}
         {!slide.useTextOverlays && (
         <div style={{ flexShrink: 0 }}>
-          {paras.map((p, i) => (
+          {/* Headline — always 44-52px bold (Tyler Germain spec) */}
+          <p style={{
+            margin: 0, marginBottom: `${10 * sc}px`,
+            fontSize: `${headlineFs}px`, fontWeight: 800,
+            color: Brand.colors.text_primary,
+            lineHeight: isBigQuote ? 1.3 : 1.18,
+            letterSpacing: '-0.03em',
+            ...(isBigQuote ? { fontStyle: 'italic' as const } : {}),
+          }}>
+            {renderWithAccent(headline, slide.accent_word)}
+          </p>
+          {/* Orange divider — Tyler Germain signature (skip for big_quote which has its own) */}
+          {!isBigQuote && (
+            <div style={{
+              width: `${44 * sc}px`, height: `${3 * sc}px`,
+              background: Brand.colors.accent_primary,
+              borderRadius: '2px',
+              marginBottom: `${(!hasVis && bodyParas.length > 0) ? 18 * sc : 0}px`,
+            }} />
+          )}
+          {/* Body — 24px regular, only for text-only slides (no visual block) */}
+          {!hasVis && bodyParas.map((p, i) => (
             <p key={i} style={{
-              margin: 0, marginBottom: i < paras.length - 1 ? `${14 * sc}px` : 0,
-              fontSize: `${fs}px`, fontWeight: Brand.typography.weights.heading,
-              color: Brand.colors.text_primary, lineHeight: isBigQuote ? 1.3 : 1.28, letterSpacing: '-0.025em',
-              ...(isBigQuote ? { fontStyle: 'italic' as const } : {}),
+              margin: 0, marginBottom: `${10 * sc}px`,
+              fontSize: `${24 * sc}px`, fontWeight: 400,
+              color: Brand.colors.text_primary, lineHeight: 1.55, letterSpacing: '-0.01em',
             }}>
-              {renderWithAccent(p, slide.accent_word)}
+              {p}
             </p>
           ))}
+          {/* Kicker — 28px bold, only for text-only slides with 3+ paragraphs */}
+          {!hasVis && kicker && (
+            <p style={{
+              margin: 0, marginTop: `${8 * sc}px`,
+              fontSize: `${28 * sc}px`, fontWeight: 700,
+              color: Brand.colors.text_primary, lineHeight: 1.3, letterSpacing: '-0.025em',
+            }}>
+              {renderWithAccent(kicker, slide.accent_word)}
+            </p>
+          )}
         </div>
         )}
 

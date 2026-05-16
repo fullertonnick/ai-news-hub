@@ -3,7 +3,7 @@
 
 export const Brand = {
   colors: {
-    bg_primary: '#111111',           // Near-black — carousel backgrounds
+    bg_primary: '#1A1A1A',           // Dark charcoal — carousel backgrounds (#1A1A1A per brand spec)
     bg_surface: '#282828',           // Cards, code blocks, containers
     bg_overlay: 'rgba(0,0,0,0.55)', // Photo overlays on cover slides
     accent_primary: '#FF7107',       // Tangerine — the brand orange

@@ -106,7 +106,7 @@ export default function Step4Export() {
     try {
       // Wait for custom fonts to be available before capturing to avoid fallback fonts
       await document.fonts.ready;
-      const png = await toPng(el, { pixelRatio: 1, cacheBust: true });
+      const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350 });
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
     } catch (e) {
       console.error('Export error', e);
@@ -127,7 +127,7 @@ export default function Step4Export() {
       for (let i = 0; i < slides.length; i++) {
         const el = exportRefs.current[i];
         if (el) {
-          const png = await toPng(el, { pixelRatio: 1, cacheBust: true });
+          const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350 });
           zip.file(`slide-${String(i + 1).padStart(2, '0')}.png`, png.replace(/^data:image\/png;base64,/, ''), { base64: true });
         }
         await new Promise(r => setTimeout(r, 200));
