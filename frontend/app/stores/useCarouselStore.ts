@@ -55,7 +55,6 @@ interface CarouselStore {
 
   // Cover controls
   coverPosition: 'top' | 'middle' | 'bottom';
-  coverPhotoEnabled: boolean;
 
   // CTA controls
   ctaLayout: 'photo' | 'text';
@@ -91,7 +90,6 @@ interface CarouselStore {
 
   // Actions — cover/CTA
   setCoverPosition: (p: 'top' | 'middle' | 'bottom') => void;
-  setCoverPhotoEnabled: (e: boolean) => void;
   setCtaLayout: (l: 'photo' | 'text') => void;
 
   // Actions — stickers
@@ -112,7 +110,7 @@ interface CarouselStore {
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
-const INITIAL: Pick<CarouselStore, 'currentStep' | 'approvals' | 'topic' | 'category' | 'style' | 'slides' | 'caption' | 'keyword' | 'copyLoading' | 'bgLoading' | 'coverPosition' | 'coverPhotoEnabled' | 'ctaLayout'> = {
+const INITIAL: Pick<CarouselStore, 'currentStep' | 'approvals' | 'topic' | 'category' | 'style' | 'slides' | 'caption' | 'keyword' | 'copyLoading' | 'bgLoading' | 'coverPosition' | 'ctaLayout'> = {
   currentStep: 1,
   approvals: { copy: false, visuals: false, edit: false },
   topic: '',
@@ -124,7 +122,6 @@ const INITIAL: Pick<CarouselStore, 'currentStep' | 'approvals' | 'topic' | 'cate
   copyLoading: false,
   bgLoading: {},
   coverPosition: 'bottom',
-  coverPhotoEnabled: true,
   ctaLayout: 'photo',
 };
 
@@ -207,7 +204,6 @@ export const useCarouselStore = create<CarouselStore>()(
 
       // ── Cover/CTA ─────────────────────────────────────────────────────────
       setCoverPosition: (coverPosition) => set({ coverPosition }),
-      setCoverPhotoEnabled: (coverPhotoEnabled) => set({ coverPhotoEnabled }),
       setCtaLayout: (ctaLayout) => set({ ctaLayout }),
 
       // ── Text Overlays ────────────────────────────────────────────────────
