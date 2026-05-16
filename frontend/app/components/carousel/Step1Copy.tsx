@@ -132,7 +132,7 @@ export default function Step1Copy() {
           ))}
 
           {/* Add slide */}
-          <button onClick={() => store.addSlide(slides.length - 2)} // before CTA
+          <button onClick={() => store.addSlide(Math.max(0, slides.length - 2))} // before CTA, never negative
             className="w-full border border-dashed border-white/10 rounded-xl py-2.5 text-xs text-gray-600 hover:text-white hover:border-white/20 transition-colors flex items-center justify-center gap-1.5">
             <Plus size={12} /> Add Slide
           </button>
