@@ -73,8 +73,8 @@ export default function Step4Export() {
         if (dataUrl.startsWith('data:')) store.setSlideBackground(s.id, dataUrl);
       } catch { /* leave as-is */ }
     }));
-    // Let React flush store updates before capturing
-    await new Promise(r => setTimeout(r, 300));
+    // Let React flush store updates + CSS background-image load before capturing
+    await new Promise(r => setTimeout(r, 600));
     setProxyingImages(false);
   }, [slides, store]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -146,9 +146,24 @@ export default function Step4Export() {
   }, [slides, caption, keyword, store.topic, ensureDataUrls]);
 
   const copyCaption = () => {
-    navigator.clipboard.writeText(caption);
-    setCaptionCopied(true);
-    setTimeout(() => setCaptionCopied(false), 2000);
+    navigator.clipboard.writeText(caption).then(() => {
+      setCaptionCopied(true);
+      setTimeout(() => setCaptionCopied(false), 2000);
+    }).catch(() => {
+      // Clipboard access denied — fall back to execCommand
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = caption;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        setCaptionCopied(true);
+        setTimeout(() => setCaptionCopied(false), 2000);
+      } catch { /* silent */ }
+    });
   };
 
   const isBusy = downloading !== null || proxyingImages;

@@ -365,9 +365,9 @@ export default function Step3Edit() {
               width={PW}
               height={PH}
             />
-            {/* Draggable text handle — positioned in the 360×450 visual coordinate space.
-                PH_vis = 52*(PW/1080) ≈ 17px, PV_vis = 56*(PH/1350) ≈ 19px.
-                textOffset is stored in 1080-scale px → divide by 3 for 360-scale. */}
+            {/* Draggable text handle — positioned at the vertical center of the content area (~44% from top),
+                which is where the baked-in text typically sits (justifyContent:center in SlideRenderer).
+                textOffset is stored in 1080-scale px → convert to 360×450 preview space. */}
             {currentIdx > 0 && currentIdx < slides.length - 1 && (
               <div
                 onMouseDown={handleTextDragStart}
@@ -375,7 +375,7 @@ export default function Step3Edit() {
                 style={{
                   position: 'absolute',
                   left: `${Math.round(52 * PW / 1080) + Math.round((slide?.textOffsetX || 0) * PW / 1080)}px`,
-                  top: `${Math.round(56 * PH / 1350) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
+                  top: `${Math.round(PH * 0.44) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
                   width: '72px',
                   height: '20px',
                   cursor: 'move',

@@ -182,9 +182,8 @@ function getTopicStickers(text: string): { text: string; pos: Record<string, str
   if (/prompt/i.test(t)) stickers.push({ text: 'PROMPTS', pos: { top: '10%', right: '5%' }, rotate: 3 });
   if (/revenue|money|\$/i.test(t)) stickers.push({ text: 'REVENUE', pos: { bottom: '32%', right: '5%' }, rotate: -2 });
 
-  // Always include a generic if we have fewer than 2
-  if (stickers.length < 2) stickers.push({ text: 'AI', pos: { top: '8%', right: '6%' }, rotate: 3 });
-  if (stickers.length < 3) stickers.push({ text: 'BUILD', pos: { bottom: '30%', right: '5%' }, rotate: -2 });
+  // Only add fallback badges if we have none at all — avoid pasting irrelevant "AI"/"BUILD" on every carousel
+  if (stickers.length === 0) stickers.push({ text: 'AI', pos: { top: '8%', right: '6%' }, rotate: 3 });
 
   return stickers.slice(0, 4);
 }
@@ -465,7 +464,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               fontSize: `${24 * sc}px`, fontWeight: 400,
               color: Brand.colors.text_primary, lineHeight: 1.55, letterSpacing: '-0.01em',
             }}>
-              {p}
+              {renderWithAccent(p, slide.accent_word)}
             </p>
           ))}
           {/* Kicker — 28px bold, only for text-only slides with 3+ paragraphs */}

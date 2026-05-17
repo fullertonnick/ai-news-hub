@@ -74,7 +74,7 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
       text={overlay.text}
       fontSize={fs}
       fontStyle={overlay.fontWeight >= 700 ? 'bold' : 'normal'}
-      fontFamily={overlay.fontFamily || 'Plus Jakarta Sans, system-ui, -apple-system, sans-serif'}
+      fontFamily={overlay.fontFamily || '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif'}
       fill={overlay.color}
       width={pxW}
       align="center"
@@ -110,10 +110,15 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
   const trRef = useRef<any>(null);
   const [cursor, setCursor] = useState<string>('default');
 
-  // Sort by zIndex ascending so Konva's paint order matches the CSS z-index used in SlideRenderer.
-  // Lower zIndex items are painted first (beneath), higher last (on top) — same as CSS stacking.
-  const sortedStickers = [...stickers].sort((a, b) => (a.zIndex ?? 10) - (b.zIndex ?? 10));
-  const sortedTextOverlays = [...textOverlays].sort((a, b) => (a.zIndex ?? 5) - (b.zIndex ?? 5));
+  // Merge stickers and text overlays into a single z-sorted list so Konva's paint order
+  // matches the CSS z-index used in SlideRenderer (lower index = painted first = beneath).
+  type LayerItem =
+    | { kind: 'sticker'; data: StickerOverlay }
+    | { kind: 'text'; data: TextOverlay };
+  const sortedLayers: LayerItem[] = [
+    ...stickers.map(s => ({ kind: 'sticker' as const, data: s })),
+    ...textOverlays.map(t => ({ kind: 'text' as const, data: t })),
+  ].sort((a, b) => (a.data.zIndex ?? 10) - (b.data.zIndex ?? 10));
 
   // Attach transformer to selected node.
   // Retries once after 150ms because sticker images (SVG data URIs) load async —
@@ -204,23 +209,24 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
         onDragEnd={handleDragEnd}
         onTransformEnd={handleTransformEnd}
       >
-        {sortedStickers.map(s => (
-          <StickerNode key={s.id} sticker={s} stageW={width} stageH={height}
-            isSelected={selectedId === s.id}
-            onSelect={() => onSelect(s.id)}
-            onMouseEnter={handleMouseEnterNode}
-            onMouseLeave={handleMouseLeaveNode}
-            onDragStart={handleDragStartNode}
-            onDragEnd={handleDragEndNode} />
-        ))}
-        {sortedTextOverlays.map(t => (
-          <TextNode key={t.id} overlay={t} stageW={width} stageH={height}
-            onSelect={() => onSelect(t.id)}
-            onMouseEnter={handleMouseEnterNode}
-            onMouseLeave={handleMouseLeaveNode}
-            onDragStart={handleDragStartNode}
-            onDragEnd={handleDragEndNode} />
-        ))}
+        {sortedLayers.map(item =>
+          item.kind === 'sticker' ? (
+            <StickerNode key={item.data.id} sticker={item.data} stageW={width} stageH={height}
+              isSelected={selectedId === item.data.id}
+              onSelect={() => onSelect(item.data.id)}
+              onMouseEnter={handleMouseEnterNode}
+              onMouseLeave={handleMouseLeaveNode}
+              onDragStart={handleDragStartNode}
+              onDragEnd={handleDragEndNode} />
+          ) : (
+            <TextNode key={item.data.id} overlay={item.data} stageW={width} stageH={height}
+              onSelect={() => onSelect(item.data.id)}
+              onMouseEnter={handleMouseEnterNode}
+              onMouseLeave={handleMouseLeaveNode}
+              onDragStart={handleDragStartNode}
+              onDragEnd={handleDragEndNode} />
+          )
+        )}
         <Transformer
           ref={trRef}
           rotateEnabled
