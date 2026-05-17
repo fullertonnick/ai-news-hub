@@ -62,7 +62,7 @@ function highlightCode(code: string, highlights: string[] = [], sc: number): Rea
     }
     return (
       <div key={li} style={{ display: 'flex', minHeight: '1.5em' }}>
-        <span style={{ color: '#4B5563', userSelect: 'none', marginRight: `${16 * sc}px`, minWidth: `${24 * sc}px`, textAlign: 'right', flexShrink: 0, fontSize: `${10 * sc}px` }}>{li + 1}</span>
+        <span style={{ color: '#4B5563', userSelect: 'none', marginRight: `${16 * sc}px`, minWidth: `${28 * sc}px`, textAlign: 'right', flexShrink: 0, fontSize: `${11 * sc}px` }}>{li + 1}</span>
         <span style={{ flex: 1 }}>{tokens.length > 0 ? tokens : <span>&nbsp;</span>}</span>
       </div>
     );
@@ -76,8 +76,8 @@ function SectionLabel({ label, sc }: { label: string; sc: number }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: `${8 * sc}px`, marginBottom: `${16 * sc}px`, flexShrink: 0 }}>
       <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }} />
       <span style={{
-        color: Brand.colors.text_muted, fontSize: `${11 * sc}px`, fontWeight: 600,
-        letterSpacing: '0.12em', textTransform: 'uppercase' as const, whiteSpace: 'nowrap' as const,
+        color: Brand.colors.text_muted, fontSize: `${13 * sc}px`, fontWeight: 600,
+        letterSpacing: '0.10em', textTransform: 'uppercase' as const, whiteSpace: 'nowrap' as const,
         fontFamily: Brand.typography.font_family,
       }}>{label}</span>
       <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }} />
@@ -204,7 +204,7 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
     <div style={{
       position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden',
       fontFamily: Brand.typography.font_family,
-      backgroundColor: '#0A0A0A',
+      backgroundColor: Brand.colors.bg_primary,
       ...(hasPhoto ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center top' } : {}),
     }}>
 
@@ -294,7 +294,7 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
           <div style={{ width: `${44 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px' }} />
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
             <span style={{ color: Brand.colors.text_primary, fontSize: `${20 * sc}px`, fontWeight: 600 }}>Comment</span>
-            <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${22 * sc}px`, fontWeight: 800, padding: `${6 * sc}px ${14 * sc}px`, borderRadius: `${6 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>
+            <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${22 * sc}px`, fontWeight: 800, padding: `${6 * sc}px ${16 * sc}px`, borderRadius: `${24 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>
           </div>
         </div>
 
@@ -334,7 +334,7 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
 
         <div style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: `${10 * sc}px`, flexWrap: 'wrap' as const }}>
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600 }}>Comment</span>
-          <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, padding: `${8 * sc}px ${20 * sc}px`, borderRadius: `${8 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>
+          <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, padding: `${8 * sc}px ${22 * sc}px`, borderRadius: `${28 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600 }}>I'll send it over 🔥</span>
         </div>
 
@@ -439,7 +439,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
         <div style={{ flexShrink: 0 }}>
           {/* Headline — always 44-52px bold (Tyler Germain spec) */}
           <p style={{
-            margin: 0, marginBottom: `${10 * sc}px`,
+            margin: 0, marginBottom: `${16 * sc}px`,
             fontSize: `${headlineFs}px`, fontWeight: 800,
             color: Brand.colors.text_primary,
             lineHeight: isBigQuote ? 1.3 : 1.18,
@@ -454,28 +454,31 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               width: `${44 * sc}px`, height: `${3 * sc}px`,
               background: Brand.colors.accent_primary,
               borderRadius: '2px',
-              marginBottom: `${(!hasVis && bodyParas.length > 0) ? 18 * sc : 0}px`,
+              marginBottom: `${(!hasVis && bodyParas.length > 0) ? 24 * sc : 0}px`,
             }} />
           )}
           {/* Body — 24px regular, only for text-only slides (no visual block) */}
           {!hasVis && bodyParas.map((p, i) => (
             <p key={i} style={{
-              margin: 0, marginBottom: `${10 * sc}px`,
+              margin: 0, marginBottom: `${12 * sc}px`,
               fontSize: `${24 * sc}px`, fontWeight: 400,
               color: Brand.colors.text_primary, lineHeight: 1.55, letterSpacing: '-0.01em',
             }}>
               {renderWithAccent(p, slide.accent_word)}
             </p>
           ))}
-          {/* Kicker — 28px bold, only for text-only slides with 3+ paragraphs */}
+          {/* Kicker — 28px bold with visual breathing room. Stands apart from body as the mic-drop takeaway. */}
           {!hasVis && kicker && (
-            <p style={{
-              margin: 0, marginTop: `${8 * sc}px`,
-              fontSize: `${28 * sc}px`, fontWeight: 700,
-              color: Brand.colors.text_primary, lineHeight: 1.3, letterSpacing: '-0.025em',
-            }}>
-              {renderWithAccent(kicker, slide.accent_word)}
-            </p>
+            <div style={{ marginTop: `${28 * sc}px` }}>
+              <div style={{ width: `${24 * sc}px`, height: `${2 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px', marginBottom: `${10 * sc}px`, opacity: 0.7 }} />
+              <p style={{
+                margin: 0,
+                fontSize: `${28 * sc}px`, fontWeight: 700,
+                color: Brand.colors.text_primary, lineHeight: 1.3, letterSpacing: '-0.025em',
+              }}>
+                {renderWithAccent(kicker, slide.accent_word)}
+              </p>
+            </div>
           )}
         </div>
         )}
@@ -498,9 +501,9 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                   <div style={{ backgroundColor: Brand.colors.bg_surface, borderRadius: `${12 * sc}px`, overflow: 'hidden', border: `1px solid ${Brand.colors.code_border}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: `${6 * sc}px`, padding: `${9 * sc}px ${14 * sc}px`, backgroundColor: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${Brand.colors.divider}` }}>
                       {['#FF5F56', '#FFBD2E', '#27C93F'].map((c, i) => <div key={i} style={{ width: `${9 * sc}px`, height: `${9 * sc}px`, borderRadius: '50%', backgroundColor: c }} />)}
-                      <span style={{ marginLeft: `${8 * sc}px`, fontSize: `${9 * sc}px`, color: Brand.colors.text_muted, fontFamily: Brand.typography.mono_font }}>{v.language || 'prompt'}</span>
+                      <span style={{ marginLeft: `${8 * sc}px`, fontSize: `${11 * sc}px`, color: Brand.colors.text_muted, fontFamily: Brand.typography.mono_font }}>{v.language || 'prompt'}</span>
                     </div>
-                    <div style={{ padding: `${14 * sc}px ${16 * sc}px`, fontFamily: Brand.typography.mono_font, fontSize: `${11 * sc}px`, lineHeight: 1.65 }}>
+                    <div style={{ padding: `${14 * sc}px ${16 * sc}px`, fontFamily: Brand.typography.mono_font, fontSize: `${13 * sc}px`, lineHeight: 1.65 }}>
                       {highlightCode(v.code || '', v.highlights || [], sc)}
                     </div>
                   </div>
@@ -527,7 +530,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                         <div style={{ fontSize: `${28 * sc}px`, lineHeight: 1 }}>{s.icon}</div>
                         {/* FIX 3: value font at least 64px at export */}
                         <div style={{ fontSize: `${64 * sc}px`, fontWeight: 800, color: Brand.colors.accent_primary, lineHeight: 1, letterSpacing: '-0.03em' }}>{s.value}</div>
-                        <div style={{ fontSize: `${11 * sc}px`, color: Brand.colors.text_muted, textTransform: 'uppercase' as const, letterSpacing: '0.07em', fontWeight: 600 }}>{s.label}</div>
+                        <div style={{ fontSize: `${14 * sc}px`, color: Brand.colors.text_muted, textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
                       </div>
                     ))}
                   </div>
@@ -559,7 +562,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               return (
                 <div>
                   {v.title && (
-                    <div style={{ textAlign: 'center', fontSize: `${11 * sc}px`, color: Brand.colors.text_muted, marginBottom: `${14 * sc}px`, textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontWeight: 600 }}>
+                    <div style={{ textAlign: 'center', fontSize: `${13 * sc}px`, color: Brand.colors.text_muted, marginBottom: `${14 * sc}px`, textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontWeight: 600 }}>
                       {v.title}
                     </div>
                   )}
@@ -611,8 +614,8 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                         flexShrink: 0, fontSize: `${20 * sc}px`, fontWeight: 800, color: 'white',
                       }}>{s.number}</div>
                       <div style={{ flex: 1, paddingTop: `${4 * sc}px` }}>
-                        <div style={{ fontSize: `${18 * sc}px`, fontWeight: 700, color: Brand.colors.text_primary, marginBottom: `${6 * sc}px`, lineHeight: 1.25 }}>{s.title}</div>
-                        <div style={{ fontSize: `${14 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5 }}>{s.desc}</div>
+                        <div style={{ fontSize: `${22 * sc}px`, fontWeight: 700, color: Brand.colors.text_primary, marginBottom: `${8 * sc}px`, lineHeight: 1.25 }}>{s.title}</div>
+                        <div style={{ fontSize: `${18 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5 }}>{s.desc}</div>
                       </div>
                     </div>
                   ))}
@@ -630,13 +633,13 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                     <div style={{ display: 'flex', alignItems: 'center', gap: `${14 * sc}px`, marginBottom: `${12 * sc}px` }}>
                       {v.icon && <span style={{ fontSize: `${32 * sc}px`, lineHeight: 1 }}>{v.icon}</span>}
                       <div>
-                        <div style={{ fontSize: `${18 * sc}px`, fontWeight: 700, color: Brand.colors.text_primary }}>{v.name}</div>
-                        <div style={{ fontSize: `${12 * sc}px`, color: Brand.colors.text_muted, marginTop: `${2 * sc}px` }}>{v.source}</div>
+                        <div style={{ fontSize: `${22 * sc}px`, fontWeight: 700, color: Brand.colors.text_primary }}>{v.name}</div>
+                        <div style={{ fontSize: `${16 * sc}px`, color: Brand.colors.text_muted, marginTop: `${4 * sc}px` }}>{v.source}</div>
                       </div>
-                      <div style={{ marginLeft: 'auto', background: Brand.colors.bg_surface, borderRadius: `${6 * sc}px`, padding: `${4 * sc}px ${10 * sc}px`, fontSize: `${10 * sc}px`, color: Brand.colors.text_muted, fontWeight: 500, textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>{v.category}</div>
+                      <div style={{ marginLeft: 'auto', background: Brand.colors.bg_surface, borderRadius: `${8 * sc}px`, padding: `${5 * sc}px ${12 * sc}px`, fontSize: `${13 * sc}px`, color: Brand.colors.text_muted, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>{v.category}</div>
                     </div>
                   </div>
-                  {v.description && <p style={{ fontSize: `${13 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5, margin: 0, textAlign: 'center' }}>{v.description}</p>}
+                  {v.description && <p style={{ fontSize: `${17 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5, margin: 0, textAlign: 'center' }}>{v.description}</p>}
                 </div>
               );
             })()}
@@ -648,7 +651,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 <div style={{ display: 'flex', flexDirection: 'column', gap: `${12 * sc}px` }}>
                   <div style={{ width: `${40 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px' }} />
                   {v.supporting && (
-                    <p style={{ margin: 0, fontSize: `${14 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5 }}>{v.supporting}</p>
+                    <p style={{ margin: 0, fontSize: `${18 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5 }}>{v.supporting}</p>
                   )}
                 </div>
               );
@@ -657,25 +660,22 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
             {/* COMPARISON — 2-column before/after grid */}
             {slide.visual.type === 'comparison' && (() => {
               const v = slide.visual as ComparisonVisual;
-              const colStyle = (isAfter: boolean): React.CSSProperties => ({
-                flex: 1, display: 'flex', flexDirection: 'column', gap: `${6 * sc}px`,
-              });
               const headerColor = { before: '#F87171', after: '#4ADE80' };
               const itemBg = { before: 'rgba(248,113,113,0.07)', after: 'rgba(74,222,128,0.07)' };
               const itemBorder = { before: 'rgba(248,113,113,0.15)', after: 'rgba(74,222,128,0.15)' };
               const markColor = { before: '#F87171', after: '#4ADE80' };
               return (
-                <div style={{ display: 'flex', gap: `${12 * sc}px` }}>
+                <div style={{ display: 'flex', gap: `${18 * sc}px` }}>
                   {(['before', 'after'] as const).map(side => {
                     const items = side === 'before' ? (v.before_items || []) : (v.after_items || []);
                     const label = side === 'before' ? (v.before_label || '❌ Without AI') : (v.after_label || '✅ With AI');
                     return (
-                      <div key={side} style={colStyle(side === 'after')}>
-                        <div style={{ fontSize: `${11 * sc}px`, fontWeight: 700, color: headerColor[side], letterSpacing: '0.04em', marginBottom: `${4 * sc}px`, lineHeight: 1.3 }}>{label}</div>
+                      <div key={side} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: `${10 * sc}px` }}>
+                        <div style={{ fontSize: `${18 * sc}px`, fontWeight: 700, color: headerColor[side], letterSpacing: '0.02em', marginBottom: `${6 * sc}px`, lineHeight: 1.3 }}>{label}</div>
                         {items.map((item, i) => (
-                          <div key={i} style={{ display: 'flex', gap: `${7 * sc}px`, alignItems: 'flex-start', backgroundColor: itemBg[side], borderRadius: `${5 * sc}px`, padding: `${7 * sc}px ${8 * sc}px`, border: `1px solid ${itemBorder[side]}` }}>
-                            <span style={{ color: markColor[side], fontSize: `${9 * sc}px`, flexShrink: 0, marginTop: `${1 * sc}px`, fontWeight: 700 }}>{side === 'before' ? '✕' : '✓'}</span>
-                            <span style={{ fontSize: `${11 * sc}px`, color: side === 'before' ? Brand.colors.text_muted : Brand.colors.text_primary, lineHeight: 1.35 }}>{item}</span>
+                          <div key={i} style={{ display: 'flex', gap: `${10 * sc}px`, alignItems: 'flex-start', backgroundColor: itemBg[side], borderRadius: `${8 * sc}px`, padding: `${10 * sc}px ${12 * sc}px`, border: `1px solid ${itemBorder[side]}` }}>
+                            <span style={{ color: markColor[side], fontSize: `${14 * sc}px`, flexShrink: 0, marginTop: `${2 * sc}px`, fontWeight: 800 }}>{side === 'before' ? '✕' : '✓'}</span>
+                            <span style={{ fontSize: `${17 * sc}px`, color: side === 'before' ? Brand.colors.text_muted : Brand.colors.text_primary, lineHeight: 1.4 }}>{item}</span>
                           </div>
                         ))}
                       </div>
@@ -689,11 +689,11 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
             {slide.visual.type === 'checklist' && (() => {
               const v = slide.visual as ChecklistVisual;
               return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: `${14 * sc}px` }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: `${20 * sc}px` }}>
                   {(v.items || []).map((item, i) => (
-                    <div key={i} style={{ display: 'flex', gap: `${14 * sc}px`, alignItems: 'center' }}>
-                      <div style={{ width: `${28 * sc}px`, height: `${28 * sc}px`, borderRadius: '50%', background: Brand.colors.accent_primary, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: `${14 * sc}px`, color: 'white', fontWeight: 800 }}>✓</div>
-                      <span style={{ fontSize: `${16 * sc}px`, color: Brand.colors.text_primary, lineHeight: 1.4 }}>{item.text}</span>
+                    <div key={i} style={{ display: 'flex', gap: `${16 * sc}px`, alignItems: 'center' }}>
+                      <div style={{ width: `${36 * sc}px`, height: `${36 * sc}px`, borderRadius: '50%', background: Brand.colors.accent_primary, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: `${18 * sc}px`, color: 'white', fontWeight: 800 }}>✓</div>
+                      <span style={{ fontSize: `${20 * sc}px`, color: Brand.colors.text_primary, lineHeight: 1.4 }}>{item.text}</span>
                     </div>
                   ))}
                 </div>
