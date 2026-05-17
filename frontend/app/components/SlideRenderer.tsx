@@ -190,8 +190,9 @@ function getTopicStickers(text: string): { text: string; pos: Record<string, str
 
 function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: number; sc: number }) {
   const v = slide.visual as CoverPhotoVisual;
-  const words = slide.text.split(/\s+/);
-  const fontSize = Math.max(72 * sc, words.length <= 5 ? 92 * sc : words.length <= 7 ? 80 * sc : 70 * sc);
+  const [coverHeadline, coverSubtitle] = slide.text.split('\n\n').map(s => s.replace(/^\(|\)$/g, '').trim());
+  const headlineWords = coverHeadline.split(/\s+/);
+  const fontSize = Math.max(72 * sc, headlineWords.length <= 5 ? 92 * sc : headlineWords.length <= 7 ? 80 * sc : 70 * sc);
   // photo_enabled defaults to true unless explicitly set to false
   const photoEnabled = v.photo_enabled !== false;
   const hasPhoto = !!slide.backgroundImage && photoEnabled;
@@ -244,10 +245,12 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
       {/* Headline — vertical position controlled by v.position (default: bottom at 60%) */}
       <div style={{ position: 'absolute', top: `${H * headlineTopFraction}px`, bottom: `${120 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3 }}>
         <div style={{ fontSize: `${fontSize}px`, fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: `${14 * sc}px` }}>
-          {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
+          {renderWithAccent(coverHeadline, slide.accent_word, { color: Brand.colors.text_primary })}
         </div>
-        {v.subtext && (
-          <p style={{ color: Brand.colors.text_muted, fontSize: `${18 * sc}px`, fontWeight: 500, lineHeight: 1.4, margin: 0 }}>{v.subtext}</p>
+        {(coverSubtitle || v.subtext) && (
+          <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: `${20 * sc}px`, fontWeight: 500, lineHeight: 1.4, margin: 0 }}>
+            {coverSubtitle || v.subtext}
+          </p>
         )}
       </div>
 

@@ -37,7 +37,7 @@ function styleHint(style: string): string {
   if (style === 'prompt_reveal') {
     return `STYLE HINT: "prompt_reveal" — Before/After or Myth-Busting. Build tension (what people believe, what goes wrong), then flip it. section_labels: "The Myth", "Reality", "Before", "After"`;
   }
-  return `STYLE HINT: "tech_breakdown" — Deep Dive or Steps. Explain the mechanism: what it is → how it works → real example → how to apply it. section_labels: "The Problem", "The Fix", "Real Example", "How to Use It"`;
+  return `STYLE HINT: "tech_breakdown" — Deep Dive or Steps. Explain the mechanism: what it is → how it works → real example → how to apply it. Good section_labels: "What it is", "How it works", "Real Example", "How to Use It", "Step 1", "Step 2", "Step 3"`;
 }
 
 function fallbackKeyword(topic: string): string {
@@ -150,8 +150,9 @@ SLIDES 2 to N-1 (CONTENT):
   section_label: the label from your chosen structure (e.g. "Step 1", "01.", "The Myth", "Before", "What it is") — or null if none needed
 
 LAST SLIDE (CTA):
-  text: One question that flows naturally from the content, then:
-    "Comment '[KEYWORD]' and I'll send you [specific concrete deliverable]"
+  text: ONE compelling question that flows naturally from the content. That's all.
+    STOP after the question mark. Do NOT write "Comment X and I'll send you Y" —
+    the slide template renders that automatically using the keyword field.
   visual_type: "cta_slide"
   section_label: null
 
@@ -197,8 +198,8 @@ FORMAT EXAMPLE — shows JSON structure ONLY. Topic and structure below are unre
       "visual_type": "none"
     },
     {
-      "text": "Want the Make.com error handling template I use on every client build?\\n\\nComment 'ERRORS' and I'll send it.",
-      "accent_word": "ERRORS",
+      "text": "Want the Make.com error handling template I use on every client build?",
+      "accent_word": "template",
       "section_label": null,
       "visual_type": "cta_slide"
     }
@@ -214,11 +215,11 @@ Now write a completely original carousel about: "${topic}"`;
     const kw = fallbackKeyword(topic);
     return res.json({
       slides: [
-        { id: uid(), text: `${topic}\n\n(the complete breakdown)`, accent_word: topic.split(/\s+/).slice(0, 2).join(' ').toLowerCase(), visual_type: 'cover_photo', section_label: null, backgroundStatus: 'pending' },
-        { id: uid(), text: `Here's what most people get wrong about ${topic.toLowerCase()}.\n\nThey overthink it. They read 50 articles. They never start.\n\nOne hour of doing beats a week of planning.`, accent_word: 'get wrong', section_label: 'The Problem', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `Pick one tool. Build something real in the first session. Measure what changes after 7 days.\n\nPerfect is the enemy of shipped.`, accent_word: '7 days', section_label: 'The Fix', visual_type: 'none', backgroundStatus: 'pending' },
+        { id: uid(), text: topic.split(/\s+/).slice(0, 7).join(' '), accent_word: topic.split(/\s+/).slice(0, 2).join(' ').toLowerCase(), visual_type: 'cover_photo', section_label: null, backgroundStatus: 'pending' },
+        { id: uid(), text: `Here's what most people get wrong about ${topic.toLowerCase()}.\n\nThey overthink it. They read 50 articles. They never start.\n\nOne hour of doing beats a week of planning.`, accent_word: 'get wrong', section_label: 'Reality Check', visual_type: 'none', backgroundStatus: 'pending' },
+        { id: uid(), text: `Pick one tool. Build something real in the first session. Measure what changes after 7 days.\n\nPerfect is the enemy of shipped.`, accent_word: '7 days', section_label: 'How to Start', visual_type: 'none', backgroundStatus: 'pending' },
         { id: uid(), text: `The result: less manual work, more output, real time back.\n\nNot someday. This week.`, accent_word: 'This week', section_label: 'The Result', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `Want the exact setup I use?\n\nComment "${kw}" and I'll send you the blueprint.`, accent_word: kw, section_label: null, visual_type: 'cta_slide', backgroundStatus: 'pending' },
+        { id: uid(), text: `Want the exact system I use for ${topic.toLowerCase()}?`, accent_word: 'system', section_label: null, visual_type: 'cta_slide', backgroundStatus: 'pending' },
       ],
       caption: `Most people overcomplicate ${topic.toLowerCase()}.\n\nHere's the simple version:\n\n→ What most people get wrong\n→ The one-step fix\n→ My exact setup\n→ What changes after one week\n\nComment ${kw} and I'll send you the full blueprint 🔥\n📌 Save this before you lose it\n\n#ai #automation #business #scale #simpliscale #thenickcornelius #aitools #productivity #entrepreneurship #agencyowner`,
       keyword: kw,
@@ -266,7 +267,9 @@ Now write a completely original carousel about: "${topic}"`;
 
     const rawKw = (parsed.keyword || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
     const keyword = rawKw.length >= 2 ? rawKw : fallbackKeyword(topic);
-    const caption = stripForbidden(parsed.caption || '');
+    let caption = stripForbidden(parsed.caption || '');
+    if (caption && !caption.includes('#simpliscale')) caption += ' #simpliscale';
+    if (caption && !caption.includes('#thenickcornelius')) caption += ' #thenickcornelius';
     return res.json({ slides, caption, keyword, category });
   } catch (err) {
     console.error('Generate copy error:', err);

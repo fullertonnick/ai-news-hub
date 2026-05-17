@@ -32,8 +32,8 @@ Write a BETTER version. Rules:
 - Second person, present tense. Fragments OK.
 - NEVER use: leverage, synergy, seamless, empower, unlock, revolutionize, supercharge
 - Pick ONE accent_word: the most impactful concept, must appear verbatim in the text
-${isFirst ? '- Cover format: Bold headline + (subtitle explaining the payoff in parentheses)' : ''}
-${isLast ? '- CTA format: "Comment [KEYWORD] and I\'ll send you [specific concrete thing]"' : ''}
+${isFirst ? '- Cover format: Clean 5-8 word bold headline. Optional subtitle after \\n\\n (no parens).' : ''}
+${isLast ? '- CTA format: ONE compelling question only — stop after the ?. Never include "Comment X and I\'ll send you Y" — the template renders that automatically.' : ''}
 
 Return JSON only: {"text": "new slide copy", "accent_word": "word"}`;
 
