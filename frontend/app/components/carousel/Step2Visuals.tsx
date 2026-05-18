@@ -2,7 +2,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
 import { Loader2, RefreshCw, Check, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
-import { NICK_PHOTOS } from '../../lib/nickPhotos';
+import { NICK_PHOTOS, pickRandomPhoto } from '../../lib/nickPhotos';
 import SlideRenderer from '../SlideRenderer';
 
 async function proxyPhoto(url: string): Promise<string> {
@@ -58,16 +58,12 @@ export default function Step2Visuals() {
   // Cover/CTA photo index
   const busyRef = useRef<Record<string, boolean>>({});
 
-  const [coverPhotoIdx, setCoverPhotoIdx] = useState(() => {
-    const seed = (topic || '') + 'cover';
-    let h = 0; for (let i = 0; i < seed.length; i++) { h = ((h << 5) - h) + seed.charCodeAt(i); h |= 0; }
-    return Math.abs(h) % NICK_PHOTOS.length;
-  });
-  const [ctaPhotoIdx, setCtaPhotoIdx] = useState(() => {
-    const seed = (topic || '') + 'cta';
-    let h = 0; for (let i = 0; i < seed.length; i++) { h = ((h << 5) - h) + seed.charCodeAt(i); h |= 0; }
-    return Math.abs(h) % NICK_PHOTOS.length;
-  });
+  const [coverPhotoIdx, setCoverPhotoIdx] = useState(() =>
+    NICK_PHOTOS.indexOf(pickRandomPhoto((topic || '') + 'cover'))
+  );
+  const [ctaPhotoIdx, setCtaPhotoIdx] = useState(() =>
+    NICK_PHOTOS.indexOf(pickRandomPhoto((topic || '') + 'cta'))
+  );
 
   // Use refs so the effects always see the current slide IDs without triggering on every slide change.
   const slidesRef = useRef(slides);
