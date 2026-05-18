@@ -230,16 +230,16 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
         <div key={i} style={{
           position: 'absolute', ...sticker.pos,
           transform: `rotate(${sticker.rotate}deg)`,
-          backgroundColor: 'rgba(255,113,7,0.22)',
-          border: `${2 * sc}px solid rgba(255,113,7,0.65)`,
-          borderRadius: `${8 * sc}px`,
-          padding: `${8 * sc}px ${18 * sc}px`,
-          fontSize: `${13 * sc}px`,
+          backgroundColor: 'rgba(255,113,7,0.18)',
+          border: `${2 * sc}px solid rgba(255,113,7,0.70)`,
+          borderRadius: `${10 * sc}px`,
+          padding: `${10 * sc}px ${22 * sc}px`,
+          fontSize: `${17 * sc}px`,
           fontWeight: 800,
           color: Brand.colors.accent_primary,
-          letterSpacing: '0.12em',
+          letterSpacing: '0.10em',
           fontFamily: Brand.typography.font_family,
-          filter: `drop-shadow(0 0 ${14 * sc}px rgba(255,113,7,0.45))`,
+          filter: `drop-shadow(0 0 ${16 * sc}px rgba(255,113,7,0.50))`,
           zIndex: 2,
           opacity: 0.95,
         }}>{sticker.text}</div>
@@ -251,7 +251,7 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
           {renderWithAccent(coverHeadline, slide.accent_word, { color: Brand.colors.text_primary })}
         </div>
         {(coverSubtitle || v.subtext) && (
-          <p style={{ color: 'rgba(255,255,255,0.72)', fontSize: `${20 * sc}px`, fontWeight: 500, lineHeight: 1.4, margin: 0 }}>
+          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: `${24 * sc}px`, fontWeight: 500, lineHeight: 1.4, margin: 0 }}>
             {coverSubtitle || v.subtext}
           </p>
         )}
@@ -300,7 +300,7 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
           <div style={{ width: `${44 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px' }} />
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
             <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600 }}>Comment</span>
-            {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${22 * sc}px`, fontWeight: 800, padding: `${6 * sc}px ${16 * sc}px`, borderRadius: `${24 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>}
+            {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, padding: `${7 * sc}px ${18 * sc}px`, borderRadius: `${26 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>}
           </div>
         </div>
 
@@ -508,7 +508,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                   <div style={{ backgroundColor: Brand.colors.bg_surface, borderRadius: `${12 * sc}px`, overflow: 'hidden', border: `1px solid ${Brand.colors.code_border}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: `${6 * sc}px`, padding: `${9 * sc}px ${14 * sc}px`, backgroundColor: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${Brand.colors.divider}` }}>
                       {['#FF5F56', '#FFBD2E', '#27C93F'].map((c, i) => <div key={i} style={{ width: `${9 * sc}px`, height: `${9 * sc}px`, borderRadius: '50%', backgroundColor: c }} />)}
-                      <span style={{ marginLeft: `${8 * sc}px`, fontSize: `${11 * sc}px`, color: Brand.colors.text_muted, fontFamily: Brand.typography.mono_font }}>{v.language || 'prompt'}</span>
+                      <span style={{ marginLeft: `${8 * sc}px`, fontSize: `${13 * sc}px`, color: Brand.colors.text_muted, fontFamily: Brand.typography.mono_font }}>{v.language || 'prompt'}</span>
                     </div>
                     <div style={{ padding: `${14 * sc}px ${16 * sc}px`, fontFamily: Brand.typography.mono_font, fontSize: `${15 * sc}px`, lineHeight: 1.65 }}>
                       {highlightCode(v.code || '', v.highlights || [], sc)}
@@ -595,7 +595,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                           <text
                             x={p.x + nW / 2} y={p.y + nH / 2}
                             textAnchor="middle" dominantBaseline="middle"
-                            fill={c.text} fontSize={14 * sc}
+                            fill={c.text} fontSize={16 * sc}
                             fontFamily={Brand.typography.font_family} fontWeight="700"
                           >{n.label}</text>
                         </g>
