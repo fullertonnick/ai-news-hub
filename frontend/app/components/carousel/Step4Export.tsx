@@ -90,7 +90,8 @@ export default function Step4Export() {
       visual, backgroundImage: s.backgroundImage,
       stickers: s.stickers, textOverlays: s.textOverlays,
       useTextOverlays: s.useTextOverlays,
-      textOffsetX: s.textOffsetX, textOffsetY: s.textOffsetY,
+      textOffsetX: s.useTextOverlays ? 0 : s.textOffsetX,
+      textOffsetY: s.useTextOverlays ? 0 : s.textOffsetY,
     };
   });
 

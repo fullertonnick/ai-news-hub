@@ -1,7 +1,7 @@
 'use client';
 import React, { forwardRef } from 'react';
 import { Brand } from '../brand/simpliscale';
-import {
+import type {
   CarouselSlide, CodeBlockVisual, StatsGridVisual, DiagramVisual,
   StepsListVisual, CoverPhotoVisual, SkillCardVisual, CTASlideVisual,
   BigQuoteVisual, ComparisonVisual, ChecklistVisual, TextOverlay,
@@ -73,7 +73,7 @@ function highlightCode(code: string, highlights: string[] = [], sc: number): Rea
 
 function SectionLabel({ label, sc }: { label: string; sc: number }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: `${8 * sc}px`, marginBottom: `${16 * sc}px`, flexShrink: 0 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: `${8 * sc}px`, flexShrink: 0 }}>
       <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.12)' }} />
       <span style={{
         color: Brand.colors.text_muted, fontSize: `${13 * sc}px`, fontWeight: 600,
@@ -297,7 +297,7 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
           <div style={{ width: `${44 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px' }} />
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
             <span style={{ color: Brand.colors.text_primary, fontSize: `${20 * sc}px`, fontWeight: 600 }}>Comment</span>
-            <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${22 * sc}px`, fontWeight: 800, padding: `${6 * sc}px ${16 * sc}px`, borderRadius: `${24 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>
+            {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${22 * sc}px`, fontWeight: 800, padding: `${6 * sc}px ${16 * sc}px`, borderRadius: `${24 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>}
           </div>
         </div>
 
@@ -337,7 +337,7 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
 
         <div style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: `${10 * sc}px`, flexWrap: 'wrap' as const }}>
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600 }}>Comment</span>
-          <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, padding: `${8 * sc}px ${22 * sc}px`, borderRadius: `${28 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>
+          {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, padding: `${8 * sc}px ${22 * sc}px`, borderRadius: `${28 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>}
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600 }}>I'll send it over 🔥</span>
         </div>
 
@@ -425,21 +425,22 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
         <div style={{ position: 'absolute', top: `${-10 * sc}px`, left: `${44 * sc}px`, fontSize: `${160 * sc}px`, lineHeight: 1, color: Brand.colors.accent_primary, opacity: 0.12, fontFamily: 'Georgia, serif', fontWeight: 900, zIndex: 0, pointerEvents: 'none', userSelect: 'none' as const }}>"</div>
       )}
 
-      {/* Content — vertically centered, with optional text offset */}
+      {/* Content — vertically centered */}
       <div style={{
         flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
         padding: `${PV}px ${PH}px`, paddingBottom: `${16 * sc}px`,
         position: 'relative', gap: `${22 * sc}px`,
         overflow: 'hidden', minHeight: 0,
-        ...(txOff || tyOff ? { transform: `translate(${txOff}px, ${tyOff}px)` } : {}),
       }}>
 
         {/* Section label */}
         {slide.section_label && <SectionLabel label={slide.section_label} sc={sc} />}
 
-        {/* Tyler Germain layout: headline → orange divider → body → kicker */}
+        {/* Tyler Germain layout: headline → orange divider → body → kicker.
+            Text offset (set by drag handle in Step3) is applied only to this block,
+            not to the visual block, so repositioning text doesn't shift stacked visuals. */}
         {!slide.useTextOverlays && (
-        <div style={{ flexShrink: 0 }}>
+        <div style={{ flexShrink: 0, ...(txOff || tyOff ? { transform: `translate(${txOff}px, ${tyOff}px)` } : {}) }}>
           {/* Headline — always 44-52px bold (Tyler Germain spec) */}
           <p style={{
             margin: 0, marginBottom: `${16 * sc}px`,

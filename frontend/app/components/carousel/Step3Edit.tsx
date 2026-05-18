@@ -150,8 +150,9 @@ export default function Step3Edit() {
       visual,
       backgroundImage: s.backgroundImage,
       useTextOverlays: s.useTextOverlays,
-      textOffsetX: s.textOffsetX,
-      textOffsetY: s.textOffsetY,
+      // Only apply text offset when baked-in text is visible
+      textOffsetX: s.useTextOverlays ? 0 : s.textOffsetX,
+      textOffsetY: s.useTextOverlays ? 0 : s.textOffsetY,
     };
   };
 
@@ -365,10 +366,10 @@ export default function Step3Edit() {
               width={PW}
               height={PH}
             />
-            {/* Draggable text handle — positioned at the vertical center of the content area (~44% from top),
-                which is where the baked-in text typically sits (justifyContent:center in SlideRenderer).
+            {/* Draggable text handle — only shown for middle slides with baked-in text visible.
+                Hidden when useTextOverlays=true (text is hidden) so the handle isn't misleading.
                 textOffset is stored in 1080-scale px → convert to 360×450 preview space. */}
-            {currentIdx > 0 && currentIdx < slides.length - 1 && (
+            {currentIdx > 0 && currentIdx < slides.length - 1 && !slide?.useTextOverlays && (
               <div
                 onMouseDown={handleTextDragStart}
                 onTouchStart={handleTextDragStart}

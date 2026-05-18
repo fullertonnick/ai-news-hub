@@ -137,21 +137,23 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
       const node = stage.findOne(`.sticker_${selectedId}`) || stage.findOne(`.text_${selectedId}`);
       if (node) {
         tr.nodes([node]);
+        tr.getLayer()?.batchDraw();
       } else {
         tr.nodes([]);
       }
     };
 
     attach();
-    // Retry in case the image is still loading (SVG data URIs fire onload async)
-    const timer = setTimeout(attach, 150);
+    // Retry — SVG data URIs fire onload async so the KImage node may not exist yet
+    const timer = setTimeout(attach, 200);
     return () => clearTimeout(timer);
   }, [selectedId, stickers.length, textOverlays.length]);
 
   const handleMouseEnterNode = useCallback(() => setCursor('grab'), []);
   const handleMouseLeaveNode = useCallback(() => setCursor('default'), []);
   const handleDragStartNode = useCallback(() => setCursor('grabbing'), []);
-  // Reset to default after drag — mouse may have moved off the node during drag
+  // After drag ends, re-evaluate hover state — if mouse is still over a node Konva
+  // fires mouseenter again and updates to 'grab'. Default to 'default' as fallback.
   const handleDragEndNode = useCallback(() => setCursor('default'), []);
 
   // Sync drag end back to store
