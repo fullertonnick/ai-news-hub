@@ -309,11 +309,14 @@ export default function Step3Edit() {
 
           {showWebSearch && (
             <div className="mb-3 rounded-xl border border-white/15 bg-white/[0.03] p-3 space-y-2">
-              <div className="text-[10px] font-bold text-white uppercase tracking-widest">Web Image Search</div>
+              <div className="flex items-center justify-between">
+                <div className="text-[10px] font-bold text-white uppercase tracking-widest">Web Image Search</div>
+                <span className="text-[9px] text-gray-600">via DuckDuckGo — may be rate limited</span>
+              </div>
               <div className="flex gap-2">
                 <input value={webQuery} onChange={e => setWebQuery(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') searchWebImages(); }}
-                  placeholder="claude code terminal screenshot"
+                  placeholder="claude code terminal dark"
                   className="flex-1 bg-white/[0.02] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:outline-none focus:border-white/20" />
                 <button onClick={searchWebImages} disabled={searchingWeb || !webQuery.trim()}
                   className="flex items-center gap-1 text-xs font-bold text-black bg-white hover:bg-gray-200 disabled:opacity-40 px-3 py-1.5 rounded-lg">
@@ -337,7 +340,7 @@ export default function Step3Edit() {
                 </div>
               )}
               {searchError && (
-                <p className="text-[10px] text-red-400 flex items-center gap-1"><span>⚠</span>{searchError}</p>
+                <p className="text-[10px] text-yellow-500/80 flex items-center gap-1">⚠ {searchError}. Try uploading an image instead.</p>
               )}
               {!searchingWeb && !searchError && webResults.length === 0 && webQuery && (
                 <p className="text-[10px] text-gray-500">Press Search or hit Enter.</p>

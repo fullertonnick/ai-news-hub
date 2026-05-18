@@ -72,6 +72,7 @@ interface CarouselStore {
   setSlides: (slides: SlideData[]) => void;
   updateSlideText: (id: string, text: string) => void;
   updateSlideAccent: (id: string, word: string) => void;
+  updateSlideSectionLabel: (id: string, label: string) => void;
   updateSlideVisualType: (id: string, vt: string) => void;
   reorderSlide: (id: string, dir: 'up' | 'down') => void;
   addSlide: (afterIndex: number) => void;
@@ -154,6 +155,10 @@ export const useCarouselStore = create<CarouselStore>()(
 
       updateSlideAccent: (id, word) => set(s => ({
         slides: s.slides.map(sl => sl.id === id ? { ...sl, accent_word: word } : sl),
+      })),
+
+      updateSlideSectionLabel: (id, label) => set(s => ({
+        slides: s.slides.map(sl => sl.id === id ? { ...sl, section_label: label || undefined } : sl),
       })),
 
       updateSlideVisualType: (id, vt) => set(s => ({
@@ -256,7 +261,7 @@ export const useCarouselStore = create<CarouselStore>()(
     }),
     {
       name: 'simpliscale-carousel-pipeline',
-      version: 9,
+      version: 10,
       migrate: (persisted: any, fromVersion: number) => {
         if (fromVersion < 9) {
           return {

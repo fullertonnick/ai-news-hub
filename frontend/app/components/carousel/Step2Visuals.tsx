@@ -177,16 +177,28 @@ export default function Step2Visuals() {
   else visual = slide.visual || { type: slide.visual_type || 'none' };
   const renderSlide = { text: slide.text, accent_word: slide.accent_word, section_label: slide.section_label, visual, backgroundImage: slide.backgroundImage, stickers: slide.stickers, textOverlays: slide.textOverlays, useTextOverlays: slide.useTextOverlays, textOffsetX: slide.textOffsetX, textOffsetY: slide.textOffsetY };
 
+  const middleSlides = slides.slice(1, -1);
+  const bgDone = middleSlides.filter(s => s.backgroundImage).length;
+  const allGenerating = Object.values(generating).some(Boolean);
+
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-white">Visuals</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Cover & CTA use your photos. Content slides get AI-generated backgrounds.</p>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Cover & CTA use your photos. Content slides get AI-generated backgrounds.
+            {middleSlides.length > 0 && (
+              <span className={`ml-2 font-medium ${bgDone === middleSlides.length ? 'text-green-400' : 'text-gray-500'}`}>
+                {bgDone}/{middleSlides.length} backgrounds ready
+              </span>
+            )}
+          </p>
         </div>
-        <button onClick={generateAll} disabled={Object.values(generating).some(Boolean)}
-          className="text-xs font-bold text-black bg-brand-orange hover:bg-orange-500 disabled:opacity-40 px-4 py-2 rounded-lg transition-colors">
-          Generate All Backgrounds
+        <button onClick={generateAll} disabled={allGenerating}
+          className="text-xs font-bold text-black bg-brand-orange hover:bg-orange-500 disabled:opacity-40 px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+          {allGenerating && <Loader2 size={10} className="animate-spin" />}
+          {allGenerating ? 'Generating...' : 'Generate All Backgrounds'}
         </button>
       </div>
 
@@ -313,9 +325,9 @@ export default function Step2Visuals() {
         </div>
       </div>
 
-      <button onClick={() => { store.approve('visuals'); store.setStep(3); }}
-        className="w-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-        <Check size={14} /> Continue to Editor
+      <button onClick={() => { store.approve('visuals'); store.setStep(3); }} disabled={allGenerating}
+        className="w-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-40">
+        <Check size={14} /> {allGenerating ? 'Wait for backgrounds to finish...' : 'Continue to Editor'}
       </button>
     </div>
   );

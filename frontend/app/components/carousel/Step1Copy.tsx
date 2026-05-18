@@ -121,12 +121,22 @@ export default function Step1Copy() {
                 className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-gray-200 leading-relaxed resize-none focus:outline-none focus:border-brand-orange/30"
                 rows={Math.max(2, Math.ceil(slide.text.length / 80))} />
 
-              {/* Accent word */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-gray-600 uppercase tracking-wider">Accent:</span>
-                <input type="text" value={slide.accent_word || ''} onChange={e => store.updateSlideAccent(slide.id, e.target.value)}
-                  placeholder="word to highlight orange"
-                  className="bg-transparent border-b border-white/10 text-xs text-brand-orange px-1 py-0.5 w-32 focus:outline-none focus:border-brand-orange" />
+              {/* Accent word + section label */}
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-600 uppercase tracking-wider">Accent:</span>
+                  <input type="text" value={slide.accent_word || ''} onChange={e => store.updateSlideAccent(slide.id, e.target.value)}
+                    placeholder="word to highlight orange"
+                    className="bg-transparent border-b border-white/10 text-xs text-brand-orange px-1 py-0.5 w-32 focus:outline-none focus:border-brand-orange" />
+                </div>
+                {(slide.visual_type !== 'cover_photo' && slide.visual_type !== 'cta_slide') && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-gray-600 uppercase tracking-wider">Label:</span>
+                    <input type="text" value={slide.section_label || ''} onChange={e => store.updateSlideSectionLabel(slide.id, e.target.value)}
+                      placeholder="e.g. Step 1 / Before / Reality"
+                      className="bg-transparent border-b border-white/10 text-xs text-gray-400 px-1 py-0.5 w-36 focus:outline-none focus:border-white/30" />
+                  </div>
+                )}
               </div>
             </div>
           ))}

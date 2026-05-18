@@ -55,17 +55,24 @@ function fallbackKeyword(topic: string): string {
   return (words[0] || 'BUILD').slice(0, 8);
 }
 
-// If AI picks an accent_word that isn't in the slide text, extract the best word from the text.
+// If AI picks an accent_word that isn't in the slide text, extract the most impactful phrase.
 function fixAccentWord(text: string, accentWord: string | undefined): string {
   if (!accentWord) return '';
   if (text.toLowerCase().includes(accentWord.toLowerCase())) return accentWord;
-  // Find the most impactful word: numbers, tool names, or longest meaningful word
-  const numMatch = text.match(/\b\d[\d,. ]*(?:%|x|hrs?|min|days?|weeks?|months?|k|\$)?\b/i);
+  // Prefer tool/file names (CLAUDE.md, CLAUDE.json, etc.)
+  const toolMatch = text.match(/\b[A-Z][A-Z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/);
+  if (toolMatch) return toolMatch[0];
+  // Prefer numbers with units (most concrete = most impactful)
+  const numMatch = text.match(/\$[\d,]+[k]?|\b\d+(?:\.\d+)?x\b|\b\d+(?:\s*(?:%|hrs?|hours?|min|minutes?|days?|weeks?|months?|seconds?|k))\b/i);
   if (numMatch) return numMatch[0].trim();
-  const words = text.split(/\s+/).filter(w => w.replace(/[^a-zA-Z]/g, '').length > 4);
-  const stop = new Set(['their', 'there', 'where', 'every', 'which', 'about', 'after', 'before', 'while', 'doing', 'using', 'start', 'build', 'when', 'from', 'that', 'with', 'your', 'have', 'more', 'this', 'just', 'most']);
-  const candidate = words.find(w => !stop.has(w.toLowerCase().replace(/[^a-z]/g, ''))) || words[0] || accentWord;
-  return candidate.replace(/[^a-zA-Z0-9]/g, '');
+  // Prefer short named concepts: 1-3 word noun phrases that aren't stop words
+  const stop = new Set(['their', 'there', 'where', 'every', 'which', 'about', 'after', 'before', 'while', 'doing', 'using', 'start', 'build', 'when', 'from', 'that', 'with', 'your', 'have', 'more', 'this', 'just', 'most', 'also', 'than', 'then', 'what', 'into', 'over', 'them', 'they', 'some']);
+  const words = text.split(/\s+/).filter(w => {
+    const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
+    return clean.length > 4 && !stop.has(clean);
+  });
+  const candidate = words[0] || accentWord;
+  return candidate.replace(/[.,!?;:]$/, '');
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -77,10 +84,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const apiKey = process.env.GEMINI_API_KEY;
   const category = detectCategory(topic);
 
+  const categoryHint: Record<string, string> = {
+    'claude-code': `CATEGORY CONTEXT (claude-code): Use specific Claude Code terminology. Key concepts: CLAUDE.md (persistent memory file), /hooks (pre/post tool use), Claude Code CLI, claude-3-7-sonnet, tool_use blocks, system prompts, context window, session persistence. Mention exact file names, commands, or flags when relevant.`,
+    'make-automation': `CATEGORY CONTEXT (make-automation): Use specific Make.com terminology. Key concepts: scenarios, modules, HTTP requests, webhooks, data stores, error handlers, routers, bundles, operations. Mention specific integrations (Slack, Notion, HubSpot, Airtable) by name.`,
+    'ai-agents': `CATEGORY CONTEXT (ai-agents): Use specific AI agent terminology. Key concepts: orchestration, sub-agents, tool calls, context injection, handoff protocols, memory types (episodic/semantic), agent loops, multi-step tasks. Reference real frameworks: Claude, OpenAI, LangChain, AutoGPT.`,
+    'business-ai': `CATEGORY CONTEXT (business-ai): Focus on measurable business outcomes. Use specific numbers (time saved, cost reduced, revenue increased). Reference real tools and workflows that agency owners actually use.`,
+  };
+
   const prompt = `You are writing an Instagram carousel for Nick Cornelius (@thenickcornelius) — SimpliScale + KingCaller AI, $70K+/month. Audience: entrepreneurs and agency owners who use AI to scale.
 
 TOPIC: "${topic}"
-${research_context?.full_research ? `\nRESEARCH:\n${research_context.full_research.slice(0, 2000)}` : ''}
+${categoryHint[category] ? `\n${categoryHint[category]}\n` : ''}${research_context?.full_research ? `\nRESEARCH:\n${research_context.full_research.slice(0, 2000)}` : ''}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 BULLSHIT TEST — every content slide must pass all 3:
@@ -106,11 +120,13 @@ WRITING STYLE — Tyler Germain
 ACCENT WORD — highlighted orange, one per slide
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 RULE: accent_word MUST appear verbatim in the slide text (case-insensitive).
-Pick the phrase that carries the most weight — the number, the tool, the surprise.
+Pick the phrase that delivers the BIGGEST punch — the stat, the tool name, the counter-intuitive fact.
+Can be 1–3 words. Prefer specifics over abstractions.
   - Slide about cutting 3 hrs to 20 min → "3 hours"
   - Slide about CLAUDE.md → "CLAUDE.md"
   - Slide about a myth → the thing being busted (e.g. "never forgets")
-NOT: random adjectives, the slide title, a word that doesn't appear in text.
+  - Slide about a step → the tool or command (e.g. "git commit", "CLAUDE.md", "/api/imagen")
+NOT: random adjectives, the slide title, a filler word, a word not in the text.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${styleHint(style)}
@@ -165,14 +181,14 @@ KEYWORD: max 8 chars, ALL CAPS, the single core concept
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CAPTION — ready to paste into Instagram:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Line 1: Hook — one sentence that reframes the topic. NOT the slide headline verbatim. Scroll-stopping.
+Line 1: Hook — ONE sentence that makes the reader stop scrolling. Reframes the topic unexpectedly. NOT the slide headline verbatim.
 [blank line]
-3-5 lines starting with → that preview the key insights (not slide titles — actual insights)
+3-5 lines starting with → (arrow symbol) that tease the most surprising insights inside — actual takeaways, not vague promises. Make each one feel like a secret.
 [blank line]
-Comment [KEYWORD] and I'll send you [specific thing] 🔥
+Comment [KEYWORD] and I'll send you [name the EXACT thing — e.g. "the template", "the full script", "the checklist"] 🔥
 📌 Save this before you lose it
 [blank line]
-10-15 hashtags on one line (must include #simpliscale #thenickcornelius)
+10-15 hashtags on one line (must include #simpliscale #thenickcornelius #aitools)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 FORMAT EXAMPLE — shows JSON structure ONLY. Topic and structure below are unrelated to your task.
