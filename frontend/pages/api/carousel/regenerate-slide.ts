@@ -18,10 +18,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const isLast = slideIndex === total - 1;
   const position = isFirst ? 'COVER (first slide)' : isLast ? 'CTA (last slide)' : `content slide ${slideIndex + 1} of ${total}`;
 
+  const categoryHints: Record<string, string> = {
+    'claude-code': 'Use specific Claude Code terminology: CLAUDE.md, /hooks, tool_use, context window, session. Name exact files and commands.',
+    'make-automation': 'Use specific Make.com terminology: scenarios, modules, webhooks, error handlers, data stores. Name real integrations.',
+    'ai-agents': 'Use specific agent terminology: orchestration, sub-agents, tool calls, memory types. Reference real frameworks.',
+    'business-ai': 'Use specific numbers (hours saved, revenue impact). Name the exact tools and workflows.',
+  };
+
   const prompt = `You are rewriting a single Instagram carousel slide for Nick Cornelius (@thenickcornelius).
 
 Topic: "${topic}"
 Category: ${category || 'general'}
+${categoryHints[category] ? categoryHints[category] : ''}
 Style: ${style || 'tech_breakdown'}
 Slide position: ${position}
 Current text: "${currentText}"
@@ -31,11 +39,12 @@ Write a BETTER version. Rules:
 - 2–4 sentences max. End with a kicker.
 - Second person, present tense. Fragments OK.
 - NEVER use: leverage, synergy, seamless, empower, unlock, revolutionize, supercharge
-- Pick ONE accent_word: the most impactful concept, must appear verbatim in the text
+- accent_word: the most impactful concept, 1–3 words, must appear verbatim in the text
+  Prefer: file names (CLAUDE.md), numbers with units (3 hours), tool names (Claude Code)
 ${isFirst ? '- Cover format: Clean 5-8 word bold headline. Optional subtitle after \\n\\n (no parens).' : ''}
 ${isLast ? '- CTA format: ONE compelling question only — stop after the ?. Never include "Comment X and I\'ll send you Y" — the template renders that automatically.' : ''}
 
-Return JSON only: {"text": "new slide copy", "accent_word": "word"}`;
+Return JSON only: {"text": "new slide copy", "accent_word": "word or short phrase"}`;
 
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {

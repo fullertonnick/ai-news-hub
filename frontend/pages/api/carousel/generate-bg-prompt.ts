@@ -34,14 +34,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const slideWords = slideText.slice(0, 300).toLowerCase();
   const conceptHints: string[] = [];
   if (/terminal|code|file|editor|command|script|repo|\.md|claude\.md/.test(slideWords)) conceptHints.push('glowing terminal screen with blurred amber-lit code, mechanical keyboard in foreground, shallow depth of field');
+  if (/mcp|tool[_\s]call|tool_use|function[_\s]call|api\s*call/.test(slideWords)) conceptHints.push('dark server rack corridor, amber LED strips casting warm glow on blurred hardware, cinematic depth of field');
   if (/workflow|automat|trigger|webhook|module|connect|scenario/.test(slideWords)) conceptHints.push('dark server room with warm amber floor LEDs, blurred hardware racks, cinematic corridor perspective');
   if (/agent|ai model|claude|gemini|openai|anthropic|llm/.test(slideWords)) conceptHints.push('dark workspace with softly glowing screen showing abstract code, amber rim lighting, bokeh background');
   if (/memory|context|forget|remember|session|persist/.test(slideWords)) conceptHints.push('dark desk with glowing monitor showing blurred text document, single warm amber desk lamp, deep shadows');
+  if (/token|context\s*window|limit|exceed|compress/.test(slideWords)) conceptHints.push('dark minimal background with single amber gauge/meter glow, deep shadows, cinematic bokeh');
   if (/revenue|money|income|roi|cost|profit|\$/.test(slideWords)) conceptHints.push('dark executive desk with warm amber lamp glow, blurred laptop screen, upscale office bokeh');
   if (/client|onboard|meet|call|team|proposal/.test(slideWords)) conceptHints.push('dark professional meeting room, single overhead warm spotlight, empty modern chairs, cinematic angle');
   if (/email|message|slack|notification|inbox|reply/.test(slideWords)) conceptHints.push('dark room with glowing amber phone screen bokeh, blurred notification light trails');
-  if (/hook|prompt|instruction|system prompt/.test(slideWords)) conceptHints.push('dark mechanical keyboard with amber backlit keys, code on blurred screen behind, macro lens depth of field');
+  if (/hook|hooks?|bash_tool|settings\.json|instruction/.test(slideWords)) conceptHints.push('dark mechanical keyboard with amber backlit keys, code on blurred screen behind, macro lens depth of field');
   if (/error|fail|break|crash|fix|debug/.test(slideWords)) conceptHints.push('dark workspace with single amber warning glow on monitor, blurred error text, moody cinematic lighting');
+  if (/step|setup|install|configure|init/.test(slideWords)) conceptHints.push('dark home office desk, single warm amber lamp illuminating notebook and laptop, cinematic angle, shallow depth of field');
 
   const sceneHint = conceptHints.length > 0
     ? `SCENE CONCEPT (derived from slide text): ${conceptHints[0]}`
