@@ -105,8 +105,15 @@ export default function Step4Export() {
     setDownloading(i);
     setExportError(null);
     try {
-      // Wait for custom fonts to be available before capturing to avoid fallback fonts
+      // Wait for all fonts to settle, then explicitly load Plus Jakarta Sans in critical weights
       await document.fonts.ready;
+      await Promise.allSettled([
+        document.fonts.load('800 52px "Plus Jakarta Sans"'),
+        document.fonts.load('700 28px "Plus Jakarta Sans"'),
+        document.fonts.load('400 24px "Plus Jakarta Sans"'),
+        document.fonts.load('500 12px "Plus Jakarta Sans"'),
+        document.fonts.load('400 15px "JetBrains Mono"'),
+      ]);
       const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350 });
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
     } catch (e) {
@@ -121,8 +128,15 @@ export default function Step4Export() {
     setDownloading('zip');
     setExportError(null);
     try {
-      // Wait for custom fonts before any capture
+      // Wait for all fonts to settle, then explicitly load Plus Jakarta Sans in critical weights
       await document.fonts.ready;
+      await Promise.allSettled([
+        document.fonts.load('800 52px "Plus Jakarta Sans"'),
+        document.fonts.load('700 28px "Plus Jakarta Sans"'),
+        document.fonts.load('400 24px "Plus Jakarta Sans"'),
+        document.fonts.load('500 12px "Plus Jakarta Sans"'),
+        document.fonts.load('400 15px "JetBrains Mono"'),
+      ]);
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       for (let i = 0; i < slides.length; i++) {

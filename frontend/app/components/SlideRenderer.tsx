@@ -62,7 +62,7 @@ function highlightCode(code: string, highlights: string[] = [], sc: number): Rea
     }
     return (
       <div key={li} style={{ display: 'flex', minHeight: '1.5em' }}>
-        <span style={{ color: '#4B5563', userSelect: 'none', marginRight: `${16 * sc}px`, minWidth: `${28 * sc}px`, textAlign: 'right', flexShrink: 0, fontSize: `${11 * sc}px` }}>{li + 1}</span>
+        <span style={{ color: '#4B5563', userSelect: 'none', marginRight: `${16 * sc}px`, minWidth: `${28 * sc}px`, textAlign: 'right', flexShrink: 0, fontSize: `${12 * sc}px` }}>{li + 1}</span>
         <span style={{ flex: 1 }}>{tokens.length > 0 ? tokens : <span>&nbsp;</span>}</span>
       </div>
     );
@@ -192,7 +192,10 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
   const v = slide.visual as CoverPhotoVisual;
   const [coverHeadline, coverSubtitle] = slide.text.split('\n\n').map(s => s.replace(/^\(|\)$/g, '').trim());
   const headlineWords = coverHeadline.split(/\s+/);
-  const fontSize = Math.max(72 * sc, headlineWords.length <= 5 ? 92 * sc : headlineWords.length <= 7 ? 80 * sc : 70 * sc);
+  const fontSize = headlineWords.length <= 4 ? 96 * sc
+    : headlineWords.length <= 6 ? 86 * sc
+    : headlineWords.length <= 8 ? 76 * sc
+    : 66 * sc;
   // photo_enabled defaults to true unless explicitly set to false
   const photoEnabled = v.photo_enabled !== false;
   const hasPhoto = !!slide.backgroundImage && photoEnabled;
@@ -285,18 +288,18 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
         {/* Nick's photo on right — always shown for photo layout (design element, not background) */}
         <img src="/nick.jpg" alt="" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.60}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: hasImagen ? 0.55 : 0.72, zIndex: 1 }} />
         {/* Gradient fade left — keeps text readable */}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 32%, rgba(17,17,17,0.88) 52%, rgba(17,17,17,0.40) 72%, rgba(17,17,17,0.08) 100%)`, zIndex: 2 }} />
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 32%, rgba(26,26,26,0.88) 52%, rgba(26,26,26,0.40) 72%, rgba(26,26,26,0.08) 100%)`, zIndex: 2 }} />
         {/* Subtle orange glow on left */}
         <div style={{ position: 'absolute', left: 0, top: 0, width: '60%', height: '100%', background: 'radial-gradient(ellipse 80% 60% at 25% 50%, rgba(255,113,7,0.09) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 3 }} />
 
         {/* Left content column */}
         <div style={{ position: 'absolute', left: `${PH}px`, right: `${W * 0.52}px`, top: 0, bottom: `${80 * sc}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: `${22 * sc}px`, zIndex: 4 }}>
-          <div style={{ fontSize: `${40 * sc}px`, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em' }}>
+          <div style={{ fontSize: `${48 * sc}px`, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em' }}>
             {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
           </div>
           <div style={{ width: `${44 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px' }} />
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
-            <span style={{ color: Brand.colors.text_primary, fontSize: `${20 * sc}px`, fontWeight: 600 }}>Comment</span>
+            <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600 }}>Comment</span>
             {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${22 * sc}px`, fontWeight: 800, padding: `${6 * sc}px ${16 * sc}px`, borderRadius: `${24 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>}
           </div>
         </div>
@@ -416,7 +419,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
       {!hasImagen && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '25%', background: `linear-gradient(to bottom, rgba(255,113,7,0.025), transparent)`, pointerEvents: 'none' }} />}
 
       {/* Orange left border accent — all content slides (Tyler Germain signature) */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${4 * sc}px`, background: Brand.colors.accent_primary, zIndex: 4 }} />
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${6 * sc}px`, background: Brand.colors.accent_primary, zIndex: 4 }} />
       {/* Subtle orange radial glow */}
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(255,113,7,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
@@ -474,7 +477,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
           {/* Kicker — 28px bold with visual breathing room. Stands apart from body as the mic-drop takeaway. */}
           {!hasVis && kicker && (
             <div style={{ marginTop: `${28 * sc}px` }}>
-              <div style={{ width: `${24 * sc}px`, height: `${2 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px', marginBottom: `${10 * sc}px`, opacity: 0.7 }} />
+              <div style={{ width: `${32 * sc}px`, height: `${2 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px', marginBottom: `${10 * sc}px`, opacity: 0.8 }} />
               <p style={{
                 margin: 0,
                 fontSize: `${28 * sc}px`, fontWeight: 700,
@@ -498,8 +501,8 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 <div style={{ overflow: 'hidden' }}>
                   {v.instruction && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: `${6 * sc}px`, marginBottom: `${10 * sc}px` }}>
-                      <span style={{ color: Brand.colors.accent_primary, fontSize: `${11 * sc}px`, fontWeight: 700 }}>→</span>
-                      <span style={{ color: Brand.colors.text_muted, fontSize: `${11 * sc}px`, fontWeight: 500, fontStyle: 'italic' as const }}>{v.instruction}</span>
+                      <span style={{ color: Brand.colors.accent_primary, fontSize: `${13 * sc}px`, fontWeight: 700 }}>→</span>
+                      <span style={{ color: Brand.colors.text_muted, fontSize: `${13 * sc}px`, fontWeight: 500, fontStyle: 'italic' as const }}>{v.instruction}</span>
                     </div>
                   )}
                   <div style={{ backgroundColor: Brand.colors.bg_surface, borderRadius: `${12 * sc}px`, overflow: 'hidden', border: `1px solid ${Brand.colors.code_border}` }}>
@@ -507,7 +510,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                       {['#FF5F56', '#FFBD2E', '#27C93F'].map((c, i) => <div key={i} style={{ width: `${9 * sc}px`, height: `${9 * sc}px`, borderRadius: '50%', backgroundColor: c }} />)}
                       <span style={{ marginLeft: `${8 * sc}px`, fontSize: `${11 * sc}px`, color: Brand.colors.text_muted, fontFamily: Brand.typography.mono_font }}>{v.language || 'prompt'}</span>
                     </div>
-                    <div style={{ padding: `${14 * sc}px ${16 * sc}px`, fontFamily: Brand.typography.mono_font, fontSize: `${13 * sc}px`, lineHeight: 1.65 }}>
+                    <div style={{ padding: `${14 * sc}px ${16 * sc}px`, fontFamily: Brand.typography.mono_font, fontSize: `${15 * sc}px`, lineHeight: 1.65 }}>
                       {highlightCode(v.code || '', v.highlights || [], sc)}
                     </div>
                   </div>
