@@ -55,6 +55,65 @@ function fallbackKeyword(topic: string): string {
   return (words[0] || 'BUILD').slice(0, 8);
 }
 
+// ─── Category-aware fallback carousel ─────────────────────────────────────────
+
+type FallbackCategory = 'claude-code' | 'make-automation' | 'ai-agents' | 'business-ai';
+
+const CATEGORY_FALLBACKS: Record<FallbackCategory, (topic: string, kw: string) => { slides: any[]; caption: string; keyword: string }> = {
+  'claude-code': (topic, kw) => ({
+    keyword: kw,
+    slides: [
+      { id: uid(), text: `Claude Code forgets everything when you close the session\n\n(here's the 5-minute fix that makes it remember forever)`, accent_word: 'forgets everything', visual_type: 'cover_photo', section_label: null, backgroundStatus: 'pending' },
+      { id: uid(), text: `Claude Code has no persistent memory by default.\n\nEvery new session = blank slate. You re-explain your stack, your patterns, your constraints. Every. Single. Time.\n\nThat's 10-15 minutes of setup wasted on every session.`, accent_word: 'blank slate', section_label: 'The Problem', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `CLAUDE.md is the fix. One file in your project root.\n\nClaude reads it automatically at session start — no prompting needed. Your stack, your rules, your context. Loaded in seconds.`, accent_word: 'CLAUDE.md', section_label: 'The Fix', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `What goes in CLAUDE.md:\n\n→ Your tech stack (exact versions)\n→ Naming conventions and patterns\n→ What NOT to change\n→ Current sprint goal\n\n50 words beats 1,000 words of re-explanation.`, accent_word: '50 words', section_label: 'What to Put In It', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `After CLAUDE.md: session setup drops from 15 minutes to 0.\n\nClaude knows your codebase cold before you type a word.\n\nThat's 5+ hours back per week.`, accent_word: '5+ hours', section_label: 'The Result', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `Want the exact CLAUDE.md template I use on every project?`, accent_word: 'template', section_label: null, visual_type: 'cta_slide', backgroundStatus: 'pending' },
+    ],
+    caption: `Most Claude Code users are wasting 15 minutes per session re-explaining their codebase.\n\nHere's the 5-minute fix:\n\n→ Why Claude forgets everything between sessions\n→ What CLAUDE.md actually is (and how to create it)\n→ The exact 50 words that save 5+ hours per week\n→ My template — copy it directly into your project\n\nComment ${kw} and I'll send you the template 🔥\n📌 Save this before you lose it\n\n#claudecode #claudeai #anthropic #aitools #coding #devtools #aideveloper #simpliscale #thenickcornelius #agencyowner #aiautomation #productivity #solopreneur #entrepreneurship #buildwithAI`,
+  }),
+  'make-automation': (topic, kw) => ({
+    keyword: kw,
+    slides: [
+      { id: uid(), text: `Your Make.com automations are failing silently right now\n\n(and you won't know until a client calls angry)`, accent_word: 'silently', visual_type: 'cover_photo', section_label: null, backgroundStatus: 'pending' },
+      { id: uid(), text: `Make.com scenarios fail with zero notification by default.\n\nTrigger fires. HTTP error. Data stops. No alert. No fallback.\n\nYour client's form submission goes nowhere while you sleep.`, accent_word: 'zero notification', section_label: 'The Problem', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `Add an Error Handler module after every HTTP request.\n\nRoute failures to a Slack message with the error text, module name, and timestamp.\n\n4 minutes to set up. Saves you from the 10pm client call.`, accent_word: '4 minutes', section_label: 'The Fix', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `My error alert includes:\n\n→ Which scenario failed\n→ Which module threw the error\n→ The exact error message\n→ Timestamp so you can replay it\n\nOne Slack message = full context without digging.`, accent_word: 'full context', section_label: 'What the Alert Includes', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `Want the Make.com error handling template I use on every client build?`, accent_word: 'template', section_label: null, visual_type: 'cta_slide', backgroundStatus: 'pending' },
+    ],
+    caption: `Most Make.com automations fail in silence. Here's what that actually costs you:\n\n→ Why Make gives zero failure alerts by default\n→ The 4-minute fix that protects every scenario\n→ How to route errors to Slack with full context\n→ The exact error handler template I use on every build\n\nComment ${kw} and I'll send you the template 🔥\n📌 Save this before you lose it\n\n#makecom #automation #nocode #aiautomation #workflow #simpliscale #thenickcornelius #agencyowner #solopreneur #productivity #businessautomation #entrepreneur #makecreator #aitools #zapier`,
+  }),
+  'ai-agents': (topic, kw) => ({
+    keyword: kw,
+    slides: [
+      { id: uid(), text: `Most AI agents fail for the same reason\n\n(it's not the model — it's the scope)`, accent_word: 'fail', visual_type: 'cover_photo', section_label: null, backgroundStatus: 'pending' },
+      { id: uid(), text: `Agents that try to do everything fail at everything.\n\nThe ones that work have exactly one job, 2-3 tools, and a clear output format.\n\nScope creep kills more agents than bad models.`, accent_word: 'one job', section_label: 'The Mistake', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `The best agent setup: Task → Tools → Loop → Output.\n\nTask: one specific deliverable.\nTools: read, write, notify — nothing else.\nLoop: scan, decide, act, repeat.\nOutput: structured JSON or plain English.`, accent_word: 'Loop', section_label: 'The Structure', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `Add a human checkpoint for any decision worth $50+.\n\nRoute it to Slack with context. Approve or reject in one click.\n\nThe agent resumes. No bottleneck. No lost deals.`, accent_word: '$50+', section_label: 'The Safety Layer', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `Want the full agent architecture I use on every client deployment?`, accent_word: 'architecture', section_label: null, visual_type: 'cta_slide', backgroundStatus: 'pending' },
+    ],
+    caption: `Most AI agents fail — and it's not the model's fault.\n\n→ The single reason 80% of agents fail in production\n→ The Task-Tools-Loop-Output structure that actually works\n→ How to add human approval without killing throughput\n→ Real accuracy benchmarks: what to expect in week 1\n\nComment ${kw} and I'll send you the full setup guide 🔥\n📌 Save this before you lose it\n\n#aiagents #autonomousai #agenticai #claudeai #anthropic #aitools #simpliscale #thenickcornelius #agencyowner #automation #productivityhacks #entrepreneurship #buildwithAI #solopreneur #aiautomation`,
+  }),
+  'business-ai': (topic, kw) => ({
+    keyword: kw,
+    slides: [
+      { id: uid(), text: `The AI tools saving businesses 20 hours a week\n\n(most owners haven't tried a single one)`, accent_word: '20 hours', visual_type: 'cover_photo', section_label: null, backgroundStatus: 'pending' },
+      { id: uid(), text: `Most business owners use AI like a search engine.\n\nPaste a question. Read the answer. Move on.\n\nThat's 10% of what it can do. The other 90% runs your actual workflow.`, accent_word: '10%', section_label: 'The Gap', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `The highest-ROI AI task isn't writing. It's decision support.\n\nFeed it your data. Ask it to find the pattern. Get the answer in 3 minutes instead of 3 hours.\n\nEvery owner I know who does this never goes back.`, accent_word: '3 minutes', section_label: 'The Highest ROI Use', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `My AI stack for running a $70k/month agency:\n\n→ Claude for writing, analysis, strategy\n→ Make.com for client workflow automation\n→ Claude Code for any custom tool\n\nTotal cost: under $200/month.`, accent_word: '$200/month', section_label: 'My Stack', visual_type: 'none', backgroundStatus: 'pending' },
+      { id: uid(), text: `Want the full AI implementation guide for agency owners?`, accent_word: 'implementation', section_label: null, visual_type: 'cta_slide', backgroundStatus: 'pending' },
+    ],
+    caption: `Most business owners are using AI at 10% capacity.\n\n→ Why search-engine usage misses the entire point\n→ The highest-ROI AI application most owners haven't tried\n→ My exact AI stack for running a $70k/month agency\n→ What NOT to automate first (this surprises most people)\n\nComment ${kw} and I'll send you the full guide 🔥\n📌 Save this before you lose it\n\n#aitools #businessai #aiautomation #entrepreneurship #agencyowner #simpliscale #thenickcornelius #solopreneur #productivity #businessgrowth #aistrategy #chatgpt #anthropic #makecreator #scaleyourbusiness`,
+  }),
+};
+
+function buildCategoryFallback(topic: string, category: string): { slides: any[]; caption: string; keyword: string; category: string } {
+  const kw = fallbackKeyword(topic);
+  const cat = (category in CATEGORY_FALLBACKS) ? category as FallbackCategory : 'business-ai';
+  const result = CATEGORY_FALLBACKS[cat](topic, kw);
+  return { ...result, category };
+}
+
 // If AI picks an accent_word that isn't in the slide text, extract the most impactful phrase.
 function fixAccentWord(text: string, accentWord: string | undefined): string {
   if (!accentWord) return '';
@@ -228,19 +287,7 @@ The example above is Make.com error handling — purely a format reference. IGNO
 Now write a completely original carousel about: "${topic}"`;
 
   if (!apiKey) {
-    const kw = fallbackKeyword(topic);
-    return res.json({
-      slides: [
-        { id: uid(), text: topic.split(/\s+/).slice(0, 7).join(' '), accent_word: topic.split(/\s+/).slice(0, 2).join(' ').toLowerCase(), visual_type: 'cover_photo', section_label: null, backgroundStatus: 'pending' },
-        { id: uid(), text: `Here's what most people get wrong about ${topic.toLowerCase()}.\n\nThey overthink it. They read 50 articles. They never start.\n\nOne hour of doing beats a week of planning.`, accent_word: 'get wrong', section_label: 'Reality Check', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `Pick one tool. Build something real in the first session. Measure what changes after 7 days.\n\nPerfect is the enemy of shipped.`, accent_word: '7 days', section_label: 'How to Start', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `The result: less manual work, more output, real time back.\n\nNot someday. This week.`, accent_word: 'This week', section_label: 'The Result', visual_type: 'none', backgroundStatus: 'pending' },
-        { id: uid(), text: `Want the exact system I use for ${topic.toLowerCase()}?`, accent_word: 'system', section_label: null, visual_type: 'cta_slide', backgroundStatus: 'pending' },
-      ],
-      caption: `Most people overcomplicate ${topic.toLowerCase()}.\n\nHere's the simple version:\n\n→ What most people get wrong\n→ The one-step fix\n→ My exact setup\n→ What changes after one week\n\nComment ${kw} and I'll send you the full blueprint 🔥\n📌 Save this before you lose it\n\n#ai #automation #business #scale #simpliscale #thenickcornelius #aitools #productivity #entrepreneurship #agencyowner`,
-      keyword: kw,
-      category,
-    });
+    return res.json(buildCategoryFallback(topic, category));
   }
 
   try {
@@ -289,6 +336,7 @@ Now write a completely original carousel about: "${topic}"`;
     return res.json({ slides, caption, keyword, category });
   } catch (err) {
     console.error('Generate copy error:', err);
-    return res.status(500).json({ error: 'Copy generation failed. Try again.' });
+    // Fall back to high-quality category-specific content rather than erroring out
+    return res.json({ ...buildCategoryFallback(topic, category), _fallback: true });
   }
 }

@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useCarouselStore, type TextOverlay } from '../../stores/useCarouselStore';
-import { Check, Trash2, ChevronLeft, ChevronRight, Upload, Loader2, Wand2, Type, ArrowUp, ArrowDown, Search } from 'lucide-react';
+import { Check, Trash2, ChevronLeft, ChevronRight, Upload, Loader2, Wand2, Type, ArrowUp, ArrowDown } from 'lucide-react';
 import SlideRenderer from '../SlideRenderer';
 import type { StickerOverlay } from '../../types';
 import { FONT_OPTIONS } from '../../lib/fonts';
@@ -91,12 +91,6 @@ export default function Step3Edit() {
   const [generatingVisual, setGeneratingVisual] = useState(false);
   const [customPrompt, setCustomPrompt] = useState('');
   const [showPrompt, setShowPrompt] = useState(false);
-  const [showWebSearch, setShowWebSearch] = useState(false);
-  const [webQuery, setWebQuery] = useState('');
-  const [webResults, setWebResults] = useState<Array<{ url: string; thumbnail: string; title: string; source: string }>>([]);
-  const [searchingWeb, setSearchingWeb] = useState(false);
-  const [importingImage, setImportingImage] = useState<string | null>(null);
-  const [searchError, setSearchError] = useState<string | null>(null);
 
   const slide = slides[currentIdx];
   const stickers = slide?.stickers || [];
@@ -225,54 +219,6 @@ export default function Step3Edit() {
     setGeneratingVisual(false);
   }, [slide, store, stickers.length]);
 
-  const searchWebImages = useCallback(async () => {
-    if (!webQuery.trim()) return;
-    setSearchingWeb(true);
-    setWebResults([]);
-    setSearchError(null);
-    try {
-      const r = await fetch('/api/image-search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: webQuery }),
-      });
-      const d = await r.json();
-      if (d.images?.length) {
-        setWebResults(d.images);
-      } else if (d.images?.length === 0) {
-        setSearchError('No images found — try a different query');
-      } else {
-        setSearchError(d.hint || d.error || 'Search unavailable — Google Custom Search API not configured');
-      }
-    } catch {
-      setSearchError('Search failed — check your connection');
-    }
-    setSearchingWeb(false);
-  }, [webQuery]);
-
-  const importWebImage = useCallback(async (img: { url: string; title: string }) => {
-    if (!slide) return;
-    setImportingImage(img.url);
-    try {
-      const r = await fetch('/api/image-proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: img.url }),
-      });
-      const d = await r.json();
-      if (d.dataUrl) {
-        const s: StickerOverlay = { id: uid(), src: d.dataUrl, label: img.title.slice(0, 30) || 'Web Image', x: 50, y: 55, width: 60, rotation: 0, opacity: 1, zIndex: 10 + stickers.length };
-        store.addSticker(slide.id, s);
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => setSelectedId(s.id));
-        });
-        setShowWebSearch(false);
-        setWebResults([]);
-        setWebQuery('');
-      }
-    } catch (e) { console.error('Import failed:', e); }
-    setImportingImage(null);
-  }, [slide, store, stickers.length]);
 
   if (!slide) return null;
 
@@ -298,8 +244,7 @@ export default function Step3Edit() {
             <button onClick={() => { setCurrentIdx(i => Math.min(slides.length - 1, i + 1)); setSelectedId(null); }} disabled={currentIdx === slides.length - 1} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronRight size={16} /></button>
             <div className="ml-auto flex gap-1.5">
               <button onClick={addText} className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-white border border-white/10 hover:border-white/20 px-2 py-1 rounded-lg"><Type size={10} /> Text</button>
-              <button onClick={() => { setShowWebSearch(!showWebSearch); setShowPrompt(false); setSearchError(null); }} className="flex items-center gap-1 text-[10px] text-white bg-white/10 hover:bg-white/20 border border-white/15 px-2 py-1 rounded-lg font-bold"><Search size={10} /> Web Image</button>
-              <button onClick={() => { setShowPrompt(!showPrompt); setShowWebSearch(false); }} className="flex items-center gap-1 text-[10px] text-black bg-brand-orange hover:bg-orange-500 px-2 py-1 rounded-lg font-bold"><Wand2 size={10} /> AI Visual</button>
+              <button onClick={() => setShowPrompt(!showPrompt)} className="flex items-center gap-1 text-[10px] text-black bg-brand-orange hover:bg-orange-500 px-2 py-1 rounded-lg font-bold"><Wand2 size={10} /> AI Visual</button>
             </div>
           </div>
 
@@ -317,47 +262,6 @@ export default function Step3Edit() {
                 </button>
                 <button onClick={() => generateVisual()} disabled={generatingVisual} className="text-xs text-gray-400 hover:text-white px-2 py-1.5">Auto</button>
               </div>
-            </div>
-          )}
-
-          {showWebSearch && (
-            <div className="mb-3 rounded-xl border border-white/15 bg-white/[0.03] p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="text-[10px] font-bold text-white uppercase tracking-widest">Web Image Search</div>
-                <span className="text-[9px] text-gray-600">via DuckDuckGo — may be rate limited</span>
-              </div>
-              <div className="flex gap-2">
-                <input value={webQuery} onChange={e => setWebQuery(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') searchWebImages(); }}
-                  placeholder="claude code terminal dark"
-                  className="flex-1 bg-white/[0.02] border border-white/5 rounded-lg px-3 py-1.5 text-xs text-gray-300 focus:outline-none focus:border-white/20" />
-                <button onClick={searchWebImages} disabled={searchingWeb || !webQuery.trim()}
-                  className="flex items-center gap-1 text-xs font-bold text-black bg-white hover:bg-gray-200 disabled:opacity-40 px-3 py-1.5 rounded-lg">
-                  {searchingWeb ? <Loader2 size={10} className="animate-spin" /> : <Search size={10} />}
-                  Search
-                </button>
-              </div>
-              {webResults.length > 0 && (
-                <div className="grid grid-cols-3 gap-1.5 max-h-48 overflow-y-auto pt-1">
-                  {webResults.map((img, i) => (
-                    <button key={i} onClick={() => importWebImage(img)} disabled={importingImage === img.url}
-                      className="relative aspect-square rounded border border-white/10 overflow-hidden hover:border-brand-orange/40 transition-all disabled:opacity-40">
-                      <img src={img.thumbnail} alt={img.title} className="w-full h-full object-cover" />
-                      {importingImage === img.url && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                          <Loader2 size={14} className="animate-spin text-brand-orange" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {searchError && (
-                <p className="text-[10px] text-yellow-500/80 flex items-center gap-1">⚠ {searchError}. Try uploading an image instead.</p>
-              )}
-              {!searchingWeb && !searchError && webResults.length === 0 && webQuery && (
-                <p className="text-[10px] text-gray-500">Press Search or hit Enter.</p>
-              )}
             </div>
           )}
 

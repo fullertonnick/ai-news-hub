@@ -150,15 +150,16 @@ export default function Step2Visuals() {
     }
   }, [slides, generateBg]);
 
-  // Auto-generate middle backgrounds on first mount when none exist yet.
-  // Runs once — `hasAutoStarted` prevents re-triggering if slides update.
-  const hasAutoStarted = useRef(false);
+  // Auto-generate middle backgrounds when slides arrive without images.
+  // Tracks the current slide-set by ID so it re-fires correctly after copy is regenerated.
+  const lastAutoStartKey = useRef<string>('');
   useEffect(() => {
-    if (hasAutoStarted.current) return;
+    const slidesKey = slides.map(s => s.id).join(',');
+    if (lastAutoStartKey.current === slidesKey) return; // already started for this slide set
     const middle = slides.slice(1, -1);
     if (!middle.length) return;
     if (!middle.some(s => !s.backgroundImage)) return; // all already have images
-    hasAutoStarted.current = true;
+    lastAutoStartKey.current = slidesKey;
     // Small delay so cover/CTA photo effects finish first
     const t = setTimeout(generateAll, 600);
     return () => clearTimeout(t);
@@ -321,9 +322,9 @@ export default function Step2Visuals() {
         </div>
       </div>
 
-      <button onClick={() => { store.approve('visuals'); store.setStep(3); }} disabled={allGenerating}
-        className="w-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-40">
-        <Check size={14} /> {allGenerating ? 'Wait for backgrounds to finish...' : 'Continue to Editor'}
+      <button onClick={() => { store.approve('visuals'); store.setStep(3); }}
+        className="w-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+        <Check size={14} /> Continue to Editor{allGenerating ? ' (backgrounds still loading…)' : ''}
       </button>
     </div>
   );
