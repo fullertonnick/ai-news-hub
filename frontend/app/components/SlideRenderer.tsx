@@ -164,26 +164,48 @@ function RenderOverlays({ slide, W, H }: { slide: CarouselSlide; W: number; H: n
 
 // ─── Cover Template — full-bleed photo, floating topic badges ────────────────
 
-// Generate topic-relevant sticker labels from slide text
-function getTopicStickers(text: string): { text: string; pos: Record<string, string>; rotate: number }[] {
+// Generate topic-relevant sticker labels from slide text.
+// headlinePosition controls where the headline sits so badges don't overlap it:
+//   'top'    → headline at 10%, so badges go in the lower-middle zone (42-55%)
+//   'middle' → headline at 35%, badges stay in the upper zone (8-22%)
+//   'bottom' → headline at 60% (default), badges stay in the upper zone (8-22%)
+function getTopicStickers(text: string, headlinePosition: 'top' | 'middle' | 'bottom' = 'bottom'): { text: string; pos: Record<string, string>; rotate: number }[] {
   const t = text.toLowerCase();
   const stickers: { text: string; pos: Record<string, string>; rotate: number }[] = [];
 
-  // Pick 3-4 relevant stickers based on topic keywords
-  if (/claude/i.test(t)) stickers.push({ text: 'CLAUDE', pos: { top: '8%', right: '5%' }, rotate: 3 });
-  if (/code/i.test(t)) stickers.push({ text: 'CODE', pos: { top: '20%', left: '4%' }, rotate: -2 });
-  if (/make\.com|make/i.test(t)) stickers.push({ text: 'MAKE.COM', pos: { top: '10%', right: '4%' }, rotate: 2 });
-  if (/automat/i.test(t)) stickers.push({ text: 'AUTOMATE', pos: { top: '22%', left: '4%' }, rotate: -3 });
-  if (/agent/i.test(t)) stickers.push({ text: 'AGENTS', pos: { top: '12%', right: '5%' }, rotate: 4 });
-  if (/ai\b/i.test(t)) stickers.push({ text: 'AI', pos: { top: '8%', right: '6%' }, rotate: 3 });
-  if (/scale|grow/i.test(t)) stickers.push({ text: 'SCALE', pos: { bottom: '30%', right: '5%' }, rotate: -2 });
-  if (/install|setup|vs.?code/i.test(t)) stickers.push({ text: 'VS CODE', pos: { top: '12%', right: '5%' }, rotate: 2 });
-  if (/workflow/i.test(t)) stickers.push({ text: 'WORKFLOW', pos: { top: '18%', left: '4%' }, rotate: -3 });
-  if (/prompt/i.test(t)) stickers.push({ text: 'PROMPTS', pos: { top: '10%', right: '5%' }, rotate: 3 });
-  if (/revenue|money|\$/i.test(t)) stickers.push({ text: 'REVENUE', pos: { bottom: '32%', right: '5%' }, rotate: -2 });
+  const isTop = headlinePosition === 'top';
+  // Safe badge positions: upper zone for middle/bottom headlines, lower-middle zone for top headline
+  const p: Record<string, string>[] = isTop
+    ? [
+        { top: '42%', right: '5%' },
+        { top: '50%', left: '4%' },
+        { bottom: '22%', right: '5%' },
+        { bottom: '28%', left: '4%' },
+      ]
+    : [
+        { top: '8%', right: '5%' },
+        { top: '20%', left: '4%' },
+        { top: '30%', right: '4%' },
+        { top: '38%', left: '4%' },
+      ];
 
-  // Only add fallback badges if we have none at all — avoid pasting irrelevant "AI"/"BUILD" on every carousel
-  if (stickers.length === 0) stickers.push({ text: 'AI', pos: { top: '8%', right: '6%' }, rotate: 3 });
+  const rotations = [3, -2, 2, -3];
+  const push = (text: string, idx: number) => stickers.push({ text, pos: p[idx % p.length], rotate: rotations[idx % rotations.length] });
+
+  if (/claude/i.test(t)) push('CLAUDE', 0);
+  if (/code/i.test(t)) push('CODE', 1);
+  if (/make\.com|make/i.test(t)) push('MAKE.COM', 0);
+  if (/automat/i.test(t)) push('AUTOMATE', 1);
+  if (/agent/i.test(t)) push('AGENTS', 0);
+  if (/ai\b/i.test(t)) push('AI', 0);
+  if (/scale|grow/i.test(t)) push('SCALE', 2);
+  if (/install|setup|vs.?code/i.test(t)) push('VS CODE', 0);
+  if (/workflow/i.test(t)) push('WORKFLOW', 1);
+  if (/prompt/i.test(t)) push('PROMPTS', 0);
+  if (/revenue|money|\$/i.test(t)) push('REVENUE', 2);
+
+  // Only add fallback if no topic badges matched
+  if (stickers.length === 0) stickers.push({ text: 'AI', pos: p[0], rotate: 3 });
 
   return stickers.slice(0, 4);
 }
@@ -200,9 +222,10 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
   const photoEnabled = v.photo_enabled !== false;
   const hasPhoto = !!slide.backgroundImage && photoEnabled;
   const showFallbackPhoto = !hasPhoto && photoEnabled;
-  const stickers = getTopicStickers(slide.text);
   // Headline vertical start: top=10%, middle=35%, bottom=60% (default)
-  const headlineTopFraction = v.position === 'top' ? 0.10 : v.position === 'middle' ? 0.35 : 0.60;
+  const headlinePos = v.position ?? 'bottom';
+  const headlineTopFraction = headlinePos === 'top' ? 0.10 : headlinePos === 'middle' ? 0.35 : 0.60;
+  const stickers = getTopicStickers(slide.text, headlinePos);
 
   return (
     <div style={{
@@ -301,6 +324,7 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
             <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600 }}>Comment</span>
             {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, padding: `${7 * sc}px ${18 * sc}px`, borderRadius: `${26 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>}
+            <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600 }}>I'll send it over 🔥</span>
           </div>
         </div>
 

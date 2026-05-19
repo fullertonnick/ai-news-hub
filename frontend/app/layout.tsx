@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://simpliscale-carousel.vercel.app'),
   title: 'SimpliScale Command Center',
   description: 'Content growth dashboard — carousels, scripts, posts, LinkedIn, ideas.',
   twitter: { card: 'summary_large_image', creator: '@thenickcornelius' },

@@ -13,6 +13,18 @@ const KonvaEditor = dynamic(() => import('./KonvaEditor'), { ssr: false });
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 function svgUri(svg: string) { return 'data:image/svg+xml,' + encodeURIComponent(svg); }
 
+// Convert URL-encoded SVG data URIs to base64 when storing in the slide.
+// html-to-image is more reliable with base64 SVGs than URL-encoded ones during export.
+function toBase64SvgUri(src: string): string {
+  if (!src.startsWith('data:image/svg+xml,')) return src;
+  try {
+    const svg = decodeURIComponent(src.replace('data:image/svg+xml,', ''));
+    return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+  } catch {
+    return src;
+  }
+}
+
 // ─── Real brand SVGs (Simple Icons paths) ───────────────────────────────────
 interface BankSticker { label: string; src: string; category: string; }
 
@@ -158,7 +170,8 @@ export default function Step3Edit() {
 
   const addSticker = useCallback((bs: BankSticker) => {
     if (!slide) return;
-    const s: StickerOverlay = { id: uid(), src: bs.src, label: bs.label, x: 50, y: 40, width: 20, rotation: 0, opacity: 1, zIndex: 10 + stickers.length };
+    // Convert URL-encoded SVG data URIs to base64 so html-to-image captures them reliably
+    const s: StickerOverlay = { id: uid(), src: toBase64SvgUri(bs.src), label: bs.label, x: 50, y: 40, width: 20, rotation: 0, opacity: 1, zIndex: 10 + stickers.length };
     store.addSticker(slide.id, s);
     // Defer selection — sticker images (SVG data URIs) load async. The Konva node
     // won't exist until useKonvaImage resolves, so the Transformer can't attach yet.

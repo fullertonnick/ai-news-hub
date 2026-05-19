@@ -121,8 +121,8 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
   ].sort((a, b) => (a.data.zIndex ?? 10) - (b.data.zIndex ?? 10));
 
   // Attach transformer to selected node.
-  // Retries once after 150ms because sticker images (SVG data URIs) load async —
-  // the Konva node won't exist until useKonvaImage resolves onload.
+  // Sticker images (especially uploaded PNGs) load async — poll until the node is
+  // available, giving up after ~2 seconds to avoid infinite retries on missing nodes.
   useEffect(() => {
     const tr = trRef.current;
     const stage = stageRef.current;
@@ -133,19 +133,26 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
       return;
     }
 
+    let attempts = 0;
+    const MAX_ATTEMPTS = 10;
+
     const attach = () => {
       const node = stage.findOne(`.sticker_${selectedId}`) || stage.findOne(`.text_${selectedId}`);
       if (node) {
         tr.nodes([node]);
         tr.getLayer()?.batchDraw();
+        return;
+      }
+      if (attempts < MAX_ATTEMPTS) {
+        attempts++;
+        timer = setTimeout(attach, 200);
       } else {
         tr.nodes([]);
       }
     };
 
+    let timer: ReturnType<typeof setTimeout>;
     attach();
-    // Retry — SVG data URIs fire onload async so the KImage node may not exist yet
-    const timer = setTimeout(attach, 200);
     return () => clearTimeout(timer);
   }, [selectedId, stickers.length, textOverlays.length]);
 
