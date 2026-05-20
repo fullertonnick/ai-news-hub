@@ -45,6 +45,8 @@ export default function Step2Visuals() {
   const [bgError, setBgError] = useState<Record<string, string>>({});
   const [photoLoading, setPhotoLoading] = useState(false);
   const [ctaPhotoLoading, setCtaPhotoLoading] = useState(false);
+  const [previewScale, setPreviewScale] = useState(0.667);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   // Extract slide IDs so photo effects re-run when slides are regenerated (new IDs = new copy generation)
   const coverSlideId = slides[0]?.id;
@@ -68,6 +70,17 @@ export default function Step2Visuals() {
   // Use refs so the effects always see the current slide IDs without triggering on every slide change.
   const slidesRef = useRef(slides);
   useEffect(() => { slidesRef.current = slides; }, [slides]);
+
+  // Responsive preview scale — mirrors Step4Export's approach.
+  useEffect(() => {
+    const el = previewContainerRef.current;
+    if (!el) return;
+    const update = () => setPreviewScale((el.offsetWidth || 360) / 540);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Auto-apply cover photo — set raw URL immediately, then upgrade to proxied data URL.
   // Use getState() for actions so `store` is not a reactive dependency (avoids re-render loop).
@@ -211,8 +224,8 @@ export default function Step2Visuals() {
             <span className="ml-auto text-[10px] text-gray-600 uppercase">{isFirst ? 'Cover' : isLast ? 'CTA' : slide.visual_type?.replace(/_/g, ' ') || 'Content'}</span>
           </div>
 
-          <div style={{ width: '100%', maxWidth: 360, aspectRatio: '4/5', position: 'relative', margin: '0 auto', overflow: 'hidden', borderRadius: 12 }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: 540, height: 675, transform: 'scale(0.667)', transformOrigin: 'top left' }}>
+          <div ref={previewContainerRef} style={{ width: '100%', maxWidth: 360, aspectRatio: '4/5', position: 'relative', margin: '0 auto', overflow: 'hidden', borderRadius: 12 }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, width: 540, height: 675, transform: `scale(${previewScale})`, transformOrigin: 'top left' }}>
               <SlideRenderer slide={renderSlide} slideNumber={currentIdx + 1} totalSlides={slides.length} />
             </div>
           </div>

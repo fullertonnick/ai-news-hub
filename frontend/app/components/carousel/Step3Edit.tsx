@@ -19,7 +19,10 @@ function toBase64SvgUri(src: string): string {
   if (!src.startsWith('data:image/svg+xml,')) return src;
   try {
     const svg = decodeURIComponent(src.replace('data:image/svg+xml,', ''));
-    return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+    // TextEncoder handles Unicode correctly; btoa needs a latin1-range string.
+    const bytes = new TextEncoder().encode(svg);
+    const binary = Array.from(bytes, b => String.fromCharCode(b)).join('');
+    return 'data:image/svg+xml;base64,' + btoa(binary);
   } catch {
     return src;
   }
@@ -89,6 +92,7 @@ export default function Step3Edit() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [generatingVisual, setGeneratingVisual] = useState(false);
+  const [visualError, setVisualError] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
   const [showPrompt, setShowPrompt] = useState(false);
 
@@ -202,6 +206,7 @@ export default function Step3Edit() {
   const generateVisual = useCallback(async (prompt?: string) => {
     if (!slide) return;
     setGeneratingVisual(true);
+    setVisualError(null);
     try {
       const p = prompt || `Create a clean visual explaining: "${slide.text.slice(0, 200)}". Dark background, modern UI mockup or diagram. No text. Square.`;
       const r = await fetch('/api/imagen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: p }) });
@@ -214,8 +219,13 @@ export default function Step3Edit() {
         });
         setCustomPrompt('');
         setShowPrompt(false);
+      } else {
+        setVisualError(d.error || 'No image returned — try a different prompt.');
       }
-    } catch (e) { console.error('AI visual generation failed:', e); }
+    } catch (e) {
+      console.error('AI visual generation failed:', e);
+      setVisualError('Network error — check connection and try again.');
+    }
     setGeneratingVisual(false);
   }, [slide, store, stickers.length]);
 
@@ -239,9 +249,9 @@ export default function Step3Edit() {
         {/* Preview + Konva */}
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-3">
-            <button onClick={() => { setCurrentIdx(i => Math.max(0, i - 1)); setSelectedId(null); }} disabled={currentIdx === 0} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronLeft size={16} /></button>
+            <button onClick={() => { setCurrentIdx(i => Math.max(0, i - 1)); setSelectedId(null); setVisualError(null); }} disabled={currentIdx === 0} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronLeft size={16} /></button>
             <span className="text-xs text-gray-400 font-medium">Slide {currentIdx + 1} / {slides.length}</span>
-            <button onClick={() => { setCurrentIdx(i => Math.min(slides.length - 1, i + 1)); setSelectedId(null); }} disabled={currentIdx === slides.length - 1} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronRight size={16} /></button>
+            <button onClick={() => { setCurrentIdx(i => Math.min(slides.length - 1, i + 1)); setSelectedId(null); setVisualError(null); }} disabled={currentIdx === slides.length - 1} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronRight size={16} /></button>
             <div className="ml-auto flex gap-1.5">
               <button onClick={addText} className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-white border border-white/10 hover:border-white/20 px-2 py-1 rounded-lg"><Type size={10} /> Text</button>
               <button onClick={() => setShowPrompt(!showPrompt)} className="flex items-center gap-1 text-[10px] text-black bg-brand-orange hover:bg-orange-500 px-2 py-1 rounded-lg font-bold"><Wand2 size={10} /> AI Visual</button>
@@ -262,6 +272,7 @@ export default function Step3Edit() {
                 </button>
                 <button onClick={() => generateVisual()} disabled={generatingVisual} className="text-xs text-gray-400 hover:text-white px-2 py-1.5">Auto</button>
               </div>
+              {visualError && <p className="text-[10px] text-red-400">{visualError}</p>}
             </div>
           )}
 
@@ -296,7 +307,7 @@ export default function Step3Edit() {
                 style={{
                   position: 'absolute',
                   left: `${Math.round(52 * PW / 1080) + Math.round((slide?.textOffsetX || 0) * PW / 1080)}px`,
-                  top: `${Math.round(PH * 0.44) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
+                  top: `${Math.round(PH * 0.50) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
                   width: '72px',
                   height: '20px',
                   cursor: 'move',
@@ -320,7 +331,7 @@ export default function Step3Edit() {
           {/* Thumbnails */}
           <div className="flex gap-1.5 mt-3 overflow-x-auto pb-1">
             {slides.map((s, i) => (
-              <button key={s.id} onClick={() => { setCurrentIdx(i); setSelectedId(null); }}
+              <button key={s.id} onClick={() => { setCurrentIdx(i); setSelectedId(null); setVisualError(null); }}
                 className={`relative flex-shrink-0 w-10 rounded border overflow-hidden transition-all ${i === currentIdx ? 'border-brand-orange ring-1 ring-brand-orange/30' : 'border-white/10 opacity-50 hover:opacity-100'}`}
                 style={{ aspectRatio: '4/5' }}>
                 {s.backgroundImage ? <img src={s.backgroundImage} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-[#111] flex items-center justify-center text-[8px] text-gray-600">{i + 1}</div>}

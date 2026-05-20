@@ -119,7 +119,7 @@ export default function Step1Copy() {
               {/* Editable text */}
               <textarea value={slide.text} onChange={e => store.updateSlideText(slide.id, e.target.value)}
                 className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-gray-200 leading-relaxed resize-none focus:outline-none focus:border-brand-orange/30"
-                rows={Math.max(2, Math.ceil(slide.text.length / 80))} />
+                rows={Math.max(3, (slide.text.match(/\n/g) || []).length + Math.ceil(slide.text.length / 80))} />
 
               {/* Accent word + section label */}
               <div className="flex items-center gap-4 flex-wrap">

@@ -190,19 +190,24 @@ function getTopicStickers(text: string, headlinePosition: 'top' | 'middle' | 'bo
       ];
 
   const rotations = [3, -2, 2, -3];
-  const push = (text: string, idx: number) => stickers.push({ text, pos: p[idx % p.length], rotate: rotations[idx % rotations.length] });
+  // Use stickers.length as position index so each new badge gets a unique slot.
+  // Previously hardcoded indices caused overlapping when multiple keywords matched.
+  const push = (text: string) => {
+    const idx = stickers.length;
+    stickers.push({ text, pos: p[idx % p.length], rotate: rotations[idx % rotations.length] });
+  };
 
-  if (/claude/i.test(t)) push('CLAUDE', 0);
-  if (/code/i.test(t)) push('CODE', 1);
-  if (/make\.com|make/i.test(t)) push('MAKE.COM', 0);
-  if (/automat/i.test(t)) push('AUTOMATE', 1);
-  if (/agent/i.test(t)) push('AGENTS', 0);
-  if (/ai\b/i.test(t)) push('AI', 0);
-  if (/scale|grow/i.test(t)) push('SCALE', 2);
-  if (/install|setup|vs.?code/i.test(t)) push('VS CODE', 0);
-  if (/workflow/i.test(t)) push('WORKFLOW', 1);
-  if (/prompt/i.test(t)) push('PROMPTS', 0);
-  if (/revenue|money|\$/i.test(t)) push('REVENUE', 2);
+  if (/claude/i.test(t)) push('CLAUDE');
+  if (/code/i.test(t)) push('CODE');
+  if (/make\.com|make/i.test(t)) push('MAKE.COM');
+  if (/automat/i.test(t)) push('AUTOMATE');
+  if (/agent/i.test(t)) push('AGENTS');
+  if (/ai\b/i.test(t)) push('AI');
+  if (/scale|grow/i.test(t)) push('SCALE');
+  if (/install|setup|vs.?code/i.test(t)) push('VS CODE');
+  if (/workflow/i.test(t)) push('WORKFLOW');
+  if (/prompt/i.test(t)) push('PROMPTS');
+  if (/revenue|money|\$/i.test(t)) push('REVENUE');
 
   // Only add fallback if no topic badges matched
   if (stickers.length === 0) stickers.push({ text: 'AI', pos: p[0], rotate: 3 });
@@ -296,20 +301,17 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
 
   const hasImagen = !!slide.backgroundImage;
 
-  // ── Option A: Photo variant — Nick on right, text on left ──
+  // ── Option A: Photo variant — Nick on right, dark brand bg on left ──
+  // backgroundImage is intentionally ignored here — Step2 sets it to a Nick photo which
+  // would create a double-Nick effect. The right-side <img> IS the photo element for this layout.
   if (v.layout_variant === 'photo') {
     return (
       <div style={{
         position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden', fontFamily: Brand.typography.font_family,
-        ...(hasImagen
-          ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-          : { backgroundColor: Brand.colors.bg_primary }),
+        backgroundColor: Brand.colors.bg_primary,
       }}>
-        {/* Nick's photo — right half */}
-        {/* When Imagen 3 is present, add a base dark overlay first */}
-        {hasImagen && <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 0 }} />}
-        {/* Nick's photo on right — always shown for photo layout (design element, not background) */}
-        <img src="/nick.jpg" alt="" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.60}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: hasImagen ? 0.55 : 0.72, zIndex: 1 }} />
+        {/* Nick's photo on right — the sole photo element for this layout */}
+        <img src="/nick.jpg" alt="" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.60}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.72, zIndex: 1 }} />
         {/* Gradient fade left — keeps text readable */}
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 32%, rgba(26,26,26,0.88) 52%, rgba(26,26,26,0.40) 72%, rgba(26,26,26,0.08) 100%)`, zIndex: 2 }} />
         {/* Subtle orange glow on left */}
