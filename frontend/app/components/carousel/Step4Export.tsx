@@ -4,6 +4,7 @@ import { useCarouselStore } from '../../stores/useCarouselStore';
 import { Download, Package, Copy, Check, Loader2, ChevronLeft, ChevronRight, RotateCcw, AlertCircle } from 'lucide-react';
 import SlideRenderer from '../SlideRenderer';
 import { toPng } from 'html-to-image';
+import { toDataUrl } from '../../lib/imageProxy';
 import type { CarouselSlide } from '../../types';
 
 export default function Step4Export() {
@@ -33,33 +34,15 @@ export default function Step4Export() {
     return () => ro.disconnect();
   }, []);
 
-  // Convert a non-data-URL image to a data URL for CORS-safe export.
-  // Local same-origin paths are fetched directly in the browser; external URLs go through the server proxy.
-  async function toDataUrl(url: string): Promise<string> {
-    if (url.startsWith('data:')) return url;
-    if (url.startsWith('/') && !url.startsWith('//')) {
-      // Local path — fetch directly from the browser (same-origin, no CORS issue)
-      try {
-        const r = await fetch(url);
-        if (!r.ok) return url;
-        const blob = await r.blob();
-        return new Promise(resolve => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = () => resolve(url);
-          reader.readAsDataURL(blob);
-        });
-      } catch { return url; }
-    }
-    // External URL — proxy through server to avoid CORS
-    try {
-      const r = await fetch('/api/image-proxy', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
-      });
-      const d = await r.json();
-      return d.dataUrl || url;
-    } catch { return url; }
+  async function preloadFonts() {
+    await document.fonts.ready;
+    await Promise.allSettled([
+      document.fonts.load('800 52px "Plus Jakarta Sans"'),
+      document.fonts.load('700 28px "Plus Jakarta Sans"'),
+      document.fonts.load('400 24px "Plus Jakarta Sans"'),
+      document.fonts.load('500 12px "Plus Jakarta Sans"'),
+      document.fonts.load('400 15px "JetBrains Mono"'),
+    ]);
   }
 
   // Safety net: proxy any non-data-URL backgrounds before first export
@@ -73,8 +56,8 @@ export default function Step4Export() {
         if (dataUrl.startsWith('data:')) store.setSlideBackground(s.id, dataUrl);
       } catch { /* leave as-is */ }
     }));
-    // Let React flush store updates + CSS background-image load before capturing
-    await new Promise(r => setTimeout(r, 600));
+    // Wait for React to flush store updates and CSS background-image to decode
+    await new Promise(r => setTimeout(r, 800));
     setProxyingImages(false);
   }, [slides, store]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -105,15 +88,7 @@ export default function Step4Export() {
     setDownloading(i);
     setExportError(null);
     try {
-      // Wait for all fonts to settle, then explicitly load Plus Jakarta Sans in critical weights
-      await document.fonts.ready;
-      await Promise.allSettled([
-        document.fonts.load('800 52px "Plus Jakarta Sans"'),
-        document.fonts.load('700 28px "Plus Jakarta Sans"'),
-        document.fonts.load('400 24px "Plus Jakarta Sans"'),
-        document.fonts.load('500 12px "Plus Jakarta Sans"'),
-        document.fonts.load('400 15px "JetBrains Mono"'),
-      ]);
+      await preloadFonts();
       const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350 });
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
     } catch (e) {
@@ -128,15 +103,7 @@ export default function Step4Export() {
     setDownloading('zip');
     setExportError(null);
     try {
-      // Wait for all fonts to settle, then explicitly load Plus Jakarta Sans in critical weights
-      await document.fonts.ready;
-      await Promise.allSettled([
-        document.fonts.load('800 52px "Plus Jakarta Sans"'),
-        document.fonts.load('700 28px "Plus Jakarta Sans"'),
-        document.fonts.load('400 24px "Plus Jakarta Sans"'),
-        document.fonts.load('500 12px "Plus Jakarta Sans"'),
-        document.fonts.load('400 15px "JetBrains Mono"'),
-      ]);
+      await preloadFonts();
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       for (let i = 0; i < slides.length; i++) {

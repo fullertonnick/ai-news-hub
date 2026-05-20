@@ -3,39 +3,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
 import { Loader2, RefreshCw, Check, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import { NICK_PHOTOS, pickRandomPhoto } from '../../lib/nickPhotos';
+import { toDataUrl as proxyPhoto } from '../../lib/imageProxy';
 import SlideRenderer from '../SlideRenderer';
-
-async function proxyPhoto(url: string): Promise<string> {
-  // Local same-origin paths (e.g. /nick-photos/nick-1.jpg) are already accessible to
-  // html-to-image without a round-trip through the server proxy. The proxy runs server-side
-  // and cannot resolve relative URLs, so we skip it for local paths.
-  if (url.startsWith('/') && !url.startsWith('//')) {
-    try {
-      const r = await fetch(url);
-      if (!r.ok) return url;
-      const blob = await r.blob();
-      return new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => resolve(url);
-        reader.readAsDataURL(blob);
-      });
-    } catch {
-      return url;
-    }
-  }
-  try {
-    const r = await fetch('/api/image-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url }),
-    });
-    const d = await r.json();
-    return d.dataUrl || url;
-  } catch {
-    return url;
-  }
-}
 
 export default function Step2Visuals() {
   const store = useCarouselStore();

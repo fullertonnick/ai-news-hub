@@ -37,7 +37,18 @@ function styleHint(style: string): string {
   if (style === 'prompt_reveal') {
     return `STYLE HINT: "prompt_reveal" — Before/After or Myth-Busting. Build tension (what people believe, what goes wrong), then flip it. section_labels: "The Myth", "Reality", "Before", "After"`;
   }
-  return `STYLE HINT: "tech_breakdown" — Deep Dive or Steps. Explain the mechanism: what it is → how it works → real example → how to apply it. Good section_labels: "What it is", "How it works", "Real Example", "How to Use It", "Step 1", "Step 2", "Step 3"`;
+  return `STYLE HINT: "tech_breakdown" — The structure must come from the topic's natural shape, NOT from a template.
+
+Ask yourself:
+• Is this topic a sequential process or setup guide? → Steps
+• Is this topic a list of separate things (tools, tips, examples)? → Numbered List
+• Does this topic bust a common belief? → Myth-Busting
+• Does this topic compare two options or approaches? → Comparison
+• Does this topic explain a mechanism or hidden system? → Deep Dive
+• Does this topic show a transformation or "before vs. now"? → Before/After
+
+Pick the ONE structure where every slide title writes itself instantly. If you're straining to title a slide, you chose the wrong structure.
+DO NOT default to numbered steps for technical content — that's lazy. Match the structure to the content.`;
 }
 
 function fallbackKeyword(topic: string): string {
@@ -238,52 +249,65 @@ KEYWORD: max 8 chars, ALL CAPS, the single core concept
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-CAPTION — ready to paste into Instagram:
+CAPTION — ready to paste into Instagram. Use \\n\\n for blank lines between sections.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Line 1: Hook — ONE sentence that makes the reader stop scrolling. Reframes the topic unexpectedly. NOT the slide headline verbatim.
-[blank line]
-3-5 lines starting with → (arrow symbol) that tease the most surprising insights inside — actual takeaways, not vague promises. Make each one feel like a secret.
-[blank line]
-Comment [KEYWORD] and I'll send you [name the EXACT thing — e.g. "the template", "the full script", "the checklist"] 🔥
+[HOOK] ONE sentence. Stops scrolling. Reframes the topic unexpectedly. NOT the slide headline verbatim.
+\\n\\n
+[BULLETS] 3-5 lines each starting with → that tease the most surprising insight inside. Actual takeaways, not vague promises. Each line feels like a secret the reader doesn't know yet.
+\\n\\n
+Comment [KEYWORD] and I'll send you [exact deliverable — e.g. "the template", "the full setup guide", "the checklist"] 🔥
 📌 Save this before you lose it
-[blank line]
-10-15 hashtags on one line (must include #simpliscale #thenickcornelius #aitools)
+\\n\\n
+[HASHTAGS] 10-15 on one line — must include #simpliscale #thenickcornelius #aitools
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-FORMAT EXAMPLE — shows JSON structure ONLY. Topic and structure below are unrelated to your task.
+FORMAT EXAMPLE — shows JSON structure ONLY. This example uses Deep Dive structure.
+Yours may use a completely different structure. IGNORE topic and content below.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {
   "slides": [
     {
-      "text": "Your Make.com automation is silently failing\\n\\n(and you won't know until a client is already angry)",
-      "accent_word": "silently failing",
+      "text": "Most AI agents fail within 2 weeks of deployment\\n\\n(and it's never the model's fault)",
+      "accent_word": "never the model's fault",
       "section_label": null,
       "visual_type": "cover_photo"
     },
     {
-      "text": "Make.com scenarios fail with zero notification by default.\\n\\nYour trigger fires, hits an API error, and stops. No alert. No fallback. Client data queues up going nowhere.\\n\\nThat's the out-of-the-box behavior.",
-      "accent_word": "zero notification",
-      "section_label": "Before",
+      "text": "An AI agent is a loop: perceive → decide → act → repeat. That's it.\\n\\nNot magic. Not sentience. A program that reads inputs, calls tools, and writes outputs — until a condition is met or a human stops it.",
+      "accent_word": "perceive → decide → act",
+      "section_label": "What it actually is",
       "visual_type": "none"
     },
     {
-      "text": "Add an Error Handler route after every HTTP module. Route failures to a Slack message with the error text and module name.\\n\\n4 minutes to set up. Saves you from a client escalation at 9pm.",
-      "accent_word": "4 minutes",
-      "section_label": "After",
+      "text": "Agents fail when scope is wrong, not when models are wrong.\\n\\nA GPT-4-level model with one clear task outperforms a frontier model with 12 vague tasks every time.\\n\\nScope is the architecture decision. Model is the implementation detail.",
+      "accent_word": "one clear task",
+      "section_label": "Why most fail",
       "visual_type": "none"
     },
     {
-      "text": "Want the Make.com error handling template I use on every client build?",
-      "accent_word": "template",
+      "text": "My best-performing agent handles exactly one job: email triage. It reads, labels, drafts replies, and flags anything over $10K.\\n\\nIt's been running 6 months. Zero crashes. 3 tools. 200 lines of code.",
+      "accent_word": "3 tools",
+      "section_label": "Real example",
+      "visual_type": "none"
+    },
+    {
+      "text": "Start with the smallest useful task in your workflow — the one you do 10 times a day and hate.\\n\\nBuild the agent for that. Ship in a week. Add tasks only after it runs clean for 30 days.",
+      "accent_word": "30 days",
+      "section_label": "How to apply it",
+      "visual_type": "none"
+    },
+    {
+      "text": "Want the agent architecture template I use on every client deployment?",
+      "accent_word": "architecture template",
       "section_label": null,
       "visual_type": "cta_slide"
     }
   ],
-  "caption": "Most Make.com automations fail in silence.\\n\\nHere's what that actually costs you:\\n\\n→ Why Make.com gives zero failure alerts by default\\n→ The 4-minute fix that protects every scenario\\n→ How to route errors to Slack instantly\\n→ The exact template I use on client builds\\n\\nComment ERRORS and I'll send you the blueprint 🔥\\n📌 Save this before you lose it\\n\\n#makecom #automation #nocode #aiautomation #workflow #simpliscale #thenickcornelius #agencyowner #solopreneur #productivity #businessautomation #entrepreneur #makecreator #aitools #zapier",
-  "keyword": "ERRORS"
+  "caption": "Most AI agents fail — and it's not because the models are bad.\\n\\nHere's what's actually going wrong:\\n\\n→ The perceive-decide-act loop every agent runs (it's simpler than you think)\\n→ Why scope kills more agents than bad models\\n→ A 3-tool agent that's been running flawlessly for 6 months\\n→ The 30-day rule before you add complexity\\n\\nComment AGENTS and I'll send you the full architecture template 🔥\\n📌 Save this before you lose it\\n\\n#aiagents #autonomousai #claude #anthropic #aitools #simpliscale #thenickcornelius #agencyowner #automation #buildwithAI",
+  "keyword": "AGENTS"
 }
 
-The example above is Make.com error handling — purely a format reference. IGNORE its structure and content.
+The example above is AI agents with Deep Dive structure — purely a format reference. YOUR carousel must use whatever structure naturally fits "${topic}". Do NOT copy this structure.
 Now write a completely original carousel about: "${topic}"`;
 
   if (!apiKey) {
