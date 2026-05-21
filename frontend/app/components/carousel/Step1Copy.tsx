@@ -74,6 +74,18 @@ export default function Step1Copy() {
           className="w-full bg-brand-orange hover:bg-orange-500 disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
           {copyLoading ? <><Loader2 size={14} className="animate-spin" />Generating Copy...</> : <><Zap size={14} />{slides.length ? 'Regenerate All Copy' : 'Generate Copy'}</>}
         </button>
+
+        {!slides.length && !error && (
+          <div className="space-y-1.5 pt-1">
+            <p className="text-[10px] text-gray-600 uppercase tracking-widest font-bold">Try these:</p>
+            {['Claude Code memory system', 'Make.com client onboarding automation', 'AI agents for agency owners'].map(t => (
+              <button key={t} onClick={() => store.setTopic(t)}
+                className="text-[10px] text-gray-600 hover:text-brand-orange transition-colors block truncate text-left">
+                → {t}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Error banner */}

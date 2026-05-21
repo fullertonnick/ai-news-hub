@@ -109,7 +109,8 @@ export default function Step2Visuals() {
       if (id.dataUrl) {
         useCarouselStore.getState().setSlideBackground(slideId, id.dataUrl);
       } else {
-        const msg = id.error || 'Image generation returned no result';
+        const rawMsg = id.error || 'Image generation returned no result';
+        const msg = rawMsg.includes('GEMINI_API_KEY') ? 'No API key — set GEMINI_API_KEY to generate backgrounds' : rawMsg;
         setBgError(prev => ({ ...prev, [slideId]: msg }));
         useCarouselStore.getState().setSlideBackgroundStatus(slideId, 'error');
       }
