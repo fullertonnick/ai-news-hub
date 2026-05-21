@@ -37,11 +37,28 @@ export default function Step4Export() {
   async function preloadFonts() {
     await document.fonts.ready;
     await Promise.allSettled([
+      // Core slide fonts
       document.fonts.load('800 52px "Plus Jakarta Sans"'),
       document.fonts.load('700 28px "Plus Jakarta Sans"'),
       document.fonts.load('400 24px "Plus Jakarta Sans"'),
       document.fonts.load('500 12px "Plus Jakarta Sans"'),
+      // Italic variants (used by big_quote slides)
+      document.fonts.load('italic 800 52px "Plus Jakarta Sans"'),
+      document.fonts.load('italic 700 44px "Plus Jakarta Sans"'),
+      document.fonts.load('italic 400 24px "Plus Jakarta Sans"'),
+      // Code block font
       document.fonts.load('400 15px "JetBrains Mono"'),
+      document.fonts.load('500 15px "JetBrains Mono"'),
+      // Text overlay fonts
+      document.fonts.load('400 24px "Caveat"'),
+      document.fonts.load('700 24px "Caveat"'),
+      document.fonts.load('400 24px "Archivo Black"'),
+      document.fonts.load('400 24px "DM Sans"'),
+      document.fonts.load('700 24px "DM Sans"'),
+      document.fonts.load('400 24px "Playfair Display"'),
+      document.fonts.load('700 24px "Playfair Display"'),
+      document.fonts.load('italic 400 24px "Playfair Display"'),
+      document.fonts.load('italic 700 24px "Playfair Display"'),
     ]);
   }
 

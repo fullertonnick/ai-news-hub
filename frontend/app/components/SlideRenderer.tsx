@@ -173,21 +173,31 @@ function getTopicStickers(text: string, headlinePosition: 'top' | 'middle' | 'bo
   const t = text.toLowerCase();
   const stickers: { text: string; pos: Record<string, string>; rotate: number }[] = [];
 
-  const isTop = headlinePosition === 'top';
-  // Safe badge positions: upper zone for middle/bottom headlines, lower-middle zone for top headline
-  const p: Record<string, string>[] = isTop
-    ? [
-        { top: '42%', right: '5%' },
-        { top: '50%', left: '4%' },
-        { bottom: '22%', right: '5%' },
-        { bottom: '28%', left: '4%' },
-      ]
-    : [
-        { top: '8%', right: '5%' },
-        { top: '20%', left: '4%' },
-        { top: '30%', right: '4%' },
-        { top: '38%', left: '4%' },
-      ];
+  // Safe badge positions:
+  //   'top'    → headline at 10%, badges go in the lower-middle zone (42-55%)
+  //   'middle' → headline at 35%, badges stay in tight upper zone (6-28%) to avoid overlap
+  //   'bottom' → headline at 60%, badges in upper zone (8-38%, all clear of headline)
+  const p: Record<string, string>[] =
+    headlinePosition === 'top'
+      ? [
+          { top: '42%', right: '5%' },
+          { top: '50%', left: '4%' },
+          { bottom: '22%', right: '5%' },
+          { bottom: '28%', left: '4%' },
+        ]
+      : headlinePosition === 'middle'
+        ? [
+            { top: '6%',  right: '5%' },
+            { top: '15%', left: '4%' },
+            { top: '23%', right: '4%' },
+            { top: '28%', left: '4%' },
+          ]
+        : [
+            { top: '8%',  right: '5%' },
+            { top: '20%', left: '4%' },
+            { top: '30%', right: '4%' },
+            { top: '38%', left: '4%' },
+          ];
 
   const rotations = [3, -2, 2, -3];
   // Use stickers.length as position index so each new badge gets a unique slot.
@@ -275,7 +285,7 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
 
       {/* Headline — vertical position controlled by v.position (default: bottom at 60%) */}
       <div style={{ position: 'absolute', top: `${H * headlineTopFraction}px`, bottom: `${120 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3 }}>
-        <div style={{ fontSize: `${fontSize}px`, fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: `${14 * sc}px` }}>
+        <div style={{ fontSize: `${fontSize}px`, fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: `${14 * sc}px`, textShadow: '0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.85)' }}>
           {renderWithAccent(coverHeadline, slide.accent_word, { color: Brand.colors.text_primary })}
         </div>
         {(coverSubtitle || v.subtext) && (
@@ -320,10 +330,10 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
 
         {/* Left content column */}
         <div style={{ position: 'absolute', left: `${PH}px`, right: `${W * 0.52}px`, top: 0, bottom: `${80 * sc}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: `${22 * sc}px`, zIndex: 4 }}>
-          <div style={{ fontSize: `${48 * sc}px`, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em' }}>
+          <div style={{ fontSize: `${52 * sc}px`, fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.03em', textShadow: 'none' }}>
             {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
           </div>
-          <div style={{ width: `${44 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px' }} />
+          <div style={{ width: `${52 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px' }} />
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
             <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600 }}>Comment</span>
             {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, padding: `${7 * sc}px ${18 * sc}px`, borderRadius: `${26 * sc}px`, lineHeight: 1.2 }}>{v.keyword}</span>}
