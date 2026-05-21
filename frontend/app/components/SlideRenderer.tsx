@@ -290,7 +290,7 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
         </div>
         {(coverSubtitle || v.subtext) && (
           <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: `${24 * sc}px`, fontWeight: 500, lineHeight: 1.4, margin: 0 }}>
-            {coverSubtitle || v.subtext}
+            {renderWithAccent(coverSubtitle || v.subtext || '', slide.accent_word, { color: 'rgba(255,255,255,0.75)' })}
           </p>
         )}
       </div>
@@ -422,7 +422,10 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   // ─── Standard content slides — NO header, vertically centered ───
 
   const isBigQuote = slide.visual?.type === 'big_quote';
-  const hasVis = slide.visual?.type !== 'none' && !!slide.visual?.type;
+  // Only treat a slide as having a visual if the visual object has data beyond just the type field.
+  // This prevents empty visual blocks when visual_type is set but no structured data was generated.
+  const hasActualVisualData = slide.visual && Object.keys(slide.visual).filter(k => k !== 'type').length > 0;
+  const hasVis = slide.visual?.type !== 'none' && !!slide.visual?.type && !!hasActualVisualData;
   const hasImagen = !!slide.backgroundImage;
   const paras = (slide.text || '').split('\n\n').filter(Boolean);
   const headline = paras[0] || slide.text || '';

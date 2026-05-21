@@ -37,18 +37,21 @@ function styleHint(style: string): string {
   if (style === 'prompt_reveal') {
     return `STYLE HINT: "prompt_reveal" — Before/After or Myth-Busting. Build tension (what people believe, what goes wrong), then flip it. section_labels: "The Myth", "Reality", "Before", "After"`;
   }
-  return `STYLE HINT: "tech_breakdown" — The structure must come from the topic's natural shape, NOT from a template.
+  return `STYLE HINT: "tech_breakdown" — Match structure to topic shape. Use this decision tree:
 
-Ask yourself:
-• Is this topic a sequential process or setup guide? → Steps
-• Is this topic a list of separate things (tools, tips, examples)? → Numbered List
-• Does this topic bust a common belief? → Myth-Busting
-• Does this topic compare two options or approaches? → Comparison
-• Does this topic explain a mechanism or hidden system? → Deep Dive
-• Does this topic show a transformation or "before vs. now"? → Before/After
+1. Topic = "HOW to do X" / step-by-step process / installation → STEPS ("Step 1", "Step 2"…)
+2. Topic = "N things that Y" / multiple equal examples / tool list → NUMBERED LIST ("01.", "02."…)
+3. Topic = mechanism / feature / system / "how X works" → DEEP DIVE ("What it is", "Why it matters", "How it works", "Real example", "How to apply")
+4. Topic = common misconception / what people get wrong → MYTH-BUSTING ("The Myth", "Reality", or "What people think", "What actually happens")
+5. Topic = two competing approaches / which to choose → COMPARISON ("Option A", "Option B", then "The verdict")
+6. Topic = dramatic transformation / before-now contrast → BEFORE/AFTER ("Before", "After")
 
-Pick the ONE structure where every slide title writes itself instantly. If you're straining to title a slide, you chose the wrong structure.
-DO NOT default to numbered steps for technical content — that's lazy. Match the structure to the content.`;
+PICK THE FIRST that fits naturally. Every slide title should write itself. If you're forcing slide titles, restart with a different structure.
+
+EXPLICITLY FORBIDDEN:
+- "Level 1", "Level 2", "Level 3" — never, ever, under any circumstances
+- "The Problem", "The Fix" as the ONLY two slides — this cliché is banned
+- Vague section labels like "Introduction", "Conclusion", "Overview", "Summary"`;
 }
 
 function fallbackKeyword(topic: string): string {
@@ -126,6 +129,7 @@ function buildCategoryFallback(topic: string, category: string): { slides: any[]
 }
 
 // If AI picks an accent_word that isn't in the slide text, extract the most impactful phrase.
+// Priority: tool/file names > numbers with units > kicker sentence words > first long word.
 function fixAccentWord(text: string, accentWord: string | undefined): string {
   if (!accentWord) return '';
   if (text.toLowerCase().includes(accentWord.toLowerCase())) return accentWord;
@@ -133,16 +137,26 @@ function fixAccentWord(text: string, accentWord: string | undefined): string {
   const toolMatch = text.match(/\b[A-Z][A-Z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/);
   if (toolMatch) return toolMatch[0];
   // Prefer numbers with units (most concrete = most impactful)
-  const numMatch = text.match(/\$[\d,]+[k]?|\b\d+(?:\.\d+)?x\b|\b\d+(?:\s*(?:%|hrs?|hours?|min|minutes?|days?|weeks?|months?|seconds?|k))\b/i);
+  const numMatch = text.match(/\$[\d,]+[k+]?|\b\d+(?:\.\d+)?x\b|\b\d+(?:\s*(?:%|hrs?|hours?|min|minutes?|days?|weeks?|months?|seconds?|k|K))\b/i);
   if (numMatch) return numMatch[0].trim();
-  // Prefer short named concepts: 1-3 word noun phrases that aren't stop words
-  const stop = new Set(['their', 'there', 'where', 'every', 'which', 'about', 'after', 'before', 'while', 'doing', 'using', 'start', 'build', 'when', 'from', 'that', 'with', 'your', 'have', 'more', 'this', 'just', 'most', 'also', 'than', 'then', 'what', 'into', 'over', 'them', 'they', 'some']);
-  const words = text.split(/\s+/).filter(w => {
+  // Prefer tool/product names in title case followed by punctuation (e.g. "Claude Code", "Make.com")
+  const brandMatch = text.match(/\b(?:Claude(?:\s+Code)?|Make\.com|Notion|Slack|HubSpot|Airtable|Zapier|n8n|Cursor|VS\s*Code|Replicate|Anthropic|OpenAI|Gemini)\b/i);
+  if (brandMatch) return brandMatch[0];
+  // Prefer words from the LAST sentence (kicker) — they carry the most punch
+  const stop = new Set(['their', 'there', 'where', 'every', 'which', 'about', 'after', 'before', 'while', 'doing', 'using', 'start', 'build', 'when', 'from', 'that', 'with', 'your', 'have', 'more', 'this', 'just', 'most', 'also', 'than', 'then', 'what', 'into', 'over', 'them', 'they', 'some', 'will', 'been', 'were', 'could', 'would', 'should']);
+  const sentences = text.split(/[.!?]+/).filter(Boolean);
+  const kicker = sentences[sentences.length - 1] || text;
+  const kickerWords = kicker.split(/\s+/).filter(w => {
     const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
     return clean.length > 4 && !stop.has(clean);
   });
-  const candidate = words[0] || accentWord;
-  return candidate.replace(/[.,!?;:]$/, '');
+  if (kickerWords.length) return kickerWords[kickerWords.length - 1].replace(/[.,!?;:]$/, '');
+  // Final fallback: first long non-stopword anywhere in text
+  const allWords = text.split(/\s+/).filter(w => {
+    const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
+    return clean.length > 4 && !stop.has(clean);
+  });
+  return (allWords[0] || accentWord).replace(/[.,!?;:]$/, '');
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -205,40 +219,46 @@ ${styleHint(style)}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 STRUCTURE — pick ONE that best fits this specific topic:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ABSOLUTELY BANNED: "Level 1, Level 2..." — never use this.
-AVOID DEFAULTING TO: "The Problem / The Fix" — only use if the topic is a direct pain/solution story.
+ABSOLUTELY BANNED: "Level 1", "Level 2", "Level 3" — if you write these, the output fails.
+ABSOLUTELY BANNED section labels: "Introduction", "Conclusion", "Overview", "Summary"
+OVERUSED — avoid: "The Problem / The Fix" as only two sections (cliché unless topic truly IS pain+solution)
 
-Choose the structure where each slide writes itself:
-• Steps → "Step 1…Step N": setup guides, how-to tutorials, sequential processes
-• Numbered List → "01.…02.": tools, tips, or examples without strict ordering
-• Before/After → "Before" then "After": transformation, contrast, what changed
-• Myth-Busting → "The Myth" then "Reality": correcting beliefs people hold
-• Deep Dive → What it is → Why it matters → How it works → Real example → How to apply
-• Comparison → Side A vs Side B → pick one: tradeoffs, which to choose and why
+Use the STYLE HINT decision tree above to choose ONE structure. Every section label must follow that structure's naming pattern consistently.
 
-The right structure makes every slide title obvious. If you can't title a slide naturally, you picked the wrong structure.
+CORRECT SECTION LABEL EXAMPLES BY STRUCTURE:
+• Steps: "Step 1", "Step 2", "Step 3"
+• Numbered List: "01.", "02.", "03."
+• Deep Dive: "What it actually is", "Why it matters", "How it works", "Real example", "How to use it now"
+• Myth-Busting: "The Myth", "The Reality" — or "Myth #1: [specific belief]", "Reality: [what actually happens]"
+• Before/After: "Before", "After" — or specific contrast names like "What most people do", "What actually works"
+• Comparison: Name each option specifically, e.g. "Claude Code alone", "Claude Code + CLAUDE.md"
 
-Slide count = how deep the topic actually needs to go. Don't pad.
-  5 distinct steps → 5 content slides. 3 myths → 3 slides. 7 tools → 7 slides.
+Slide count = topic depth, not padding. Be ruthless.
+  3 myths → 3 content slides. 4 steps → 4 slides. 5 tools → 5 slides.
   Total range: 5–10 slides (including cover + CTA).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SLIDE SPECS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SLIDE 1 (COVER):
-  text: 5-8 word bold headline + (subtitle in parens with the specific payoff)
+  text: 5-8 word bold declarative headline + (subtitle in parens naming the exact payoff)
+    GOOD: "Claude Code forgets everything between sessions\n\n(and CLAUDE.md fixes it in 5 minutes)"
+    BAD: "Here's what you need to know about AI memory" — too vague
   visual_type: "cover_photo"
   section_label: null
 
 SLIDES 2 to N-1 (CONTENT):
-  text: 2-4 punchy sentences, one idea, ends with a kicker
+  text: 2-4 punchy sentences. One idea per slide. Last sentence = kicker that lands hard.
+    Each sentence should be ≤ 15 words. Fragments are fine. Never start with "In conclusion".
   visual_type: "none"
-  section_label: the label from your chosen structure (e.g. "Step 1", "01.", "The Myth", "Before", "What it is") — or null if none needed
+  section_label: REQUIRED — must match your chosen structure's naming pattern exactly (e.g. "Step 1", "01.", "The Myth", "Before", "What it actually is")
+    Exception: set null only if the chosen structure genuinely has no labels (rare).
 
 LAST SLIDE (CTA):
-  text: ONE compelling question that flows naturally from the content. That's all.
-    STOP after the question mark. Do NOT write "Comment X and I'll send you Y" —
-    the slide template renders that automatically using the keyword field.
+  text: ONE compelling question ending with "?" — flows naturally from the content's promise.
+    GOOD: "Want the exact CLAUDE.md template I use on every project?"
+    BAD: "Comment MEMORY below for more!" — DO NOT include "Comment X" text. The template adds this.
+    STOP after the question mark. Nothing else.
   visual_type: "cta_slide"
   section_label: null
 
@@ -334,18 +354,21 @@ Now write a completely original carousel about: "${topic}"`;
 
     const slides = (parsed.slides || []).map((s: any) => {
       const cleanText = stripForbidden(s.text || '');
-      // Normalize section_label: null/"null"/"none" → undefined; strip "Level X" prefix
+      // Normalize section_label: null/"null"/"none"/empty → undefined
+      // Strip banned patterns: "Level X", generic intro/outro labels
       const rawLabel: string | null | undefined = s.section_label;
-      const sectionLabel = (rawLabel && rawLabel !== 'null' && rawLabel !== 'none')
-        ? rawLabel.replace(/^level\s+\d+\s*[:.]?\s*/i, '').trim() || undefined
+      const BANNED_LABELS = /^(level\s+\d+|introduction|conclusion|overview|summary|content|slide\s+\d+)$/i;
+      const sectionLabel = (rawLabel && rawLabel !== 'null' && rawLabel !== 'none' && rawLabel.trim())
+        ? rawLabel.replace(/^level\s+\d+\s*[:.]?\s*/i, '').trim().replace(/^slide\s+\d+\s*[:.]?\s*/i, '').trim() || undefined
         : undefined;
+      const cleanedLabel = sectionLabel && !BANNED_LABELS.test(sectionLabel) ? sectionLabel : undefined;
       // Ensure visual_type is a known value
       const vt = VALID_VISUAL_TYPES.has(s.visual_type) ? s.visual_type : 'none';
       return {
         ...s,
         text: cleanText,
         accent_word: fixAccentWord(cleanText, s.accent_word),
-        section_label: sectionLabel,
+        section_label: cleanedLabel,
         visual_type: vt,
         id: uid(),
         backgroundStatus: 'pending' as const,
