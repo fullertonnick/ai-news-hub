@@ -327,7 +327,17 @@ Yours may use a completely different structure. IGNORE topic and content below.
   "keyword": "AGENTS"
 }
 
-The example above is AI agents with Deep Dive structure — purely a format reference. YOUR carousel must use whatever structure naturally fits "${topic}". Do NOT copy this structure.
+The example above uses Deep Dive structure for an AI concepts topic. It is purely a JSON format reference.
+YOUR carousel may use a completely different structure. Do NOT copy the labels or flow above.
+
+PICK THE RIGHT STRUCTURE FOR THIS TOPIC:
+  Setup / install / configure / how to do X → STEPS   (labels: "Step 1", "Step 2", "Step 3")
+  N tools / mistakes / reasons / tips        → NUMBERED LIST   (labels: "01.", "02.", "03.")
+  What is X / how does X actually work       → DEEP DIVE   (labels: "What it actually is", "Why it matters", "Real example", "How to apply it")
+  X is wrong / myth vs reality               → MYTH-BUSTING   (labels: "Myth #1: [belief]", "Reality: [what's true]")
+  Before AI vs after / old way vs new way    → BEFORE/AFTER   (labels: "Before", "After" — or descriptive contrasts)
+  X vs Y / which approach to choose          → COMPARISON   (label each option by its actual name)
+
 Now write a completely original carousel about: "${topic}"`;
 
   if (!apiKey) {
