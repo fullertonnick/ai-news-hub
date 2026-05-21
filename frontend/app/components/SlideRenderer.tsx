@@ -302,16 +302,17 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
   const hasImagen = !!slide.backgroundImage;
 
   // ── Option A: Photo variant — Nick on right, dark brand bg on left ──
-  // backgroundImage is intentionally ignored here — Step2 sets it to a Nick photo which
-  // would create a double-Nick effect. The right-side <img> IS the photo element for this layout.
+  // The right-side <img> uses slide.backgroundImage (set via Step2 photo shuffle), falling back
+  // to /nick.jpg. We keep the slide background as solid dark (#1A1A1A) to avoid double-Nick.
   if (v.layout_variant === 'photo') {
+    const photoSrc = slide.backgroundImage || '/nick.jpg';
     return (
       <div style={{
         position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden', fontFamily: Brand.typography.font_family,
         backgroundColor: Brand.colors.bg_primary,
       }}>
-        {/* Nick's photo on right — the sole photo element for this layout */}
-        <img src="/nick.jpg" alt="" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.60}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.72, zIndex: 1 }} />
+        {/* Nick's photo on right — uses the selected photo from Step2 shuffle */}
+        <img src={photoSrc} alt="" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.60}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.72, zIndex: 1 }} />
         {/* Gradient fade left — keeps text readable */}
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 32%, rgba(26,26,26,0.88) 52%, rgba(26,26,26,0.40) 72%, rgba(26,26,26,0.08) 100%)`, zIndex: 2 }} />
         {/* Subtle orange glow on left */}
