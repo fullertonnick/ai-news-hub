@@ -96,8 +96,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body
-        className="bg-black text-white antialiased"
-        style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}
+        className="bg-[#1A1A1A] text-white antialiased"
+        style={{ fontFamily: '"Plus Jakarta Sans", Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}
       >
         {children}
       </body>
