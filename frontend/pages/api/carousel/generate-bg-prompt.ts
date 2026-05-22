@@ -45,10 +45,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (/hook|hooks?|bash_tool|settings\.json|instruction/.test(slideWords)) conceptHints.push('dark mechanical keyboard with amber backlit keys, code on blurred screen behind, macro lens depth of field');
   if (/error|fail|break|crash|fix|debug/.test(slideWords)) conceptHints.push('dark workspace with single amber warning glow on monitor, blurred error text, moody cinematic lighting');
   if (/step|setup|install|configure|init/.test(slideWords)) conceptHints.push('dark home office desk, single warm amber lamp illuminating notebook and laptop, cinematic angle, shallow depth of field');
+  if (/output|result|deliver|ship|produce|generat/.test(slideWords)) conceptHints.push('dark workspace with glowing screen showing finished deliverable, warm amber light from monitor, cinematic depth of field');
+  if (/loop|repeat|schedule|automat|cron|trigger/.test(slideWords)) conceptHints.push('dark abstract visualization of circular amber glowing path on near-black, minimal, professional, bokeh, continuous flow');
+  if (/data|file|row|record|process|extract|parse|chunk/.test(slideWords)) conceptHints.push('dark server rack corridor bathed in warm amber light, blurred hardware in background, cinematic perspective, bokeh');
+  if (/team|hire|outsource|agency|client\b|proposal/.test(slideWords)) conceptHints.push('dark executive boardroom with single overhead warm spotlight, empty premium chairs, cinematic wide angle');
+  if (/cost|saving|budget|price|fee|expense/.test(slideWords)) conceptHints.push('dark minimal desk with single warm amber lamp, closed laptop, simple luxury, bokeh office depth');
+  if (/context\s*window|compress|summar|token\b/.test(slideWords)) conceptHints.push('dark minimal background with abstract amber horizontal gauge glow, near-black, cinematic, precision');
+  if (/myth|wrong|mistake|fail|common|believe|think/.test(slideWords)) conceptHints.push('dark atmospheric background with single amber spotlight cutting through dark mist, theatrical, reveals-the-truth mood');
+
+  // Type-specific scene fallbacks — used when slide text doesn't match any concept hint
+  const SCENE_FALLBACKS: Record<string, string> = {
+    cover_photo: 'dramatic dark home office at night, multiple ultrawide monitors with warm amber glow, mechanical keyboard foreground, bokeh depth of field, cinematic',
+    code_block: 'extreme close-up dark mechanical keyboard with single amber-backlit key, dark background, macro photography, shallow depth of field',
+    stats_grid: 'ultra-dark minimal background, deep charcoal gradient, subtle warm orange radial glow from center at low opacity, completely clean',
+    steps_list: 'dark background with subtle directional amber light suggesting forward movement, ascending diagonal light rays, professional',
+    diagram: 'abstract dark background with subtle orange glowing node network, blurred fiber optic trails, minimal tech-forward',
+    big_quote: 'single warm spotlight beam cutting through dark atmospheric smoke, theatrical, moody, cinematic, high contrast',
+    comparison: 'dark neutral background, two subtle zones of different color temperature — cool blue left, warm amber right, minimal',
+    skill_card: 'premium dark product photography, dark vignette, soft warm center glow, luxury brand aesthetic, minimal',
+    cta_slide: 'dramatic stage lighting, single intense warm orange spotlight circle from above, deep black surround, theatrical premium',
+    checklist: 'dark minimal background, subtle amber radial glow, clean and professional, perfect for reading',
+    none: 'atmospheric dark background with subtle warm texture, clean professional, very subtle orange glow on left edge',
+  };
 
   const sceneHint = conceptHints.length > 0
     ? `SCENE CONCEPT (derived from slide text): ${conceptHints[0]}`
-    : `SCENE: cinematic dark workspace with warm amber light source, deep shadows`;
+    : `SCENE: ${SCENE_FALLBACKS[slideType] || SCENE_FALLBACKS.none}`;
 
   const prompt = `Write an Imagen 3 image generation prompt for an Instagram carousel slide background.
 

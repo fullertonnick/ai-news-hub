@@ -74,6 +74,7 @@ export default function Step4Export() {
     ]);
   }
 
+
   // Safety net: proxy any non-data-URL backgrounds before first export
   const ensureDataUrls = useCallback(async () => {
     const external = slides.filter(s => s.backgroundImage && !s.backgroundImage.startsWith('data:'));

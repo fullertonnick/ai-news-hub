@@ -122,8 +122,19 @@ export default function Step2Visuals() {
     setGenerating(prev => ({ ...prev, [slideId]: false }));
   }, [topic, category]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Generate ALL middle backgrounds one-at-a-time (truly sequential to avoid rate limits)
+  // Generate MISSING middle backgrounds one-at-a-time (skips slides that already have images).
+  // Use this for auto-generation and the primary button — avoids expensive re-generation.
   const generateAll = useCallback(async () => {
+    for (const s of slides.slice(1, -1)) {
+      if (!busyRef.current[s.id] && !s.backgroundImage) {
+        await generateBg(s.id, s.text, s.visual_type || 'none');
+        await new Promise(r => setTimeout(r, 400));
+      }
+    }
+  }, [slides, generateBg]);
+
+  // Regenerate ALL middle backgrounds, including ones that already have images.
+  const regenerateAll = useCallback(async () => {
     for (const s of slides.slice(1, -1)) {
       if (!busyRef.current[s.id]) {
         await generateBg(s.id, s.text, s.visual_type || 'none');
@@ -158,6 +169,7 @@ export default function Step2Visuals() {
 
   const middleSlides = slides.slice(1, -1);
   const bgDone = middleSlides.filter(s => s.backgroundImage).length;
+  const bgMissing = middleSlides.filter(s => !s.backgroundImage).length;
   const allGenerating = Object.values(generating).some(Boolean);
 
   return (
@@ -174,11 +186,21 @@ export default function Step2Visuals() {
             )}
           </p>
         </div>
-        <button onClick={generateAll} disabled={allGenerating}
-          className="text-xs font-bold text-black bg-brand-orange hover:bg-orange-500 disabled:opacity-40 px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
-          {allGenerating && <Loader2 size={10} className="animate-spin" />}
-          {allGenerating ? 'Generating...' : 'Generate All Backgrounds'}
-        </button>
+        <div className="flex gap-1.5">
+          {bgMissing > 0 && (
+            <button onClick={generateAll} disabled={allGenerating}
+              className="text-xs font-bold text-black bg-brand-orange hover:bg-orange-500 disabled:opacity-40 px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+              {allGenerating && <Loader2 size={10} className="animate-spin" />}
+              {allGenerating ? 'Generating...' : `Generate Missing (${bgMissing})`}
+            </button>
+          )}
+          {bgDone > 0 && (
+            <button onClick={regenerateAll} disabled={allGenerating}
+              className="text-xs font-medium text-gray-400 hover:text-white border border-white/10 hover:border-white/20 disabled:opacity-40 px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+              <RefreshCw size={10} /> Regen All
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex gap-6 flex-col lg:flex-row">

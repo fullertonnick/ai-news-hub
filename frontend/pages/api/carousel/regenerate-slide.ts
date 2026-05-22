@@ -29,22 +29,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 Topic: "${topic}"
 Category: ${category || 'general'}
-${categoryHints[category] ? categoryHints[category] : ''}
-Style: ${style || 'tech_breakdown'}
+${categoryHints[category] ? `${categoryHints[category]}\n` : ''}Style: ${style || 'tech_breakdown'}
 Slide position: ${position}
 Current text: "${currentText}"
 
-Write a BETTER version. Rules:
-- Pass the Bullshit Test: Specific numbers, novel insight, every sentence earns its place
-- 2–4 sentences max. End with a kicker.
+━━━ REWRITE RULES ━━━
+- Pass the Bullshit Test: specific numbers, novel insight, every sentence earns its place
+- 2–4 sentences max. End with a kicker. Last line should land hard.
 - Second person, present tense. Fragments OK.
-- NEVER use: leverage, synergy, seamless, empower, unlock, revolutionize, supercharge
-- accent_word: the most impactful concept, 1–3 words, must appear verbatim in the text
-  Prefer: file names (CLAUDE.md), numbers with units (3 hours), tool names (Claude Code)
-${isFirst ? '- Cover format: Clean 5-8 word bold headline. Optional subtitle after \\n\\n (no parens).' : ''}
-${isLast ? '- CTA format: ONE compelling question only — stop after the ?. Never include "Comment X and I\'ll send you Y" — the template renders that automatically.' : ''}
+- FORBIDDEN: leverage, synergy, seamless, empower, unlock, revolutionize, supercharge, utilize, paradigm
+- Concrete: "Claude reads your repo in 15s" NOT "AI understands your codebase"
 
-Return JSON only: {"text": "new slide copy", "accent_word": "word or short phrase"}`;
+━━━ ACCENT WORD ━━━
+accent_word MUST appear verbatim in the text (case-insensitive). Pick what a reader would screenshot.
+Priority: numbers with units ("3 hours", "$200/month", "4x") → file/tool/command names ("CLAUDE.md", "/hooks") → myth being busted → core mechanism → named concept
+NEVER pick generic adjectives, filler words, or anything not in the text.
+${isFirst ? `
+━━━ COVER FORMAT ━━━
+Bold headline 5-8 words + optional subtitle after \\n\\n in parens: (specific payoff, one line)
+Example: "Claude Code forgets everything when you close the session\\n\\n(here's the 5-minute fix that makes it remember forever)"` : ''}${isLast ? `
+━━━ CTA FORMAT ━━━
+ONE compelling question that creates desire for the offer. Stop after the ?.
+Never write "Comment X and I'll send you Y" — the slide template renders that automatically.
+Make it feel like the punchline of the whole carousel.` : ''}
+
+Return JSON only: {"text": "...", "accent_word": "..."}`;
+
 
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {

@@ -32,23 +32,35 @@ function detectCategory(topic: string): string {
 
 function styleHint(style: string): string {
   if (style === 'use_case_list') {
-    return `STYLE HINT: "use_case_list" — Numbered List or Comparison. Each content slide = one real-world use case or example. section_labels: "Use Case 1", "Example 2", "01."`;
+    return `STYLE: "use_case_list" — Numbered examples. Each content slide = one real use case with a specific, concrete outcome. Labels: "01.", "02.", "Use Case 1", "Example 2".`;
   }
   if (style === 'prompt_reveal') {
-    return `STYLE HINT: "prompt_reveal" — Before/After or Myth-Busting. Build tension (what people believe, what goes wrong), then flip it. section_labels: "The Myth", "Reality", "Before", "After"`;
+    return `STYLE: "prompt_reveal" — Before/After or Myth-Busting. Build tension then flip it. Labels: "The Myth" / "Reality", "Before" / "After", "What you think" / "What actually happens".`;
   }
-  return `STYLE HINT: "tech_breakdown" — The structure must come from the topic's natural shape, NOT from a template.
+  return `STYLE: "tech_breakdown" — The structure comes from the topic's NATURAL SHAPE, not a template.
 
-Ask yourself:
-• Is this topic a sequential process or setup guide? → Steps
-• Is this topic a list of separate things (tools, tips, examples)? → Numbered List
-• Does this topic bust a common belief? → Myth-Busting
-• Does this topic compare two options or approaches? → Comparison
-• Does this topic explain a mechanism or hidden system? → Deep Dive
-• Does this topic show a transformation or "before vs. now"? → Before/After
+DECISION TREE — work through in order, pick the FIRST that fits perfectly:
+1. Sequential process with ordered steps? (A → B → C) → STEPS
+   Labels: "Step 1", "Step 2", "Step 3"…
+2. List of separate unordered items? (tools, tips, prompts, examples) → NUMBERED LIST
+   Labels: "01.", "02.", "03."…
+3. Correcting a widespread false belief? → MYTH-BUSTING
+   Labels: "The Myth", "Reality", "The Proof", "Apply It"…
+4. Clear before/after transformation? → BEFORE/AFTER
+   Labels: "Before", "After", "The Switch", "The Result"…
+5. Explaining a hidden mechanism, concept, or system? → DEEP DIVE
+   Labels: "What it is", "Why it matters", "How it works", "Real example", "Apply it today"…
+6. Comparing two distinct options? → COMPARISON
+   Labels: "Option A", "Option B", "The Verdict"…
 
-Pick the ONE structure where every slide title writes itself instantly. If you're straining to title a slide, you chose the wrong structure.
-DO NOT default to numbered steps for technical content — that's lazy. Match the structure to the content.`;
+CALIBRATION EXAMPLES — use these to pick your structure:
+"Claude Code memory system" → DEEP DIVE (mechanism: what, why, how, example, apply)
+"Make.com client onboarding automation" → STEPS (sequential: trigger → modules → test → live)
+"Why 80% of AI agents fail in production" → MYTH-BUSTING (belief → reality → proof → fix)
+"5 Claude prompts every agency owner needs" → NUMBERED LIST (01. → 05.)
+"ChatGPT vs Claude for business writing" → COMPARISON (side A vs side B → verdict)
+
+BANNED: "The Problem / The Fix" as a default structure — it flattens every topic into the same shape. Reserve it ONLY when the topic IS a pain-point story (e.g., "Why your automations fail silently at 3am"). Most topics are not.`;
 }
 
 function fallbackKeyword(topic: string): string {
@@ -218,8 +230,12 @@ Choose the structure where each slide writes itself:
 
 The right structure makes every slide title obvious. If you can't title a slide naturally, you picked the wrong structure.
 
-Slide count = how deep the topic actually needs to go. Don't pad.
-  5 distinct steps → 5 content slides. 3 myths → 3 slides. 7 tools → 7 slides.
+SLIDE COUNT — count from your structure, then add cover + CTA:
+  Deep Dive with 5 phases → 7 slides total (cover + 5 content + CTA)
+  Numbered list of 5 items → 7 slides total (cover + 5 items + CTA)
+  3 myths to bust → 5 slides total (cover + 3 content + CTA)
+  4-step process → 6 slides total (cover + 4 steps + CTA)
+  Never pad slides. Never cut a structure short to hit a round number.
   Total range: 5–10 slides (including cover + CTA).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
