@@ -115,6 +115,7 @@ function RenderOverlays({ slide, W, H }: { slide: CarouselSlide; W: number; H: n
             key={s.id}
             src={s.src}
             alt={s.label}
+            crossOrigin="anonymous"
             style={{
               position: 'absolute',
               left: `${(s.x / 100) * W}px`,
@@ -229,10 +230,19 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
   const v = slide.visual as CoverPhotoVisual;
   const [coverHeadline, coverSubtitle] = slide.text.split('\n\n').map(s => s.replace(/^\(|\)$/g, '').trim());
   const headlineWords = coverHeadline.split(/\s+/);
-  const fontSize = headlineWords.length <= 4 ? 96 * sc
+  // Scale by word count first, then clamp down further if total chars are very long
+  // (guards against multi-syllable words overflowing the 1080px - 120px padding space).
+  const charLen = coverHeadline.length;
+  const fontByWords = headlineWords.length <= 4 ? 96 * sc
     : headlineWords.length <= 6 ? 86 * sc
     : headlineWords.length <= 8 ? 76 * sc
     : 66 * sc;
+  const fontByChars = charLen <= 20 ? 96 * sc
+    : charLen <= 30 ? 86 * sc
+    : charLen <= 45 ? 76 * sc
+    : charLen <= 60 ? 66 * sc
+    : 56 * sc;
+  const fontSize = Math.min(fontByWords, fontByChars);
   // photo_enabled defaults to true unless explicitly set to false
   const photoEnabled = v.photo_enabled !== false;
   const hasPhoto = !!slide.backgroundImage && photoEnabled;
@@ -316,6 +326,10 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
   // to /nick.jpg. We keep the slide background as solid dark (#1A1A1A) to avoid double-Nick.
   if (v.layout_variant === 'photo') {
     const photoSrc = slide.backgroundImage || '/nick.jpg';
+    const ctaPhotoFontSize = slide.text.length <= 30 ? 56 * sc
+      : slide.text.length <= 50 ? 48 * sc
+      : slide.text.length <= 70 ? 42 * sc
+      : 36 * sc;
     return (
       <div style={{
         position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden', fontFamily: Brand.typography.font_family,
@@ -330,7 +344,7 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
 
         {/* Left content column */}
         <div style={{ position: 'absolute', left: `${PH}px`, right: `${W * 0.52}px`, top: 0, bottom: `${80 * sc}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: `${22 * sc}px`, zIndex: 4 }}>
-          <div style={{ fontSize: `${52 * sc}px`, fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.03em', textShadow: 'none' }}>
+          <div style={{ fontSize: `${ctaPhotoFontSize}px`, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em', textShadow: 'none' }}>
             {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
           </div>
           <div style={{ width: `${52 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px' }} />
@@ -422,7 +436,24 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   // ─── Standard content slides — NO header, vertically centered ───
 
   const isBigQuote = slide.visual?.type === 'big_quote';
-  const hasVis = slide.visual?.type !== 'none' && !!slide.visual?.type;
+  // A visual block only renders when the visual type has meaningful data.
+  // Visual objects from the AI only have a 'type' field when the user manually
+  // changed visual_type in Step1 without AI providing full data — guard against
+  // rendering empty frames for those types.
+  const visualHasData = (() => {
+    const v = slide.visual;
+    if (!v || v.type === 'none') return false;
+    if (v.type === 'code_block') return !!(v as CodeBlockVisual).code;
+    if (v.type === 'stats_grid') return !!((v as StatsGridVisual).stats?.length);
+    if (v.type === 'diagram') return !!((v as DiagramVisual).nodes?.length);
+    if (v.type === 'steps_list') return !!((v as StepsListVisual).steps?.length);
+    if (v.type === 'comparison') return !!((v as ComparisonVisual).before_items?.length || (v as ComparisonVisual).after_items?.length);
+    if (v.type === 'checklist') return !!((v as ChecklistVisual).items?.length);
+    if (v.type === 'skill_card') return !!(v as SkillCardVisual).name;
+    // big_quote — renders even if partial (supporting text is optional)
+    return true;
+  })();
+  const hasVis = visualHasData;
   const hasImagen = !!slide.backgroundImage;
   const paras = (slide.text || '').split('\n\n').filter(Boolean);
   const headline = paras[0] || slide.text || '';

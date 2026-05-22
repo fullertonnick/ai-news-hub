@@ -1,5 +1,75 @@
 import type { Metadata } from 'next';
+import {
+  Plus_Jakarta_Sans,
+  Inter,
+  JetBrains_Mono,
+  DM_Sans,
+  Caveat,
+  Playfair_Display,
+  Archivo_Black,
+} from 'next/font/google';
 import './globals.css';
+
+// Self-hosted via next/font/google so fonts are same-origin —
+// html-to-image can read the @font-face rules and embed them in exported PNGs.
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  style: ['normal', 'italic'],
+  variable: '--font-plus-jakarta-sans',
+  display: 'swap',
+  preload: true,
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '600', '700', '800'],
+  variable: '--font-inter',
+  display: 'swap',
+  preload: true,
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+  preload: false,
+});
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-dm-sans',
+  display: 'swap',
+  preload: false,
+});
+
+const caveat = Caveat({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-caveat',
+  display: 'swap',
+  preload: false,
+});
+
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-playfair-display',
+  display: 'swap',
+  preload: false,
+});
+
+const archivoBLack = Archivo_Black({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-archivo-black',
+  display: 'swap',
+  preload: false,
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://simpliscale-carousel.vercel.app'),
@@ -9,15 +79,28 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const fontVars = [
+    plusJakartaSans.variable,
+    inter.variable,
+    jetbrainsMono.variable,
+    dmSans.variable,
+    caveat.variable,
+    playfairDisplay.variable,
+    archivoBLack.variable,
+  ].join(' ');
+
   return (
-    <html lang="en">
+    <html lang="en" className={fontVars}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Load all brand fonts via link tag — avoids build-time network fetch from next/font */}
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,700;1,800&family=JetBrains+Mono:wght@400;500&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Caveat:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Archivo+Black&display=swap" rel="stylesheet" />
       </head>
-      <body className="bg-black text-white antialiased" style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>{children}</body>
+      <body
+        className="bg-black text-white antialiased"
+        style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}
+      >
+        {children}
+      </body>
     </html>
   );
 }

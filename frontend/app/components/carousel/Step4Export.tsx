@@ -37,28 +37,40 @@ export default function Step4Export() {
   async function preloadFonts() {
     await document.fonts.ready;
     await Promise.allSettled([
-      // Core slide fonts
+      // Cover headline sizes
+      document.fonts.load('800 96px "Plus Jakarta Sans"'),
+      document.fonts.load('800 86px "Plus Jakarta Sans"'),
+      document.fonts.load('800 76px "Plus Jakarta Sans"'),
+      document.fonts.load('800 66px "Plus Jakarta Sans"'),
+      // Standard content headline sizes
       document.fonts.load('800 52px "Plus Jakarta Sans"'),
+      document.fonts.load('800 48px "Plus Jakarta Sans"'),
+      document.fonts.load('800 44px "Plus Jakarta Sans"'),
+      document.fonts.load('800 36px "Plus Jakarta Sans"'),
       document.fonts.load('700 28px "Plus Jakarta Sans"'),
+      document.fonts.load('600 24px "Plus Jakarta Sans"'),
+      document.fonts.load('500 24px "Plus Jakarta Sans"'),
       document.fonts.load('400 24px "Plus Jakarta Sans"'),
       document.fonts.load('500 12px "Plus Jakarta Sans"'),
-      // Italic variants (used by big_quote slides)
+      // Italic variants (big_quote slides)
       document.fonts.load('italic 800 52px "Plus Jakarta Sans"'),
+      document.fonts.load('italic 800 44px "Plus Jakarta Sans"'),
+      document.fonts.load('italic 800 36px "Plus Jakarta Sans"'),
       document.fonts.load('italic 700 44px "Plus Jakarta Sans"'),
       document.fonts.load('italic 400 24px "Plus Jakarta Sans"'),
       // Code block font
       document.fonts.load('400 15px "JetBrains Mono"'),
       document.fonts.load('500 15px "JetBrains Mono"'),
-      // Text overlay fonts
-      document.fonts.load('400 24px "Caveat"'),
-      document.fonts.load('700 24px "Caveat"'),
-      document.fonts.load('400 24px "Archivo Black"'),
-      document.fonts.load('400 24px "DM Sans"'),
-      document.fonts.load('700 24px "DM Sans"'),
-      document.fonts.load('400 24px "Playfair Display"'),
-      document.fonts.load('700 24px "Playfair Display"'),
-      document.fonts.load('italic 400 24px "Playfair Display"'),
-      document.fonts.load('italic 700 24px "Playfair Display"'),
+      // Text overlay fonts (all weights used by the overlay font size range)
+      document.fonts.load('400 40px "Caveat"'),
+      document.fonts.load('700 40px "Caveat"'),
+      document.fonts.load('400 40px "Archivo Black"'),
+      document.fonts.load('400 40px "DM Sans"'),
+      document.fonts.load('700 40px "DM Sans"'),
+      document.fonts.load('400 40px "Playfair Display"'),
+      document.fonts.load('700 40px "Playfair Display"'),
+      document.fonts.load('italic 400 40px "Playfair Display"'),
+      document.fonts.load('italic 700 40px "Playfair Display"'),
     ]);
   }
 
@@ -106,7 +118,7 @@ export default function Step4Export() {
     setExportError(null);
     try {
       await preloadFonts();
-      const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350 });
+      const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, includeQueryParams: false });
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
     } catch (e) {
       console.error('Export error', e);
@@ -123,13 +135,16 @@ export default function Step4Export() {
       await preloadFonts();
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
+      let missingRefs = 0;
       for (let i = 0; i < slides.length; i++) {
         const el = exportRefs.current[i];
-        if (el) {
-          const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350 });
-          zip.file(`slide-${String(i + 1).padStart(2, '0')}.png`, png.replace(/^data:image\/png;base64,/, ''), { base64: true });
-        }
+        if (!el) { missingRefs++; await new Promise(r => setTimeout(r, 200)); continue; }
+        const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, includeQueryParams: false });
+        zip.file(`slide-${String(i + 1).padStart(2, '0')}.png`, png.replace(/^data:image\/png;base64,/, ''), { base64: true });
         await new Promise(r => setTimeout(r, 200));
+      }
+      if (missingRefs > 0) {
+        console.warn(`ZIP export: ${missingRefs} slide ref(s) were null and skipped. Refresh and retry if slides are missing.`);
       }
       zip.file('instagram-caption.txt', caption || '(no caption)');
       zip.file('carousel-data.json', JSON.stringify({ topic: store.topic, keyword, slides: slides.map(s => ({ text: s.text, visual_type: s.visual_type })), caption }, null, 2));
@@ -137,6 +152,9 @@ export default function Step4Export() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = `carousel-${store.topic.replace(/\s+/g, '-').toLowerCase().slice(0, 40)}.zip`; a.click();
       URL.revokeObjectURL(url);
+      if (missingRefs > 0) {
+        setExportError(`ZIP created but ${missingRefs} slide(s) were missing — scroll down and retry if any are absent.`);
+      }
     } catch (e) {
       console.error('ZIP export error', e);
       setExportError('ZIP export failed — try downloading slides individually.');
