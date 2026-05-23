@@ -168,17 +168,21 @@ function buildCategoryFallback(topic: string, category: string): { slides: any[]
 }
 
 // If AI picks an accent_word that isn't in the slide text, extract the most impactful phrase.
+// Priority: numbers+units → tool/file names → the proposed word (cleaned) → first strong noun.
 function fixAccentWord(text: string, accentWord: string | undefined): string {
   if (!accentWord) return '';
   if (text.toLowerCase().includes(accentWord.toLowerCase())) return accentWord;
-  // Prefer tool/file names (CLAUDE.md, CLAUDE.json, etc.)
-  const toolMatch = text.match(/\b[A-Z][A-Z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/);
-  if (toolMatch) return toolMatch[0];
-  // Prefer numbers with units (most concrete = most impactful)
+  // Numbers with units — most concrete, most screenshot-worthy
   const numMatch = text.match(/\$[\d,]+[k]?|\b\d+(?:\.\d+)?x\b|\b\d+(?:\s*(?:%|hrs?|hours?|min|minutes?|days?|weeks?|months?|seconds?|k))\b/i);
   if (numMatch) return numMatch[0].trim();
-  // Prefer short named concepts: 1-3 word noun phrases that aren't stop words
-  const stop = new Set(['their', 'there', 'where', 'every', 'which', 'about', 'after', 'before', 'while', 'doing', 'using', 'start', 'build', 'when', 'from', 'that', 'with', 'your', 'have', 'more', 'this', 'just', 'most', 'also', 'than', 'then', 'what', 'into', 'over', 'them', 'they', 'some']);
+  // Tool/file names (CLAUDE.md, .json, /hooks, etc.)
+  const toolMatch = text.match(/\b[A-Z][A-Z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/);
+  if (toolMatch) return toolMatch[0];
+  // Named commands or paths (/hooks, /api/..., etc.)
+  const cmdMatch = text.match(/\/[a-z][a-z_-]{2,}/);
+  if (cmdMatch) return cmdMatch[0];
+  // Fallback: first strong noun (>4 chars, not a stopword)
+  const stop = new Set(['their', 'there', 'where', 'every', 'which', 'about', 'after', 'before', 'while', 'doing', 'using', 'start', 'build', 'when', 'from', 'that', 'with', 'your', 'have', 'more', 'this', 'just', 'most', 'also', 'than', 'then', 'what', 'into', 'over', 'them', 'they', 'some', 'never', 'always', 'still', 'right', 'first', 'second']);
   const words = text.split(/\s+/).filter(w => {
     const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
     return clean.length > 4 && !stop.has(clean);
