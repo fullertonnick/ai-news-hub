@@ -265,7 +265,7 @@ export default function Step4Export() {
           viewport-relative which can cause capture artifacts when the page is scrolled. */}
       <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
         {renderSlides.map((slide, i) => (
-          <SlideRenderer key={i} ref={el => { exportRefs.current[i] = el; }} slide={slide} slideNumber={i + 1} totalSlides={slides.length} forExport />
+          <SlideRenderer key={slides[i]?.id || i} ref={el => { exportRefs.current[i] = el; }} slide={slide} slideNumber={i + 1} totalSlides={slides.length} forExport />
         ))}
       </div>
     </div>

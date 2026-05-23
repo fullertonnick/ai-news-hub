@@ -83,6 +83,10 @@ const STICKER_BANK: BankSticker[] = [
 ];
 const CATEGORIES = ['All', ...Array.from(new Set(STICKER_BANK.map(s => s.category)))];
 
+// ─── Preview dimensions — must match the canvas container in the JSX below ───
+const PREVIEW_W = 360;
+const PREVIEW_H = 450;
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export default function Step3Edit() {
@@ -106,6 +110,9 @@ export default function Step3Edit() {
   // ── Draggable text handle for the slide's main text block ──
   const textDragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
 
+  // Selective subscription: only the one action we need — stable reference, won't cause re-renders
+  const setTextOffset = useCarouselStore(state => state.setTextOffset);
+
   const handleTextDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (!slide) return;
     e.preventDefault();
@@ -124,15 +131,15 @@ export default function Step3Edit() {
       if (!textDragRef.current || !slide) return;
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-      // Preview is 360px wide, slide internal coords are 1080. So 1px preview = 3px slide.
-      // textOffset is stored in 1080-unit pixels.
+      // textOffset is stored in 1080-unit pixels. Convert preview drag delta to slide scale:
+      // preview width PREVIEW_W maps to slide width 1080, preview height PREVIEW_H maps to 1350.
       const dxPreview = clientX - textDragRef.current.startX;
       const dyPreview = clientY - textDragRef.current.startY;
-      const dxSlide = dxPreview * (1080 / 360); // = dxPreview * 3
-      const dySlide = dyPreview * (1350 / 450); // = dyPreview * 3
+      const dxSlide = dxPreview * (1080 / PREVIEW_W);
+      const dySlide = dyPreview * (1350 / PREVIEW_H);
       const newX = Math.max(-500, Math.min(500, textDragRef.current.origX + dxSlide));
       const newY = Math.max(-500, Math.min(500, textDragRef.current.origY + dySlide));
-      store.setTextOffset(slide.id, Math.round(newX), Math.round(newY));
+      setTextOffset(slide.id, Math.round(newX), Math.round(newY));
     };
     const end = () => { textDragRef.current = null; };
     window.addEventListener('mousemove', move);
@@ -145,7 +152,7 @@ export default function Step3Edit() {
       window.removeEventListener('touchmove', move);
       window.removeEventListener('touchend', end);
     };
-  }, [slide, store]);
+  }, [slide, setTextOffset]);
 
   const buildRenderSlide = (s: typeof slides[0], i: number) => {
     const isFirst = i === 0, isLast = i === slides.length - 1;
@@ -236,8 +243,7 @@ export default function Step3Edit() {
   const selText = selectedId ? textOverlays.find(t => t.id === selectedId) : null;
   const layers = [...stickers.map(s => ({ kind: 'sticker' as const, id: s.id, label: s.label, z: s.zIndex || 10 })), ...textOverlays.map(t => ({ kind: 'text' as const, id: t.id, label: t.text.slice(0, 20), z: t.zIndex || 5 }))].sort((a, b) => b.z - a.z);
 
-  // Preview dimensions
-  const PW = 360, PH = 450;
+  const PW = PREVIEW_W, PH = PREVIEW_H;
   const renderSlide = buildRenderSlide(slide, currentIdx);
 
   return (
@@ -307,7 +313,7 @@ export default function Step3Edit() {
                 style={{
                   position: 'absolute',
                   left: `${Math.round(52 * PW / 1080) + Math.round((slide?.textOffsetX || 0) * PW / 1080)}px`,
-                  top: `${Math.round(PH * 0.50) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
+                  top: `${Math.round(PH * 0.47) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
                   width: '72px',
                   height: '20px',
                   cursor: 'move',

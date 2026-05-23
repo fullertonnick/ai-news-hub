@@ -2,6 +2,33 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 export const config = { maxDuration: 60 };
 
+const FORBIDDEN: Record<string, string> = {
+  leverage: 'use', utilize: 'use', synergy: 'teamwork',
+  'game-changer': 'breakthrough', revolutionary: 'new',
+  innovative: 'effective', seamless: 'smooth', empower: 'help',
+  disruptive: 'new', 'cutting-edge': 'modern', supercharge: 'boost',
+  revolutionize: 'change', unlock: 'open', paradigm: 'approach',
+};
+
+function stripForbidden(text: string): string {
+  let r = text;
+  for (const [bad, good] of Object.entries(FORBIDDEN)) {
+    r = r.replace(new RegExp(`\\b${bad.replace(/-/g, '[- ]')}\\b`, 'gi'), good);
+  }
+  return r;
+}
+
+// Ensure accent_word appears verbatim in text; fallback to first strong word if not.
+function fixAccentWord(text: string, accentWord: string | undefined): string {
+  if (!accentWord) return '';
+  if (text.toLowerCase().includes(accentWord.toLowerCase())) return accentWord;
+  const numMatch = text.match(/\$[\d,]+[k]?|\b\d+(?:\.\d+)?x\b|\b\d+(?:\s*(?:%|hrs?|hours?|min|minutes?|days?|k))\b/i);
+  if (numMatch) return numMatch[0].trim();
+  const toolMatch = text.match(/\b[A-Z][A-Z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/);
+  if (toolMatch) return toolMatch[0];
+  return '';
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -73,7 +100,11 @@ Return JSON only: {"text": "...", "accent_word": "..."}`;
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) text = jsonMatch[0];
     const parsed = JSON.parse(text.trim());
-    return res.json(parsed);
+    const cleanText = stripForbidden(parsed.text || '');
+    return res.json({
+      text: cleanText,
+      accent_word: fixAccentWord(cleanText, parsed.accent_word),
+    });
   } catch {
     return res.json({ text: currentText, accent_word: '' });
   }

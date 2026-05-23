@@ -136,6 +136,8 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
     let attempts = 0;
     const MAX_ATTEMPTS = 10;
 
+    let timer: ReturnType<typeof setTimeout>;
+
     const attach = () => {
       const node = stage.findOne(`.sticker_${selectedId}`) || stage.findOne(`.text_${selectedId}`);
       if (node) {
@@ -151,7 +153,6 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
       }
     };
 
-    let timer: ReturnType<typeof setTimeout>;
     attach();
     return () => clearTimeout(timer);
   }, [selectedId, stickers.length, textOverlays.length]);
