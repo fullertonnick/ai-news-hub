@@ -68,8 +68,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     none: 'atmospheric dark background with subtle warm texture, clean professional, very subtle orange glow on left edge',
   };
 
+  // Combine up to 2 concept hints for more specific scene direction
   const sceneHint = conceptHints.length > 0
-    ? `SCENE CONCEPT (derived from slide text): ${conceptHints[0]}`
+    ? `SCENE CONCEPT (derived from slide text): ${conceptHints.slice(0, 2).join(' — with secondary element: ')}`
     : `SCENE: ${SCENE_FALLBACKS[slideType] || SCENE_FALLBACKS.none}`;
 
   const prompt = `Write an Imagen 3 image generation prompt for an Instagram carousel slide background.

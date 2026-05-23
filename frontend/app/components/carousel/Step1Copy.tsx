@@ -149,10 +149,13 @@ export default function Step1Copy() {
 
           {/* Caption */}
           <div className="rounded-xl bg-white/[0.02] border border-white/5 p-4 space-y-2">
-            <div className="text-xs font-bold text-gray-600 uppercase tracking-widest">Instagram Caption</div>
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-bold text-gray-600 uppercase tracking-widest">Instagram Caption</div>
+              <span className="text-[10px] text-gray-600">{caption.length} chars</span>
+            </div>
             <textarea value={caption} onChange={e => store.setCaption(e.target.value)}
-              className="w-full bg-transparent border border-white/5 rounded-lg px-3 py-2 text-xs text-gray-300 leading-relaxed resize-none focus:outline-none focus:border-brand-orange/30"
-              rows={5} />
+              className="w-full bg-transparent border border-white/5 rounded-lg px-3 py-2 text-xs text-gray-300 leading-relaxed resize-y focus:outline-none focus:border-brand-orange/30"
+              rows={12} />
           </div>
 
           {/* Approve */}
