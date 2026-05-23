@@ -63,7 +63,7 @@ const playfairDisplay = Playfair_Display({
   preload: false,
 });
 
-const archivoBLack = Archivo_Black({
+const archivoBlack = Archivo_Black({
   subsets: ['latin'],
   weight: ['400'],
   variable: '--font-archivo-black',
@@ -86,7 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     dmSans.variable,
     caveat.variable,
     playfairDisplay.variable,
-    archivoBLack.variable,
+    archivoBlack.variable,
   ].join(' ');
 
   return (

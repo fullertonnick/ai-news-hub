@@ -279,22 +279,28 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
           position: 'absolute', ...sticker.pos,
           transform: `rotate(${sticker.rotate}deg)`,
           backgroundColor: 'rgba(255,113,7,0.25)',
-          border: `${2 * sc}px solid rgba(255,113,7,0.80)`,
-          borderRadius: `${10 * sc}px`,
-          padding: `${10 * sc}px ${22 * sc}px`,
-          fontSize: `${17 * sc}px`,
+          border: `${2 * sc}px solid rgba(255,113,7,0.85)`,
+          borderRadius: `${12 * sc}px`,
+          padding: `${11 * sc}px ${24 * sc}px`,
+          fontSize: `${20 * sc}px`,
           fontWeight: 800,
           color: Brand.colors.accent_primary,
           letterSpacing: '0.10em',
           fontFamily: Brand.typography.font_family,
-          filter: `drop-shadow(0 0 ${16 * sc}px rgba(255,113,7,0.65))`,
+          filter: `drop-shadow(0 0 ${20 * sc}px rgba(255,113,7,0.70))`,
           zIndex: 2,
           opacity: 1,
         }}>{sticker.text}</div>
       ))}
 
-      {/* Headline — vertical position controlled by v.position (default: bottom at 60%) */}
-      <div style={{ position: 'absolute', top: `${H * headlineTopFraction}px`, bottom: `${120 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3 }}>
+      {/* Headline — bottom: shrinks to content and anchors above footer; top/middle: bounded zone */}
+      <div style={{
+        position: 'absolute',
+        ...(headlinePos !== 'bottom' ? { top: `${H * headlineTopFraction}px` } : {}),
+        ...(headlinePos === 'middle' ? { display: 'flex', flexDirection: 'column', justifyContent: 'center' } : {}),
+        bottom: `${120 * sc}px`,
+        left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3,
+      }}>
         <div style={{ fontSize: `${fontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: `${14 * sc}px`, textShadow: '0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.85)' }}>
           {renderWithAccent(coverHeadline, slide.accent_word, { color: Brand.colors.text_primary })}
         </div>
@@ -347,7 +353,7 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
           <div style={{ fontSize: `${ctaPhotoFontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.1, letterSpacing: '-0.03em' }}>
             {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
           </div>
-          <div style={{ width: `${52 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px' }} />
+          <div style={{ width: `${52 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px' }} />
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
             <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600 }}>Comment</span>
             {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, padding: `${7 * sc}px ${20 * sc}px`, borderRadius: '9999px', lineHeight: 1.2 }}>{v.keyword}</span>}
@@ -588,7 +594,6 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               );
             })()}
 
-            {/* FIX 3: STATS GRID — larger values, orange separator, bigger cards */}
             {slide.visual.type === 'stats_grid' && (() => {
               const v = slide.visual as StatsGridVisual;
               return (
@@ -605,7 +610,6 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                         display: 'flex', flexDirection: 'column', gap: `${8 * sc}px`,
                       }}>
                         <div style={{ fontSize: `${28 * sc}px`, lineHeight: 1 }}>{s.icon}</div>
-                        {/* FIX 3: value font at least 64px at export */}
                         <div style={{ fontSize: `${64 * sc}px`, fontWeight: 800, color: Brand.colors.accent_primary, lineHeight: 1, letterSpacing: '-0.03em' }}>{s.value}</div>
                         <div style={{ fontSize: `${14 * sc}px`, color: Brand.colors.text_muted, textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
                       </div>
@@ -615,7 +619,6 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               );
             })()}
 
-            {/* FIX 3: DIAGRAM — larger nodes filling the available space */}
             {slide.visual.type === 'diagram' && (() => {
               const v = slide.visual as DiagramVisual;
               const nodeCount = (v.nodes || []).length;
@@ -676,14 +679,12 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               );
             })()}
 
-            {/* FIX 3: STEPS LIST — larger circles, more breathing room */}
             {slide.visual.type === 'steps_list' && (() => {
               const v = slide.visual as StepsListVisual;
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: `${32 * sc}px`, justifyContent: 'center' }}>
                   {(v.steps || []).slice(0, 4).map((s, i) => (
                     <div key={i} style={{ display: 'flex', gap: `${18 * sc}px`, alignItems: 'flex-start' }}>
-                      {/* FIX 3: Circle 48px minimum at export */}
                       <div style={{
                         width: `${48 * sc}px`, height: `${48 * sc}px`, borderRadius: '50%',
                         background: `linear-gradient(135deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`,
