@@ -247,9 +247,7 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
   const photoEnabled = v.photo_enabled !== false;
   const hasPhoto = !!slide.backgroundImage && photoEnabled;
   const showFallbackPhoto = !hasPhoto && photoEnabled;
-  // Headline vertical start: top=10%, middle=35%, bottom=60% (default)
   const headlinePos = v.position ?? 'bottom';
-  const headlineTopFraction = headlinePos === 'top' ? 0.10 : headlinePos === 'middle' ? 0.35 : 0.60;
   const stickers = getTopicStickers(slide.text, headlinePos);
 
   return (
@@ -293,12 +291,14 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
         }}>{sticker.text}</div>
       ))}
 
-      {/* Headline — bottom: shrinks to content and anchors above footer; top/middle: bounded zone */}
+      {/* Headline — 'bottom': anchors above footer (no top set, grows upward from bottom:120px).
+           'top'/'middle': pinned at the specified fraction; no bottom anchor so the div wraps
+           its content naturally without stretching toward the footer. */}
       <div style={{
         position: 'absolute',
-        ...(headlinePos !== 'bottom' ? { top: `${H * headlineTopFraction}px` } : {}),
-        ...(headlinePos === 'middle' ? { display: 'flex', flexDirection: 'column', justifyContent: 'center' } : {}),
-        bottom: `${120 * sc}px`,
+        ...(headlinePos === 'top'    ? { top: `${H * 0.10}px` } : {}),
+        ...(headlinePos === 'middle' ? { top: `${H * 0.35}px` } : {}),
+        ...(headlinePos === 'bottom' ? { bottom: `${120 * sc}px` } : {}),
         left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3,
       }}>
         <div style={{ fontSize: `${fontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: `${14 * sc}px`, textShadow: '0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.85)' }}>
@@ -509,61 +509,62 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
         overflow: 'hidden', minHeight: 0,
       }}>
 
-        {/* Section label */}
-        {slide.section_label && <SectionLabel label={slide.section_label} sc={sc} />}
-
         {/* Tyler Germain layout: headline → orange divider → body → kicker.
-            Text offset (set by drag handle in Step3) is applied only to this block,
-            not to the visual block, so repositioning text doesn't shift stacked visuals. */}
+            Text offset (set by drag handle in Step3) is applied only to this block.
+            Section label is part of the baked-in text block — hidden with useTextOverlays
+            so it doesn't orphan above custom overlays. */}
         {!slide.useTextOverlays && (
-        <div style={{ flexShrink: 0, ...(txOff || tyOff ? { transform: `translate(${txOff}px, ${tyOff}px)` } : {}) }}>
-          {/* Headline — always 44-52px bold (Tyler Germain spec) */}
-          <p style={{
-            margin: 0, marginBottom: `${16 * sc}px`,
-            fontSize: `${headlineFs}px`, fontWeight: 800,
-            fontFamily: Brand.typography.font_family,
-            color: Brand.colors.text_primary,
-            lineHeight: isBigQuote ? 1.3 : 1.18,
-            letterSpacing: '-0.03em',
-            ...(isBigQuote ? { fontStyle: 'italic' as const } : {}),
-          }}>
-            {renderWithAccent(headline, slide.accent_word)}
-          </p>
-          {/* Orange divider — Tyler Germain signature (skip for big_quote which has its own) */}
-          {!isBigQuote && (
-            <div style={{
-              width: `${60 * sc}px`, height: `${4 * sc}px`,
-              background: Brand.colors.accent_primary,
-              borderRadius: '3px',
-              marginBottom: `${(!hasVis && bodyParas.length > 0) ? 28 * sc : 8 * sc}px`,
-            }} />
-          )}
-          {/* Body — 24px regular, only for text-only slides (no visual block) */}
-          {!hasVis && bodyParas.map((p, i) => (
-            <p key={i} style={{
-              margin: 0, marginBottom: `${12 * sc}px`,
-              fontSize: `${24 * sc}px`, fontWeight: 400,
+        <>
+          {slide.section_label && <SectionLabel label={slide.section_label} sc={sc} />}
+          <div style={{ flexShrink: 0, ...(txOff || tyOff ? { transform: `translate(${txOff}px, ${tyOff}px)` } : {}) }}>
+            {/* Headline — always 44-52px bold (Tyler Germain spec) */}
+            <p style={{
+              margin: 0, marginBottom: `${16 * sc}px`,
+              fontSize: `${headlineFs}px`, fontWeight: 800,
               fontFamily: Brand.typography.font_family,
-              color: Brand.colors.text_primary, lineHeight: 1.55, letterSpacing: '-0.01em',
+              color: Brand.colors.text_primary,
+              lineHeight: isBigQuote ? 1.3 : 1.18,
+              letterSpacing: '-0.03em',
+              ...(isBigQuote ? { fontStyle: 'italic' as const } : {}),
             }}>
-              {renderWithAccent(p, slide.accent_word)}
+              {renderWithAccent(headline, slide.accent_word)}
             </p>
-          ))}
-          {/* Kicker — 28px bold with visual breathing room. Stands apart from body as the mic-drop takeaway. */}
-          {!hasVis && kicker && (
-            <div style={{ marginTop: `${32 * sc}px` }}>
-              <div style={{ width: `${40 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px', marginBottom: `${12 * sc}px` }} />
-              <p style={{
-                margin: 0,
-                fontSize: `${28 * sc}px`, fontWeight: 700,
+            {/* Orange divider — Tyler Germain signature (skip for big_quote which has its own) */}
+            {!isBigQuote && (
+              <div style={{
+                width: `${60 * sc}px`, height: `${4 * sc}px`,
+                background: Brand.colors.accent_primary,
+                borderRadius: '3px',
+                marginBottom: `${(!hasVis && bodyParas.length > 0) ? 28 * sc : 8 * sc}px`,
+              }} />
+            )}
+            {/* Body — 24px regular, only for text-only slides (no visual block) */}
+            {!hasVis && bodyParas.map((p, i) => (
+              <p key={i} style={{
+                margin: 0, marginBottom: `${12 * sc}px`,
+                fontSize: `${24 * sc}px`, fontWeight: 400,
                 fontFamily: Brand.typography.font_family,
-                color: Brand.colors.text_primary, lineHeight: 1.3, letterSpacing: '-0.025em',
+                color: Brand.colors.text_primary, lineHeight: 1.55, letterSpacing: '-0.01em',
               }}>
-                {renderWithAccent(kicker, slide.accent_word)}
+                {renderWithAccent(p, slide.accent_word)}
               </p>
-            </div>
-          )}
-        </div>
+            ))}
+            {/* Kicker — 28px bold with visual breathing room. Stands apart from body as the mic-drop takeaway. */}
+            {!hasVis && kicker && (
+              <div style={{ marginTop: `${32 * sc}px` }}>
+                <div style={{ width: `${40 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px', marginBottom: `${12 * sc}px` }} />
+                <p style={{
+                  margin: 0,
+                  fontSize: `${28 * sc}px`, fontWeight: 700,
+                  fontFamily: Brand.typography.font_family,
+                  color: Brand.colors.text_primary, lineHeight: 1.3, letterSpacing: '-0.025em',
+                }}>
+                  {renderWithAccent(kicker, slide.accent_word)}
+                </p>
+              </div>
+            )}
+          </div>
+        </>
         )}
 
         {/* ── Visual ── */}

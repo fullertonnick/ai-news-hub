@@ -65,6 +65,9 @@ export default function Step4Export() {
       document.fonts.load('400 40px "Caveat"'),
       document.fonts.load('700 40px "Caveat"'),
       document.fonts.load('400 40px "Archivo Black"'),
+      document.fonts.load('400 40px "Inter"'),
+      document.fonts.load('600 40px "Inter"'),
+      document.fonts.load('700 40px "Inter"'),
       document.fonts.load('400 40px "DM Sans"'),
       document.fonts.load('700 40px "DM Sans"'),
       document.fonts.load('400 40px "Playfair Display"'),
@@ -187,7 +190,7 @@ export default function Step4Export() {
   const isBusy = downloading !== null || proxyingImages;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-5">
+    <div className="p-6 max-w-4xl mx-auto space-y-5" style={{ position: 'relative' }}>
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-bold text-white">Export Carousel</h3>
