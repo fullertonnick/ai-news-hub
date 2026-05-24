@@ -382,8 +382,15 @@ Now write a completely original carousel about: "${topic}"`;
     if (jsonMatch) text = jsonMatch[0];
     const parsed = JSON.parse(text.trim());
 
-    const slides = (parsed.slides || []).map((s: any) => {
-      const cleanText = stripForbidden(s.text || '');
+    const slides = (parsed.slides || []).map((s: any, idx: number) => {
+      let rawText = s.text || '';
+      const isLastSlide = idx === (parsed.slides || []).length - 1;
+      // CTA slide: strip any "Comment X and I'll send you Y" the AI adds — the slide template renders it from keyword
+      if (isLastSlide || s.visual_type === 'cta_slide') {
+        rawText = rawText.replace(/\s*\n*Comment\s+\w+\s+and\s+I['']ll\s+send.*/i, '').trim();
+        rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?.*/i, '').trim();
+      }
+      const cleanText = stripForbidden(rawText);
       // Normalize section_label: null/"null"/"none" → undefined; strip "Level X" prefix
       const rawLabel: string | null | undefined = s.section_label;
       const sectionLabel = (rawLabel && rawLabel !== 'null' && rawLabel !== 'none')
@@ -402,12 +409,30 @@ Now write a completely original carousel about: "${topic}"`;
       };
     });
 
+    // Enforce slide count: fall back if AI returns too few or too many
+    if (slides.length < 5) {
+      console.warn(`generate-copy: only ${slides.length} slides returned — falling back`);
+      return res.json({ ...buildCategoryFallback(topic, category), _fallback: true });
+    }
+    // Cap at 10 (keep cover + up to 8 content + CTA)
+    let finalSlides = slides.length > 10
+      ? [slides[0], ...slides.slice(1, -1).slice(0, 8), slides[slides.length - 1]]
+      : slides;
+
+    // Ensure first slide is cover_photo and last is cta_slide
+    if (finalSlides[0]?.visual_type !== 'cover_photo') {
+      finalSlides[0] = { ...finalSlides[0], visual_type: 'cover_photo' };
+    }
+    if (finalSlides[finalSlides.length - 1]?.visual_type !== 'cta_slide') {
+      finalSlides[finalSlides.length - 1] = { ...finalSlides[finalSlides.length - 1], visual_type: 'cta_slide' };
+    }
+
     const rawKw = (parsed.keyword || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
     const keyword = rawKw.length >= 2 ? rawKw : fallbackKeyword(topic);
     let caption = stripForbidden(parsed.caption || '');
-    if (caption && !caption.includes('#simpliscale')) caption += ' #simpliscale';
-    if (caption && !caption.includes('#thenickcornelius')) caption += ' #thenickcornelius';
-    return res.json({ slides, caption, keyword, category });
+    if (caption && !caption.includes('#simpliscale')) caption += '\n#simpliscale #thenickcornelius';
+    else if (caption && !caption.includes('#thenickcornelius')) caption += ' #thenickcornelius';
+    return res.json({ slides: finalSlides, caption, keyword, category });
   } catch (err) {
     console.error('Generate copy error:', err);
     // Fall back to high-quality category-specific content rather than erroring out

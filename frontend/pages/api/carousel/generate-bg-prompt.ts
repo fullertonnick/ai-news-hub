@@ -25,6 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     comparison: 'COMPARISON SLIDE — dark neutral background, clean. Two subtle zones of different color temperature (cool blue left, warm orange right) hinting at before/after. Minimal so content cards stand out.',
     skill_card: 'SKILL CARD SLIDE — premium dark product photography aesthetic. Dark vignette, soft center glow, luxury brand visual quality. Think: high-end tech product shot.',
     cta_slide: 'CTA SLIDE — dramatic stage lighting. Single warm orange spotlight from above, deep black surround. Theatrical, premium, creates a sense of anticipation and action.',
+    checklist: 'CHECKLIST SLIDE — ultra-dark, near-minimal background. Think: premium dark studio backdrop, very subtle warm vignette at edges, near-black center for maximum text readability. Clean, uncluttered, professional.',
     none: 'TEXT SLIDE — atmospheric dark background with subtle warmth. Clean and professional, perfect for reading. Very subtle texture, no distracting elements.',
   };
 
@@ -64,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     comparison: 'dark neutral background, two subtle zones of different color temperature — cool blue left, warm amber right, minimal',
     skill_card: 'premium dark product photography, dark vignette, soft warm center glow, luxury brand aesthetic, minimal',
     cta_slide: 'dramatic stage lighting, single intense warm orange spotlight circle from above, deep black surround, theatrical premium',
-    checklist: 'dark minimal background, subtle amber radial glow, clean and professional, perfect for reading',
+    checklist: 'ultra-dark minimal studio background, very subtle warm amber vignette at outer edges, near-black center, clean and professional, no texture or patterns',
     none: 'atmospheric dark background with subtle warm texture, clean professional, very subtle orange glow on left edge',
   };
 

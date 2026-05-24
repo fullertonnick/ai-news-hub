@@ -252,7 +252,7 @@ export default function Step4Export() {
             </button>
           </div>
           <textarea value={caption} onChange={e => store.setCaption(e.target.value)}
-            className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-xs text-gray-300 leading-relaxed resize-none focus:outline-none focus:border-brand-orange/30" rows={5} />
+            className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-xs text-gray-300 leading-relaxed resize-y focus:outline-none focus:border-brand-orange/30" rows={10} />
           {keyword && <div className="flex items-center gap-2"><span className="text-xs text-gray-600">Keyword:</span><span className="text-xs font-bold text-brand-orange bg-brand-orange/10 px-2.5 py-0.5 rounded-full">{keyword}</span></div>}
         </div>
       )}
