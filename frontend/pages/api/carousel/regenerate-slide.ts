@@ -18,15 +18,24 @@ function stripForbidden(text: string): string {
   return r;
 }
 
-// Ensure accent_word appears verbatim in text; fallback to first strong word if not.
+// Ensure accent_word appears verbatim in text; fallback to most impactful phrase.
+// Priority: numbers+units → tool/file names → paths/commands → first strong noun
 function fixAccentWord(text: string, accentWord: string | undefined): string {
   if (!accentWord) return '';
   if (text.toLowerCase().includes(accentWord.toLowerCase())) return accentWord;
-  const numMatch = text.match(/\$[\d,]+[k]?|\b\d+(?:\.\d+)?x\b|\b\d+(?:\s*(?:%|hrs?|hours?|min|minutes?|days?|k))\b/i);
+  const numMatch = text.match(/\$[\d,]+[k]?|\b\d+(?:\.\d+)?x\b|\b\d+(?:\s*(?:%|hrs?|hours?|min|minutes?|days?|weeks?|months?|seconds?|k))\b/i);
   if (numMatch) return numMatch[0].trim();
   const toolMatch = text.match(/\b[A-Z][A-Z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/);
   if (toolMatch) return toolMatch[0];
-  return '';
+  const cmdMatch = text.match(/\/[a-z][a-z_-]{2,}/);
+  if (cmdMatch) return cmdMatch[0];
+  const stop = new Set(['their', 'there', 'where', 'every', 'which', 'about', 'after', 'before', 'while', 'doing', 'using', 'start', 'build', 'when', 'from', 'that', 'with', 'your', 'have', 'more', 'this', 'just', 'most', 'also', 'than', 'then', 'what', 'into', 'over', 'them', 'they', 'some', 'never', 'always', 'still', 'right', 'first', 'second']);
+  const words = text.split(/\s+/).filter(w => {
+    const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
+    return clean.length > 4 && !stop.has(clean);
+  });
+  const candidate = words[0] || accentWord;
+  return candidate.replace(/[.,!?;:]$/, '');
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
