@@ -85,7 +85,7 @@ function SectionLabel({ label, sc }: { label: string; sc: number }) {
   );
 }
 
-function Footer({ sc, light = false }: { sc: number; light?: boolean }) {
+function Footer({ sc, light = false, slideNumber, totalSlides }: { sc: number; light?: boolean; slideNumber?: number; totalSlides?: number }) {
   const color = light ? 'rgba(255,255,255,0.7)' : Brand.colors.text_muted;
   const border = light ? '1px solid rgba(255,255,255,0.15)' : `1px solid ${Brand.colors.divider}`;
   return (
@@ -94,6 +94,11 @@ function Footer({ sc, light = false }: { sc: number; light?: boolean }) {
       flexShrink: 0, paddingTop: `${12 * sc}px`, borderTop: border,
     }}>
       <span style={{ color, fontSize: `${12 * sc}px`, fontWeight: 500, fontFamily: Brand.typography.font_family }}>@thenickcornelius</span>
+      {slideNumber != null && totalSlides != null && (
+        <span style={{ color, fontSize: `${11 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family, letterSpacing: '0.06em' }}>
+          {slideNumber} / {totalSlides}
+        </span>
+      )}
       <span style={{ color, fontSize: `${12 * sc}px`, fontWeight: 500, fontFamily: Brand.typography.font_family }}>{Brand.brand.save_cta}</span>
     </div>
   );
@@ -226,7 +231,7 @@ function getTopicStickers(text: string, headlinePosition: 'top' | 'middle' | 'bo
   return stickers.slice(0, 4);
 }
 
-function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: number; sc: number }) {
+function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: CarouselSlide; W: number; H: number; sc: number; slideNumber?: number; totalSlides?: number }) {
   const v = slide.visual as CoverPhotoVisual;
   const [coverHeadline, coverSubtitle] = slide.text.split('\n\n').map(s => s.replace(/^\(|\)$/g, '').trim());
   const headlineWords = coverHeadline.split(/\s+/);
@@ -313,7 +318,7 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
 
       {/* Footer */}
       <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3 }}>
-        <Footer sc={sc} light />
+        <Footer sc={sc} light slideNumber={slideNumber} totalSlides={totalSlides} />
       </div>
     </div>
   );
@@ -321,7 +326,7 @@ function CoverTemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H
 
 // ─── CTA Template — photo variant (Nick right half) or text-only ─────────────
 
-function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: number; sc: number }) {
+function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: CarouselSlide; W: number; H: number; sc: number; slideNumber?: number; totalSlides?: number }) {
   const v = slide.visual as CTASlideVisual;
   const PH = 52 * sc;
 
@@ -362,8 +367,9 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
         </div>
 
         {/* Footer */}
-        <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${PH}px`, right: `${PH}px`, borderTop: `1px solid ${Brand.colors.divider}`, paddingTop: `${12 * sc}px`, display: 'flex', justifyContent: 'space-between', zIndex: 4 }}>
+        <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${PH}px`, right: `${PH}px`, borderTop: `1px solid ${Brand.colors.divider}`, paddingTop: `${12 * sc}px`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 4 }}>
           <span style={{ color: Brand.colors.text_muted, fontSize: `${12 * sc}px`, fontWeight: 500 }}>@thenickcornelius</span>
+          {slideNumber != null && totalSlides != null && <span style={{ color: Brand.colors.text_muted, fontSize: `${11 * sc}px`, fontWeight: 600, letterSpacing: '0.06em' }}>{slideNumber} / {totalSlides}</span>}
           <span style={{ color: Brand.colors.text_muted, fontSize: `${12 * sc}px`, fontWeight: 500 }}>{Brand.brand.save_cta}</span>
         </div>
       </div>
@@ -407,6 +413,7 @@ function CTATemplate({ slide, W, H, sc }: { slide: CarouselSlide; W: number; H: 
       {/* Footer */}
       <div style={{ position: 'absolute', bottom: `${36 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `1px solid ${Brand.colors.divider}`, paddingTop: `${14 * sc}px` }}>
         <span style={{ color: Brand.colors.text_muted, fontSize: `${12 * sc}px`, fontWeight: 500 }}>@thenickcornelius</span>
+        {slideNumber != null && totalSlides != null && <span style={{ color: Brand.colors.text_muted, fontSize: `${11 * sc}px`, fontWeight: 600, letterSpacing: '0.06em' }}>{slideNumber} / {totalSlides}</span>}
         <span style={{ color: Brand.colors.text_muted, fontSize: `${12 * sc}px`, fontWeight: 500 }}>{Brand.brand.save_cta}</span>
       </div>
     </div>
@@ -423,7 +430,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   if (slide.visual?.type === 'cover_photo') {
     return (
       <div ref={ref} style={{ position: 'relative', width: `${W}px`, height: `${H}px`, flexShrink: 0, overflow: 'hidden' }}>
-        <CoverTemplate slide={slide} W={W} H={H} sc={sc} />
+        <CoverTemplate slide={slide} W={W} H={H} sc={sc} slideNumber={slideNumber} totalSlides={totalSlides} />
         <RenderOverlays slide={slide} W={W} H={H} />
       </div>
     );
@@ -433,7 +440,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   if (slide.visual?.type === 'cta_slide') {
     return (
       <div ref={ref} style={{ position: 'relative', width: `${W}px`, height: `${H}px`, flexShrink: 0, overflow: 'hidden' }}>
-        <CTATemplate slide={slide} W={W} H={H} sc={sc} />
+        <CTATemplate slide={slide} W={W} H={H} sc={sc} slideNumber={slideNumber} totalSlides={totalSlides} />
         <RenderOverlays slide={slide} W={W} H={H} />
       </div>
     );
@@ -486,7 +493,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
         : { backgroundColor: Brand.colors.bg_primary }),
     }}>
       {/* Dark overlay for text readability over Imagen 3 */}
-      {hasImagen && <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 0, pointerEvents: 'none' }} />}
+      {hasImagen && <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', zIndex: 0, pointerEvents: 'none' }} />}
 
       {/* Subtle top gradient wash — only when no Imagen 3 */}
       {!hasImagen && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '25%', background: `linear-gradient(to bottom, rgba(255,113,7,0.025), transparent)`, pointerEvents: 'none' }} />}
@@ -533,7 +540,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
             {!isBigQuote && (
               <div style={{
                 width: `${60 * sc}px`, height: `${4 * sc}px`,
-                background: Brand.colors.accent_primary,
+                background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`,
                 borderRadius: '3px',
                 marginBottom: `${(!hasVis && bodyParas.length > 0) ? 28 * sc : 8 * sc}px`,
               }} />
@@ -549,15 +556,15 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 {renderWithAccent(p, slide.accent_word)}
               </p>
             ))}
-            {/* Kicker — 28px bold with visual breathing room. Stands apart from body as the mic-drop takeaway. */}
+            {/* Kicker — mic-drop takeaway, visually separated from body */}
             {!hasVis && kicker && (
-              <div style={{ marginTop: `${32 * sc}px` }}>
-                <div style={{ width: `${40 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px', marginBottom: `${12 * sc}px` }} />
+              <div style={{ marginTop: `${40 * sc}px` }}>
+                <div style={{ width: `${48 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${14 * sc}px` }} />
                 <p style={{
                   margin: 0,
-                  fontSize: `${28 * sc}px`, fontWeight: 700,
+                  fontSize: `${30 * sc}px`, fontWeight: 800,
                   fontFamily: Brand.typography.font_family,
-                  color: Brand.colors.text_primary, lineHeight: 1.3, letterSpacing: '-0.025em',
+                  color: Brand.colors.text_primary, lineHeight: 1.28, letterSpacing: '-0.025em',
                 }}>
                   {renderWithAccent(kicker, slide.accent_word)}
                 </p>
@@ -600,7 +607,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: `${14 * sc}px` }}>
                   {/* Orange separator line */}
-                  <div style={{ width: '40%', height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px' }} />
+                  <div style={{ width: '40%', height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px' }} />
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: `${14 * sc}px` }}>
                     {(v.stats || []).slice(0, 4).map((s, i) => (
                       <div key={i} style={{
@@ -728,7 +735,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               const v = slide.visual as BigQuoteVisual;
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: `${12 * sc}px` }}>
-                  <div style={{ width: `${40 * sc}px`, height: `${3 * sc}px`, background: Brand.colors.accent_primary, borderRadius: '2px' }} />
+                  <div style={{ width: `${40 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px' }} />
                   {v.supporting && (
                     <p style={{ margin: 0, fontSize: `${18 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5 }}>{v.supporting}</p>
                   )}
@@ -785,7 +792,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
 
       {/* ── Footer ── */}
       <div style={{ padding: `0 ${PH}px ${26 * sc}px`, flexShrink: 0, position: 'relative' }}>
-        <Footer sc={sc} />
+        <Footer sc={sc} slideNumber={slideNumber} totalSlides={totalSlides} />
       </div>
 
       {/* Stickers + text overlays — rendered on top of everything */}
