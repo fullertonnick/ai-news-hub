@@ -83,7 +83,9 @@ const STICKER_BANK: BankSticker[] = [
 ];
 const CATEGORIES = ['All', ...Array.from(new Set(STICKER_BANK.map(s => s.category)))];
 
-// ─── Preview dimensions — must match the canvas container in the JSX below ───
+// ─── Preview dimensions — computed dynamically via ResizeObserver ─────────────
+// PREVIEW_W/H constants kept for the text-drag-handle fallback; actual values
+// come from the canvasW/canvasH state computed below.
 const PREVIEW_W = 360;
 const PREVIEW_H = 450;
 
@@ -99,11 +101,29 @@ export default function Step3Edit() {
   const [visualError, setVisualError] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
   const [showPrompt, setShowPrompt] = useState(false);
+  // Responsive canvas — matches Step2 pattern
+  const [canvasW, setCanvasW] = useState(PREVIEW_W);
+  const canvasH = Math.round(canvasW * (450 / 360)); // maintain 4:5 ratio
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   const slide = slides[currentIdx];
   const stickers = slide?.stickers || [];
   const textOverlays = slide?.textOverlays || [];
   const filteredBank = selectedCategory === 'All' ? STICKER_BANK : STICKER_BANK.filter(s => s.category === selectedCategory);
+
+  // Responsive canvas sizing — keeps KonvaEditor hit-detection accurate
+  useEffect(() => {
+    const el = canvasContainerRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = Math.min(el.offsetWidth || PREVIEW_W, PREVIEW_W);
+      setCanvasW(w > 0 ? w : PREVIEW_W);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // No auto-convert anymore — we make the baked-in text directly draggable below.
 
@@ -131,12 +151,12 @@ export default function Step3Edit() {
       if (!textDragRef.current || !slide) return;
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-      // textOffset is stored in 1080-unit pixels. Convert preview drag delta to slide scale:
-      // preview width PREVIEW_W maps to slide width 1080, preview height PREVIEW_H maps to 1350.
+      // textOffset is stored in 1080-unit pixels. Convert preview drag delta to slide scale.
+      // Use the current canvasW/H (dynamic) not the static PREVIEW_W/H constants.
       const dxPreview = clientX - textDragRef.current.startX;
       const dyPreview = clientY - textDragRef.current.startY;
-      const dxSlide = dxPreview * (1080 / PREVIEW_W);
-      const dySlide = dyPreview * (1350 / PREVIEW_H);
+      const dxSlide = dxPreview * (1080 / Math.max(1, canvasW));
+      const dySlide = dyPreview * (1350 / Math.max(1, canvasH));
       const newX = Math.max(-500, Math.min(500, textDragRef.current.origX + dxSlide));
       const newY = Math.max(-500, Math.min(500, textDragRef.current.origY + dySlide));
       setTextOffset(slide.id, Math.round(newX), Math.round(newY));
@@ -152,7 +172,7 @@ export default function Step3Edit() {
       window.removeEventListener('touchmove', move);
       window.removeEventListener('touchend', end);
     };
-  }, [slide, setTextOffset]);
+  }, [slide, setTextOffset, canvasW, canvasH]);
 
   const buildRenderSlide = (s: typeof slides[0], i: number) => {
     const isFirst = i === 0, isLast = i === slides.length - 1;
@@ -175,8 +195,12 @@ export default function Step3Edit() {
 
   const addSticker = useCallback((bs: BankSticker) => {
     if (!slide) return;
+    // Offset each new sticker so multiple stickers don't stack at the same position
+    const offset = stickers.length;
+    const x = 50 + (offset % 3) * 6 - 6;
+    const y = 40 + Math.floor(offset / 3) * 8;
     // Convert URL-encoded SVG data URIs to base64 so html-to-image captures them reliably
-    const s: StickerOverlay = { id: uid(), src: toBase64SvgUri(bs.src), label: bs.label, x: 50, y: 40, width: 20, rotation: 0, opacity: 1, zIndex: 10 + stickers.length };
+    const s: StickerOverlay = { id: uid(), src: toBase64SvgUri(bs.src), label: bs.label, x, y, width: 20, rotation: 0, opacity: 1, zIndex: 10 + stickers.length };
     store.addSticker(slide.id, s);
     // Defer selection — sticker images (SVG data URIs) load async. The Konva node
     // won't exist until useKonvaImage resolves, so the Transformer can't attach yet.
@@ -243,7 +267,7 @@ export default function Step3Edit() {
   const selText = selectedId ? textOverlays.find(t => t.id === selectedId) : null;
   const layers = [...stickers.map(s => ({ kind: 'sticker' as const, id: s.id, label: s.label, z: s.zIndex || 10 })), ...textOverlays.map(t => ({ kind: 'text' as const, id: t.id, label: t.text.slice(0, 20), z: t.zIndex || 5 }))].sort((a, b) => b.z - a.z);
 
-  const PW = PREVIEW_W, PH = PREVIEW_H;
+  const PW = canvasW, PH = canvasH;
   const renderSlide = buildRenderSlide(slide, currentIdx);
 
   return (
@@ -283,7 +307,7 @@ export default function Step3Edit() {
           )}
 
           {/* Canvas area — SlideRenderer scaled inside, KonvaEditor at VISUAL size to fix hit detection */}
-          <div style={{ width: PW, height: PH, position: 'relative', margin: '0 auto', borderRadius: 12, overflow: 'hidden' }}>
+          <div ref={canvasContainerRef} style={{ width: '100%', maxWidth: PREVIEW_W, aspectRatio: '4/5', position: 'relative', margin: '0 auto', borderRadius: 12, overflow: 'hidden' }}>
             {/* Base slide render — scaled 540→360 via CSS transform (pointer-events off) */}
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
               <div style={{ transform: `scale(${PW / 540})`, transformOrigin: 'top left', width: 540, height: 675, pointerEvents: 'none' }}>
