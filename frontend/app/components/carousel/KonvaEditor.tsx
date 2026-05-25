@@ -73,7 +73,7 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
       rotation={overlay.rotation || 0}
       text={overlay.text}
       fontSize={fs}
-      fontStyle={overlay.fontWeight >= 700 ? 'bold' : 'normal'}
+      fontStyle={overlay.fontWeight >= 800 ? '800' : overlay.fontWeight >= 700 ? 'bold' : 'normal'}
       fontFamily={overlay.fontFamily || '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif'}
       fill={overlay.color}
       width={pxW}
