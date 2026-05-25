@@ -293,9 +293,11 @@ LAST SLIDE (CTA):
   section_label: null
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KEYWORD: max 8 chars, ALL CAPS, the single core concept
+KEYWORD: max 8 chars, ALL CAPS, the single core concept that makes a great DM trigger
+  Pick what people will actually want to comment to unlock the offer.
   Good: MEMORY, CLAUDE, AGENTS, HOOKS, SYSTEM, CONTEXT, BUILD, REVENUE, ERRORS, STACK
-  Bad: LEARNAI, TIPS123, WORKFLOW2, CLICKME
+  Bad: LEARNAI, TIPS123, WORKFLOW2, CLICKME, TIPS, MORE, GUIDE
+  Rule: if topic is about a specific tool, name the tool. If it's about a concept, name the concept.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -364,10 +366,14 @@ Now write a completely original carousel about: "${topic}"`;
     return res.json(buildCategoryFallback(topic, category));
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 55_000);
+
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.85, maxOutputTokens: 8000 },
@@ -433,9 +439,14 @@ Now write a completely original carousel about: "${topic}"`;
     if (caption && !caption.includes('#simpliscale')) caption += '\n#simpliscale #thenickcornelius';
     else if (caption && !caption.includes('#thenickcornelius')) caption += ' #thenickcornelius';
     return res.json({ slides: finalSlides, caption, keyword, category });
-  } catch (err) {
-    console.error('Generate copy error:', err);
-    // Fall back to high-quality category-specific content rather than erroring out
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      console.error('Generate copy: Gemini request timed out');
+    } else {
+      console.error('Generate copy error:', err);
+    }
     return res.json({ ...buildCategoryFallback(topic, category), _fallback: true });
+  } finally {
+    clearTimeout(timeout);
   }
 }

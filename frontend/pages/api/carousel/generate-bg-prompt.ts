@@ -89,6 +89,8 @@ ${sceneHint}
 
 YOUR JOB: Extract 1-2 concrete visual concepts directly from the slide text, then build a cinematic dark scene around them. A viewer should subconsciously associate the image with this slide's subject after 2 seconds — not just the general topic.
 
+Be specific and concrete — "dark desk with amber desk lamp, open MacBook showing blurred code" beats "dark background". Pull from the slide text for scene elements.
+
 GOOD EXAMPLES:
 Topic "Claude Code memory" + slide about CLAUDE.md:
 → "dark oak desk, glowing text editor on laptop screen showing blurred code files, single warm amber desk lamp, mechanical keyboard in foreground, shallow depth of field, cinematic 35mm lens"

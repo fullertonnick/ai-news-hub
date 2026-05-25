@@ -326,10 +326,16 @@ export default function Step2Visuals() {
         </div>
       </div>
 
-      <button onClick={() => { store.approve('visuals'); store.setStep(3); }}
-        className="w-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-        <Check size={14} /> Continue to Editor{allGenerating ? ' (backgrounds still loading…)' : ''}
-      </button>
+      <div className="flex gap-3">
+        <button onClick={() => store.setStep(1)}
+          className="flex-none bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white font-medium py-3 px-5 rounded-xl transition-colors text-sm">
+          ← Back
+        </button>
+        <button onClick={() => { store.approve('visuals'); store.setStep(3); }}
+          className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+          <Check size={14} /> Continue to Editor{allGenerating ? ' (backgrounds still loading…)' : ''}
+        </button>
+      </div>
     </div>
   );
 }
