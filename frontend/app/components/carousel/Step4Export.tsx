@@ -234,11 +234,22 @@ export default function Step4Export() {
           className="p-2 rounded-xl hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronRight size={20} /></button>
       </div>
 
-      {/* Dots */}
-      <div className="flex justify-center gap-1.5">
-        {slides.map((_, i) => (
-          <button key={i} onClick={() => setCurrentIdx(i)}
-            className={`rounded-full transition-all ${i === currentIdx ? 'w-5 h-2 bg-brand-orange' : 'w-2 h-2 bg-white/20 hover:bg-white/40'}`} />
+      {/* Thumbnail strip — click to navigate, click download icon to export that slide */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1 justify-center">
+        {slides.map((s, i) => (
+          <button key={s.id} onClick={() => setCurrentIdx(i)}
+            className={`relative flex-shrink-0 w-12 rounded-lg border overflow-hidden transition-all ${i === currentIdx ? 'border-brand-orange ring-1 ring-brand-orange/30' : 'border-white/10 opacity-60 hover:opacity-100'}`}
+            style={{ aspectRatio: '4/5' }}
+            title={`Slide ${i + 1}`}>
+            {s.backgroundImage
+              ? <img src={s.backgroundImage} alt="" className="w-full h-full object-cover" />
+              : <div className="w-full h-full bg-[#111] flex items-center justify-center text-[9px] text-gray-600">{i + 1}</div>}
+            {i === currentIdx && (
+              <div className="absolute inset-0 bg-brand-orange/10 flex items-end justify-center pb-0.5">
+                <div className="text-[7px] font-bold text-brand-orange">{i + 1}</div>
+              </div>
+            )}
+          </button>
         ))}
       </div>
 
