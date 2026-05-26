@@ -25,7 +25,7 @@ export default function Step1Copy() {
       } else if (d.slides?.length) {
         store.setSlides(d.slides);
         store.setCaption(d.caption || '');
-        store.setKeyword(d.keyword || '');
+        store.setKeyword((d.keyword || '').toUpperCase());
         store.setCategory(d.category || '');
       } else {
         setError('No slides returned. Try rephrasing your topic.');
@@ -160,7 +160,8 @@ export default function Step1Copy() {
 
           {/* Approve */}
           <button onClick={() => { store.approve('copy'); store.setStep(2); }}
-            className="w-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+            disabled={copyLoading}
+            className="w-full bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-40">
             <Check size={14} /> Continue to Visuals
           </button>
         </div>

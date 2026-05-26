@@ -69,11 +69,12 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
       x={(overlay.x / 100) * stageW}
       y={(overlay.y / 100) * stageH}
       offsetX={pxW / 2}
-      offsetY={fs / 2}
+      offsetY={fs * 0.65}
       rotation={overlay.rotation || 0}
       text={overlay.text}
       fontSize={fs}
-      fontStyle={overlay.fontWeight >= 800 ? '800' : overlay.fontWeight >= 700 ? 'bold' : 'normal'}
+      lineHeight={1.3}
+      fontStyle={overlay.fontWeight >= 700 ? 'bold' : 'normal'}
       fontFamily={overlay.fontFamily || '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif'}
       fill={overlay.color}
       width={pxW}

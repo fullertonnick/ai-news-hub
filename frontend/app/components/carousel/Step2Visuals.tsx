@@ -51,14 +51,15 @@ export default function Step2Visuals() {
     return () => ro.disconnect();
   }, []);
 
-  // Auto-apply cover photo — set raw URL immediately, then upgrade to proxied data URL.
+  // Auto-apply cover photo — proxy to data URL without clobbering an existing data URL first.
+  // Skipping the "set raw URL immediately" step prevents the visible flash when navigating
+  // back to Step2 (the slide keeps its existing background while re-proxying completes).
   // Use getState() for actions so `store` is not a reactive dependency (avoids re-render loop).
   useEffect(() => {
     const c = slidesRef.current[0];
     if (!c) return;
     const slideId = c.id;
     const rawUrl = NICK_PHOTOS[coverPhotoIdx];
-    useCarouselStore.getState().setSlideBackground(slideId, rawUrl);
     let cancelled = false;
     setPhotoLoading(true);
     proxyPhoto(rawUrl).then(dataUrl => {
@@ -67,14 +68,13 @@ export default function Step2Visuals() {
     return () => { cancelled = true; };
   }, [coverPhotoIdx, coverSlideId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-apply CTA photo — proxy to data URL
+  // Auto-apply CTA photo — proxy to data URL (same flash-prevention approach as cover)
   useEffect(() => {
     const allSlides = slidesRef.current;
     const c = allSlides[allSlides.length - 1];
     if (!c) return;
     const slideId = c.id;
     const rawUrl = NICK_PHOTOS[ctaPhotoIdx];
-    useCarouselStore.getState().setSlideBackground(slideId, rawUrl);
     let cancelled = false;
     setCtaPhotoLoading(true);
     proxyPhoto(rawUrl).then(dataUrl => {
