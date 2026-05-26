@@ -1,9 +1,10 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Zap, RefreshCw, Search, X, TrendingUp, Loader2 } from 'lucide-react';
 import NewsCard from '../../components/NewsCard';
 import TrendingSidebar from '../../components/TrendingSidebar';
-import CarouselGenerator from '../../components/CarouselGenerator';
+import { useCarouselStore } from '../../stores/useCarouselStore';
 import { NewsItem, TrendingTopic } from '../../types';
 
 export default function Home() {
@@ -13,7 +14,7 @@ export default function Home() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [carouselTopic, setCarouselTopic] = useState<string | null>(null);
+  const router = useRouter();
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -72,6 +73,14 @@ export default function Home() {
     setRefreshing(false);
   }, [fetchNews, fetchTopics, activeFilter]);
 
+  const handleGenerateCarousel = useCallback((topic: string) => {
+    const store = useCarouselStore.getState();
+    store.setTopic(topic);
+    store.setSlides([]);
+    store.setStep(1);
+    router.push('/dashboard/carousel');
+  }, [router]);
+
   const filtered = search.trim()
     ? news.filter(n => n.title.toLowerCase().includes(search.toLowerCase()) || n.summary?.toLowerCase().includes(search.toLowerCase()) || n.topics.some(t => t.toLowerCase().includes(search.toLowerCase())))
     : news;
@@ -101,7 +110,7 @@ export default function Home() {
             <button onClick={handleRefresh} disabled={refreshing} className="p-2 rounded-xl border border-white/10 hover:border-white/20 text-gray-500 hover:text-white transition-colors">
               <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
             </button>
-            <button onClick={() => setCarouselTopic('AI Business Systems')} className="flex items-center gap-2 bg-brand-orange hover:bg-orange-500 text-white font-semibold text-sm px-4 py-2 rounded-xl transition-colors">
+            <button onClick={() => handleGenerateCarousel('AI Business Systems')} className="flex items-center gap-2 bg-brand-orange hover:bg-orange-500 text-white font-semibold text-sm px-4 py-2 rounded-xl transition-colors">
               <Zap size={14} />Carousel
             </button>
           </div>
@@ -142,7 +151,7 @@ export default function Home() {
               <>
                 <div className="space-y-4">
                   {filtered.map(item => (
-                    <NewsCard key={item.id} item={item} onGenerateCarousel={setCarouselTopic} onTopicClick={handleTopicClick} />
+                    <NewsCard key={item.id} item={item} onGenerateCarousel={handleGenerateCarousel} onTopicClick={handleTopicClick} />
                   ))}
                 </div>
                 {!search && hasMore && (
@@ -162,7 +171,7 @@ export default function Home() {
               <TrendingSidebar
                 topics={topics}
                 onTopicClick={handleTopicClick}
-                onGenerateCarousel={setCarouselTopic}
+                onGenerateCarousel={handleGenerateCarousel}
                 onRefresh={handleRefresh}
                 activeFilter={activeFilter}
               />
@@ -171,7 +180,6 @@ export default function Home() {
         </div>
       </main>
 
-      {carouselTopic && <CarouselGenerator topic={carouselTopic} onClose={() => setCarouselTopic(null)} />}
     </div>
   );
 }
