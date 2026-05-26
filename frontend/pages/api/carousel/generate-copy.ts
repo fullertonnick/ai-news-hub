@@ -231,6 +231,8 @@ WRITING STYLE — Tyler Germain
 - FORBIDDEN WORDS: leverage, synergy, game-changer, seamless, empower,
   unlock, revolutionize, supercharge, innovative, utilize, paradigm.
 - Concrete: "Claude reads your repo in 15s" NOT "AI understands your codebase"
+- Numbers beat adjectives: "saves 3 hours" beats "saves significant time"
+- Name the actual thing: "CLAUDE.md" beats "a config file", "$200/month" beats "affordable"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ACCENT WORD — highlighted orange, one per slide
@@ -276,19 +278,31 @@ SLIDE COUNT — count from your structure, then add cover + CTA:
 SLIDE SPECS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SLIDE 1 (COVER):
-  text: 5-8 word bold headline + (subtitle in parens with the specific payoff)
+  text: Hook headline (5-8 words, reveals tension or counter-intuitive fact) +
+        "\\n\\n(subtitle: specific payoff — lowercase, one line, what reader walks away with)"
+  STRONG COVERS:
+    "Claude Code forgets your entire stack between sessions\\n\\n(the 5-minute CLAUDE.md fix that changes this forever)"
+    "Most AI agents fail within 2 weeks of deployment\\n\\n(it's never the model's fault)"
+    "Make.com scenarios fail in silence by default\\n\\n(here's the 4-minute error handler that ends midnight alerts)"
+  WEAK COVERS (avoid):
+    "How to use Claude Code\\n\\n(tips and tricks)" ← vague, no tension, no payoff
   visual_type: "cover_photo"
   section_label: null
 
 SLIDES 2 to N-1 (CONTENT):
-  text: 2-4 punchy sentences, one idea, ends with a kicker
+  text: 2-4 punchy sentences. One key insight. Last line = the kicker.
+  KICKER RULE: Final sentence reframes everything above it. Short. Punchy. Changes how they see the topic.
+    GOOD kickers: "Scope is the architecture. Model is the detail."
+                  "5+ hours back. Every week. From one file."
+                  "The tool didn't fail. The scope did."
+    BAD kickers: "This is a very powerful approach." / "Consider applying this today." (no punch, no reframe)
   visual_type: "none"
   section_label: the label from your chosen structure (e.g. "Step 1", "01.", "The Myth", "Before", "What it is") — or null if none needed
 
 LAST SLIDE (CTA):
-  text: ONE compelling question that flows naturally from the content. That's all.
-    STOP after the question mark. Do NOT write "Comment X and I'll send you Y" —
-    the slide template renders that automatically using the keyword field.
+  text: ONE compelling question that flows naturally from the content. STOP after the question mark.
+    Do NOT write "Comment X and I'll send you Y" — the slide template renders that from keyword.
+    Make the question feel like the punchline of the whole carousel.
   visual_type: "cta_slide"
   section_label: null
 
