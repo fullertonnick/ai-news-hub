@@ -74,45 +74,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ? `SCENE CONCEPT (derived from slide text): ${conceptHints.slice(0, 2).join(' — with secondary element: ')}`
     : `SCENE: ${SCENE_FALLBACKS[slideType] || SCENE_FALLBACKS.none}`;
 
-  const prompt = `Write an Imagen 3 image generation prompt for an Instagram carousel slide background.
+  const prompt = `Write a single Imagen 3 image generation prompt for an Instagram carousel slide background.
 
 SLIDE CONTEXT:
-- Overall topic: "${topic}"
-- This slide's text: "${slideText.slice(0, 250)}"
+- Topic: "${topic}"
+- Slide text: "${slideText.slice(0, 200)}"
 - Slide type: ${slideType}
-- Category: ${category}
 
-VISUAL REQUIREMENT:
+VISUAL DIRECTION:
 ${guidance}
 
 ${sceneHint}
 
-YOUR JOB: Extract 1-2 concrete visual concepts directly from the slide text, then build a cinematic dark scene around them. A viewer should subconsciously associate the image with this slide's subject after 2 seconds — not just the general topic.
+YOUR JOB: Pull 1-2 concrete objects or environments directly from the slide text. Build a cinematic dark scene around them. The image should feel like it belongs to THIS specific slide — not just the general topic.
 
-Be specific and concrete — "dark desk with amber desk lamp, open MacBook showing blurred code" beats "dark background". Pull from the slide text for scene elements.
+CONCRETE BEATS ABSTRACT:
+  "dark oak desk, open MacBook with blurred amber code glow, single desk lamp casting warm light, mechanical keyboard foreground, shallow depth of field" → GOOD
+  "dark atmospheric tech background with orange accents" → TOO VAGUE
 
-GOOD EXAMPLES:
-Topic "Claude Code memory" + slide about CLAUDE.md:
-→ "dark oak desk, glowing text editor on laptop screen showing blurred code files, single warm amber desk lamp, mechanical keyboard in foreground, shallow depth of field, cinematic 35mm lens"
-
-Topic "Make.com automations" + slide about saving 20 hours per week:
-→ "dark server room corridor, amber LED floor strips casting warm glow on hardware racks, blurred motion, moody cinematic lighting, shallow depth of field, 3:4 portrait"
-
-ABSOLUTE RULES (breaking any makes the image unusable):
-- ZERO text, letters, numbers, words, typography anywhere in the image
-- ZERO faces, people, human figures, hands, or body parts
-- ZERO UI elements, app screenshots, phone screens with readable content
-- ZERO logos or brand marks
-- Background MUST be very dark (near #0A0A0A) — white text will overlay it
+ABSOLUTE RULES — breaking any makes the image unusable:
+• NO text, letters, numbers, words, or typography anywhere
+• NO faces, people, human figures, hands, or body parts
+• NO UI elements, phone screens with readable content, or logos
+• Background MUST be very dark (near #0A0A0A) — white text overlays it
 
 BRAND STYLE:
-- Near-black base throughout
-- Warm orange (#FF7107) and amber ONLY as: accent lighting, bokeh, glow, rim light
-- Cinematic lens quality — bokeh depth of field, 35mm feel
-- 3:4 portrait orientation
-- Premium, moody, high contrast
+• Near-black base. Orange/amber ONLY as accent light, glow, bokeh, or rim light.
+• Cinematic 35mm lens — shallow depth of field, professional bokeh
+• 3:4 portrait, premium and moody
 
-Return ONLY the prompt text. No JSON, no quotes, no explanation.`;
+Output the prompt only — no quotes, no JSON, no explanation.`;
 
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
