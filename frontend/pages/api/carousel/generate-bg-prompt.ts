@@ -8,10 +8,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { topic, slideText, slideType, category } = req.body;
   if (!topic || !slideText) return res.status(400).json({ error: 'topic and slideText required' });
 
+  const SAFETY_SUFFIX = ', no text, no words, no letters, no typography, no faces, no people, no hands, no human figures, no logos, no UI, near-black background, cinematic 3:4 portrait, professional photography';
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.json({
-      prompt: `Dark cinematic background for Instagram carousel about "${topic}", moody lighting, warm orange and amber accents, professional atmosphere, deep shadows, bokeh depth of field, no text, no faces, no people, 4K portrait`,
+      prompt: `Dark cinematic background for Instagram carousel about "${topic}", moody lighting, warm orange and amber accents, professional atmosphere, deep shadows, bokeh depth of field${SAFETY_SUFFIX}`,
     });
   }
 
@@ -104,8 +106,6 @@ BRAND STYLE:
 • 3:4 portrait, premium and moody
 
 Output the prompt only — no quotes, no JSON, no explanation.`;
-
-  const SAFETY_SUFFIX = ', no text, no words, no letters, no typography, no faces, no people, no hands, no human figures, no logos, no UI, near-black background, cinematic 3:4 portrait, professional photography';
 
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
