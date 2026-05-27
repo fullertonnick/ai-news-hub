@@ -106,6 +106,13 @@ export default function Step3Edit() {
   const canvasH = Math.round(canvasW * (450 / 360)); // maintain 4:5 ratio
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
+  // Clamp currentIdx when slides array shrinks (e.g. after slide removal)
+  useEffect(() => {
+    if (slides.length > 0 && currentIdx >= slides.length) {
+      setCurrentIdx(slides.length - 1);
+    }
+  }, [slides.length, currentIdx]);
+
   const slide = slides[currentIdx];
   const stickers = slide?.stickers || [];
   const textOverlays = slide?.textOverlays || [];

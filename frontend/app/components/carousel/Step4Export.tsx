@@ -123,6 +123,9 @@ export default function Step4Export() {
     setExportError(null);
     try {
       await preloadFonts();
+      // Give the browser one extra paint cycle after font loading to ensure
+      // background images and CSS are fully decoded before html-to-image captures.
+      await new Promise(r => setTimeout(r, 150));
       const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
     } catch (e) {
@@ -138,6 +141,7 @@ export default function Step4Export() {
     setExportError(null);
     try {
       await preloadFonts();
+      await new Promise(r => setTimeout(r, 150));
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       let missingRefs = 0;

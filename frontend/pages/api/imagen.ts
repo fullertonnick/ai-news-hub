@@ -19,6 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Try up to 2 times on empty response
     for (let attempt = 0; attempt < 2; attempt++) {
+      const safePrompt = `${prompt.trim()}, no text, no words, no letters, no typography, no faces, no people, no hands, no human figures, no logos, near-black background, cinematic portrait`;
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/nano-banana-pro-preview:generateContent?key=${apiKey}`,
         {
@@ -26,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           headers: { 'Content-Type': 'application/json' },
           signal: controller.signal,
           body: JSON.stringify({
-            contents: [{ parts: [{ text: `Generate an image: ${prompt}` }] }],
+            contents: [{ parts: [{ text: `Generate an image: ${safePrompt}` }] }],
             generationConfig: {
               responseModalities: ['IMAGE', 'TEXT'],
               responseMimeType: 'text/plain',

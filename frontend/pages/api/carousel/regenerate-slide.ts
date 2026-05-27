@@ -19,16 +19,20 @@ function stripForbidden(text: string): string {
 }
 
 // Ensure accent_word appears verbatim in text; fallback to most impactful phrase.
-// Priority: numbers+units → tool/file names → paths/commands → first strong noun
+// Priority: dollar amounts → numbers+units → tool/file names → arrow sequences → paths → first strong noun
 function fixAccentWord(text: string, accentWord: string | undefined): string {
   if (!accentWord) return '';
   if (text.toLowerCase().includes(accentWord.toLowerCase())) return accentWord;
-  const numMatch = text.match(/\$[\d,]+[k]?|\b\d+(?:\.\d+)?x\b|\b\d+(?:\s*(?:%|hrs?|hours?|min|minutes?|days?|weeks?|months?|seconds?|k))\b/i);
+  const dollarMatch = text.match(/\$[\d,]+(?:[kKmM])?(?:\/\w+)?/);
+  if (dollarMatch) return dollarMatch[0].trim();
+  const numMatch = text.match(/\b\d+(?:\.\d+)?(?:x\b|\s*(?:%|hrs?|hours?|min(?:utes?)?|sec(?:onds?)?|days?|weeks?|months?|[kKmM]\b))/i);
   if (numMatch) return numMatch[0].trim();
   const toolMatch = text.match(/\b[A-Z][A-Z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/);
   if (toolMatch) return toolMatch[0];
   const cmdMatch = text.match(/\/[a-z][a-z_-]{2,}/);
   if (cmdMatch) return cmdMatch[0];
+  const arrowMatch = text.match(/\w[\w\s]{2,20}(?:\s*→\s*\w[\w\s]{2,15}){2,}/);
+  if (arrowMatch) return arrowMatch[0].trim().slice(0, 30);
   const stop = new Set(['their', 'there', 'where', 'every', 'which', 'about', 'after', 'before', 'while', 'doing', 'using', 'start', 'build', 'when', 'from', 'that', 'with', 'your', 'have', 'more', 'this', 'just', 'most', 'also', 'than', 'then', 'what', 'into', 'over', 'them', 'they', 'some', 'never', 'always', 'still', 'right', 'first', 'second']);
   const words = text.split(/\s+/).filter(w => {
     const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
@@ -109,7 +113,12 @@ Return JSON only: {"text": "...", "accent_word": "..."}`;
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) text = jsonMatch[0];
     const parsed = JSON.parse(text.trim());
-    const cleanText = stripForbidden(parsed.text || '');
+    let rawText = parsed.text || '';
+    if (isLast) {
+      rawText = rawText.replace(/\s*\n*Comment\s+\w+\s+and\s+I['']ll\s+send[\s\S]*/i, '').trim();
+      rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
+    }
+    const cleanText = stripForbidden(rawText);
     return res.json({
       text: cleanText,
       accent_word: fixAccentWord(cleanText, parsed.accent_word),

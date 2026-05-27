@@ -168,19 +168,25 @@ function buildCategoryFallback(topic: string, category: string): { slides: any[]
 }
 
 // If AI picks an accent_word that isn't in the slide text, extract the most impactful phrase.
-// Priority: numbers+units → tool/file names → the proposed word (cleaned) → first strong noun.
+// Priority: dollar amounts → numbers+units → tool/file names → arrow sequences → paths → first strong noun.
 function fixAccentWord(text: string, accentWord: string | undefined): string {
   if (!accentWord) return '';
   if (text.toLowerCase().includes(accentWord.toLowerCase())) return accentWord;
-  // Numbers with units — most concrete, most screenshot-worthy
-  const numMatch = text.match(/\$[\d,]+[k]?|\b\d+(?:\.\d+)?x\b|\b\d+(?:\s*(?:%|hrs?|hours?|min|minutes?|days?|weeks?|months?|seconds?|k))\b/i);
+  // Dollar amounts first — "$200/month", "$70K", "$50"
+  const dollarMatch = text.match(/\$[\d,]+(?:[kKmM])?(?:\/\w+)?/);
+  if (dollarMatch) return dollarMatch[0].trim();
+  // Numbers with concrete units — "3 hours", "15s", "4x", "80%"
+  const numMatch = text.match(/\b\d+(?:\.\d+)?(?:x\b|\s*(?:%|hrs?|hours?|min(?:utes?)?|sec(?:onds?)?|days?|weeks?|months?|[kKmM]\b))/i);
   if (numMatch) return numMatch[0].trim();
-  // Tool/file names (CLAUDE.md, .json, /hooks, etc.)
+  // Tool/file names (CLAUDE.md, settings.json, etc.)
   const toolMatch = text.match(/\b[A-Z][A-Z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/);
   if (toolMatch) return toolMatch[0];
   // Named commands or paths (/hooks, /api/..., etc.)
   const cmdMatch = text.match(/\/[a-z][a-z_-]{2,}/);
   if (cmdMatch) return cmdMatch[0];
+  // Arrow sequences — "A → B → C" — pick the middle term as the pivot concept
+  const arrowMatch = text.match(/\w[\w\s]{2,20}(?:\s*→\s*\w[\w\s]{2,15}){2,}/);
+  if (arrowMatch) return arrowMatch[0].trim().slice(0, 30);
   // Fallback: first strong noun (>4 chars, not a stopword)
   const stop = new Set(['their', 'there', 'where', 'every', 'which', 'about', 'after', 'before', 'while', 'doing', 'using', 'start', 'build', 'when', 'from', 'that', 'with', 'your', 'have', 'more', 'this', 'just', 'most', 'also', 'than', 'then', 'what', 'into', 'over', 'them', 'they', 'some', 'never', 'always', 'still', 'right', 'first', 'second']);
   const words = text.split(/\s+/).filter(w => {
@@ -194,7 +200,7 @@ function fixAccentWord(text: string, accentWord: string | undefined): string {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { topic, style = 'tech_breakdown', research_context } = req.body;
+  const { topic, style = 'tech_breakdown' } = req.body;
   if (!topic) return res.status(400).json({ error: 'topic required' });
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -210,7 +216,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const prompt = `You are writing an Instagram carousel for Nick Cornelius (@thenickcornelius) — SimpliScale + KingCaller AI, $70K+/month. Audience: entrepreneurs and agency owners who use AI to scale.
 
 TOPIC: "${topic}"
-${categoryHint[category] ? `\n${categoryHint[category]}\n` : ''}${research_context?.full_research ? `\nRESEARCH:\n${research_context.full_research.slice(0, 2000)}` : ''}
+${categoryHint[category] ? `\n${categoryHint[category]}\n` : ''}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 BULLSHIT TEST — every content slide must pass all 3:
@@ -451,7 +457,9 @@ Now write a completely original carousel about: "${topic}"`;
     const rawKw = (parsed.keyword || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
     const keyword = rawKw.length >= 2 ? rawKw : fallbackKeyword(topic);
     let caption = stripForbidden(parsed.caption || '');
-    if (caption && !caption.includes('#simpliscale')) caption += '\n#simpliscale #thenickcornelius';
+    // Ensure the caption uses the resolved keyword (not whatever the AI wrote)
+    caption = caption.replace(/Comment\s+[A-Z0-9]+\s+and/gi, `Comment ${keyword} and`);
+    if (caption && !caption.includes('#simpliscale')) caption += '\n\n#simpliscale #thenickcornelius';
     else if (caption && !caption.includes('#thenickcornelius')) caption += ' #thenickcornelius';
     return res.json({ slides: finalSlides, caption, keyword, category });
   } catch (err: any) {

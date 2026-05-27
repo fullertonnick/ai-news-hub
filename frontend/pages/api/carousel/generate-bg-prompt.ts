@@ -105,6 +105,8 @@ BRAND STYLE:
 
 Output the prompt only — no quotes, no JSON, no explanation.`;
 
+  const SAFETY_SUFFIX = ', no text, no words, no letters, no typography, no faces, no people, no hands, no human figures, no logos, no UI, near-black background, cinematic 3:4 portrait, professional photography';
+
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
@@ -117,10 +119,10 @@ Output the prompt only — no quotes, no JSON, no explanation.`;
     });
     const d = await r.json();
     const generatedPrompt = d.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-    return res.json({ prompt: generatedPrompt });
+    return res.json({ prompt: generatedPrompt + SAFETY_SUFFIX });
   } catch {
     return res.json({
-      prompt: `Dark cinematic background representing "${topic}", warm orange accent lighting, deep shadows, professional atmosphere, bokeh depth of field, no text, no faces, 4K portrait`,
+      prompt: `Dark cinematic background representing "${topic}", warm orange accent lighting, deep shadows, professional atmosphere, bokeh depth of field${SAFETY_SUFFIX}`,
     });
   }
 }
