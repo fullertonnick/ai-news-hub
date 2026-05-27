@@ -274,15 +274,15 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
       <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)' }} />
 
       {/* Bottom gradient — strong dark behind headline and footer */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.25) 35%, rgba(0,0,0,0.75) 65%, rgba(0,0,0,0.92) 100%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.15) 25%, rgba(0,0,0,0.72) 58%, rgba(0,0,0,0.93) 78%, rgba(0,0,0,0.98) 100%)' }} />
 
       {/* Topic-relevant sticker badges — bold orange pills, clearly visible */}
       {stickers.map((sticker, i) => (
         <div key={i} style={{
           position: 'absolute', ...sticker.pos,
           transform: `rotate(${sticker.rotate}deg)`,
-          backgroundColor: 'rgba(255,113,7,0.25)',
-          border: `${2 * sc}px solid rgba(255,113,7,0.85)`,
+          backgroundColor: 'rgba(0,0,0,0.60)',
+          border: `${2 * sc}px solid ${Brand.colors.accent_primary}`,
           borderRadius: `${12 * sc}px`,
           padding: `${11 * sc}px ${24 * sc}px`,
           fontSize: `${20 * sc}px`,
@@ -361,7 +361,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
           <div style={{ width: `${52 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px' }} />
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
             <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600 }}>Comment</span>
-            {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, padding: `${7 * sc}px ${20 * sc}px`, borderRadius: '9999px', lineHeight: 1.2 }}>{v.keyword}</span>}
+            {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, padding: `${7 * sc}px ${20 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${20 * sc}px rgba(255,113,7,0.55), 0 ${2 * sc}px ${8 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
             <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600 }}>I'll send it over 🔥</span>
           </div>
         </div>
@@ -403,7 +403,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
 
         <div style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: `${10 * sc}px`, flexWrap: 'wrap' as const }}>
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600 }}>Comment</span>
-          {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, padding: `${8 * sc}px ${24 * sc}px`, borderRadius: '9999px', lineHeight: 1.2 }}>{v.keyword}</span>}
+          {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, padding: `${8 * sc}px ${24 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${24 * sc}px rgba(255,113,7,0.60), 0 ${2 * sc}px ${10 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600 }}>I'll send it over 🔥</span>
         </div>
 
@@ -499,13 +499,13 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
       {!hasImagen && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '25%', background: `linear-gradient(to bottom, rgba(255,113,7,0.025), transparent)`, pointerEvents: 'none' }} />}
 
       {/* Orange left border accent — all content slides (Tyler Germain signature) */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${6 * sc}px`, background: Brand.colors.accent_primary, zIndex: 4 }} />
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${6 * sc}px`, background: Brand.colors.accent_primary, zIndex: 4, boxShadow: `${5 * sc}px 0 ${28 * sc}px rgba(255,113,7,0.40)` }} />
       {/* Subtle orange radial glow */}
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(255,113,7,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
       {/* Big quote decorative mark — background element */}
       {isBigQuote && (
-        <div style={{ position: 'absolute', top: `${-10 * sc}px`, left: `${44 * sc}px`, fontSize: `${160 * sc}px`, lineHeight: 1, color: Brand.colors.accent_primary, opacity: 0.12, fontFamily: 'Georgia, serif', fontWeight: 900, zIndex: 0, pointerEvents: 'none', userSelect: 'none' as const }}>"</div>
+        <div style={{ position: 'absolute', top: `${-10 * sc}px`, left: `${44 * sc}px`, fontSize: `${160 * sc}px`, lineHeight: 1, color: Brand.colors.accent_primary, opacity: 0.16, fontFamily: 'Georgia, serif', fontWeight: 900, zIndex: 0, pointerEvents: 'none', userSelect: 'none' as const }}>"</div>
       )}
 
       {/* Content — vertically centered */}
@@ -542,7 +542,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 width: `${60 * sc}px`, height: `${4 * sc}px`,
                 background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`,
                 borderRadius: '3px',
-                marginBottom: `${(!hasVis && bodyParas.length > 0) ? 28 * sc : 8 * sc}px`,
+                marginBottom: `${(!hasVis && bodyParas.length > 0) ? 28 * sc : 20 * sc}px`,
               }} />
             )}
             {/* Body — 24px regular, only for text-only slides (no visual block) */}
@@ -562,7 +562,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 <div style={{ width: `${48 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${14 * sc}px` }} />
                 <p style={{
                   margin: 0,
-                  fontSize: `${30 * sc}px`, fontWeight: 800,
+                  fontSize: `${28 * sc}px`, fontWeight: 800,
                   fontFamily: Brand.typography.font_family,
                   color: Brand.colors.text_primary, lineHeight: 1.28, letterSpacing: '-0.025em',
                 }}>
@@ -606,8 +606,6 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               const v = slide.visual as StatsGridVisual;
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: `${14 * sc}px` }}>
-                  {/* Orange separator line */}
-                  <div style={{ width: '40%', height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px' }} />
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: `${14 * sc}px` }}>
                     {(v.stats || []).slice(0, 4).map((s, i) => (
                       <div key={i} style={{
