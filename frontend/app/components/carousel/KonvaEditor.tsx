@@ -121,6 +121,9 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
     ...textOverlays.map(t => ({ kind: 'text' as const, data: t })),
   ].sort((a, b) => (a.data.zIndex ?? 10) - (b.data.zIndex ?? 10));
 
+  // Reset cursor when the slide changes (stickers/overlays swapped out from under us)
+  useEffect(() => { setCursor('default'); }, [stickers, textOverlays]);
+
   // Attach transformer to selected node.
   // Sticker images (especially uploaded PNGs) load async — poll until the node is
   // available, giving up after ~2 seconds to avoid infinite retries on missing nodes.
@@ -156,7 +159,8 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
 
     attach();
     return () => clearTimeout(timer);
-  }, [selectedId, stickers.length, textOverlays.length]);
+  // Include the full arrays so the effect re-runs if an overlay is replaced (same count, different ID)
+  }, [selectedId, stickers, textOverlays]);
 
   const handleMouseEnterNode = useCallback(() => setCursor('grab'), []);
   const handleMouseLeaveNode = useCallback(() => setCursor('default'), []);

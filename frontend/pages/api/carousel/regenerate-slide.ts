@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.json({ text: currentText || 'AI-powered systems handle this automatically.', accent_word: 'automatically' });
+    return res.json({ text: null, accent_word: null });
   }
 
   const total = totalSlides || 5;
@@ -115,6 +115,7 @@ Return JSON only: {"text": "...", "accent_word": "..."}`;
       accent_word: fixAccentWord(cleanText, parsed.accent_word),
     });
   } catch {
-    return res.json({ text: currentText, accent_word: '' });
+    // Return null text so the client skips the update and preserves current state + approvals
+    return res.json({ text: null, accent_word: null });
   }
 }

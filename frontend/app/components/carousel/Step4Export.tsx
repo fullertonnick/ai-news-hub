@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
 import { Download, Package, Copy, Check, Loader2, ChevronLeft, ChevronRight, RotateCcw, AlertCircle } from 'lucide-react';
 import SlideRenderer from '../SlideRenderer';
@@ -94,8 +94,8 @@ export default function Step4Export() {
     setProxyingImages(false);
   }, [slides, store]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Build render slides
-  const renderSlides: CarouselSlide[] = slides.map((s, i) => {
+  // Build render slides — memoized so hidden 1080px renderers don't re-render on every UI state change
+  const renderSlides: CarouselSlide[] = useMemo(() => slides.map((s, i) => {
     const isFirst = i === 0, isLast = i === slides.length - 1;
     let visual: any;
     if (isFirst) visual = { type: 'cover_photo', gradient_hue: 25, position: coverPosition };
@@ -109,7 +109,8 @@ export default function Step4Export() {
       textOffsetX: s.useTextOverlays ? 0 : s.textOffsetX,
       textOffsetY: s.useTextOverlays ? 0 : s.textOffsetY,
     };
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [slides, keyword, ctaLayout, coverPosition]);
 
   const downloadSlide = useCallback(async (i: number) => {
     await ensureDataUrls();
@@ -154,7 +155,8 @@ export default function Step4Export() {
       zip.file('carousel-data.json', JSON.stringify({ topic: store.topic, keyword, slides: slides.map(s => ({ text: s.text, visual_type: s.visual_type })), caption }, null, 2));
       const blob = await zip.generateAsync({ type: 'blob' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = `carousel-${store.topic.replace(/\s+/g, '-').toLowerCase().slice(0, 40)}.zip`; a.click();
+      const safeSlug = store.topic.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase().slice(0, 40) || 'carousel';
+      const a = document.createElement('a'); a.href = url; a.download = `carousel-${safeSlug}.zip`; a.click();
       URL.revokeObjectURL(url);
       if (missingRefs > 0) {
         setExportError(`ZIP created but ${missingRefs} slide(s) were missing — scroll down and retry if any are absent.`);

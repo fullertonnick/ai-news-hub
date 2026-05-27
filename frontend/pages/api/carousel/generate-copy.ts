@@ -407,8 +407,9 @@ Now write a completely original carousel about: "${topic}"`;
       const isLastSlide = idx === (parsed.slides || []).length - 1;
       // CTA slide: strip any "Comment X and I'll send you Y" the AI adds — the slide template renders it from keyword
       if (isLastSlide || s.visual_type === 'cta_slide') {
-        rawText = rawText.replace(/\s*\n*Comment\s+\w+\s+and\s+I['']ll\s+send.*/i, '').trim();
-        rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?.*/i, '').trim();
+        rawText = rawText.replace(/\s*\n*Comment\s+\w+\s+and\s+I['']ll\s+send[\s\S]*/i, '').trim();
+        rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
+        rawText = rawText.replace(/\s*\n*Comment\s+["']?\w+["']?\s+below[\s\S]*/i, '').trim();
       }
       const cleanText = stripForbidden(rawText);
       // Normalize section_label: null/"null"/"none" → undefined; strip "Level X" prefix
