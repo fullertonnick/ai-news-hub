@@ -63,13 +63,17 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
 }) {
   const pxW = (overlay.maxWidth / 100) * stageW;
   const fs = overlay.fontSize * (stageW / 1080);
+  // Match SlideRenderer's translate(-50%,-50%) center anchor.
+  // Count explicit newlines for a better line-height estimate; single-line: fs*1.3*1/2 = fs*0.65 (same as before).
+  const numLines = overlay.text.split('\n').length;
+  const estimatedHeight = fs * 1.3 * numLines;
 
   return (
     <KText
       x={(overlay.x / 100) * stageW}
       y={(overlay.y / 100) * stageH}
       offsetX={pxW / 2}
-      offsetY={fs * 0.65}
+      offsetY={estimatedHeight / 2}
       rotation={overlay.rotation || 0}
       text={overlay.text}
       fontSize={fs}
@@ -190,6 +194,8 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
     const scaleX = node.scaleX();
     node.scaleX(1);
     node.scaleY(1);
+    // Force immediate redraw so the scale reset doesn't flash on-screen for one frame
+    trRef.current?.getLayer()?.batchDraw();
 
     const pctX = Math.round((node.x() / width) * 100);
     const pctY = Math.round((node.y() / height) * 100);

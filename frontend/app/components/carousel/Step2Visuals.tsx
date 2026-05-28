@@ -51,6 +51,13 @@ export default function Step2Visuals() {
     return () => ro.disconnect();
   }, []);
 
+  // Clamp currentIdx when slides array shrinks (e.g. after copy regeneration with fewer slides)
+  useEffect(() => {
+    if (slides.length > 0 && currentIdx >= slides.length) {
+      setCurrentIdx(slides.length - 1);
+    }
+  }, [slides.length, currentIdx]);
+
   // Auto-apply cover photo — proxy to data URL without clobbering an existing data URL first.
   // Skipping the "set raw URL immediately" step prevents the visible flash when navigating
   // back to Step2 (the slide keeps its existing background while re-proxying completes).
