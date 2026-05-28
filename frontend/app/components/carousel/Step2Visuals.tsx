@@ -29,12 +29,14 @@ export default function Step2Visuals() {
   // Cover/CTA photo index
   const busyRef = useRef<Record<string, boolean>>({});
 
-  const [coverPhotoIdx, setCoverPhotoIdx] = useState(() =>
-    NICK_PHOTOS.indexOf(pickRandomPhoto((topic || '') + 'cover'))
-  );
-  const [ctaPhotoIdx, setCtaPhotoIdx] = useState(() =>
-    NICK_PHOTOS.indexOf(pickRandomPhoto((topic || '') + 'cta'))
-  );
+  const [coverPhotoIdx, setCoverPhotoIdx] = useState(() => {
+    const idx = NICK_PHOTOS.indexOf(pickRandomPhoto((topic || '') + 'cover'));
+    return idx >= 0 ? idx : 0;
+  });
+  const [ctaPhotoIdx, setCtaPhotoIdx] = useState(() => {
+    const idx = NICK_PHOTOS.indexOf(pickRandomPhoto((topic || '') + 'cta'));
+    return idx >= 0 ? idx : 1 % NICK_PHOTOS.length;
+  });
 
   // Use refs so the effects always see the current slide IDs without triggering on every slide change.
   const slidesRef = useRef(slides);

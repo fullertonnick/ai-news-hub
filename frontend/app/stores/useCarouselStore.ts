@@ -261,10 +261,9 @@ export const useCarouselStore = create<CarouselStore>()(
     }),
     {
       name: 'simpliscale-carousel-pipeline',
-      version: 10,
+      version: 11,
       migrate: (persisted: any, fromVersion: number) => {
-        // Any data older than current version gets a clean reset (preserving only topic/category)
-        if (fromVersion < 10) {
+        if (fromVersion < 11) {
           return {
             ...INITIAL,
             topic: persisted?.topic || '',

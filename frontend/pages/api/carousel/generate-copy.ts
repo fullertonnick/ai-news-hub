@@ -1,24 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { stripForbidden, fixAccentWord as fixAccentWordLib, extractGeminiText } from '@/lib/carousel-lib';
 
 export const config = { maxDuration: 60 };
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-
-const FORBIDDEN: Record<string, string> = {
-  leverage: 'use', utilize: 'use', synergy: 'teamwork',
-  'game-changer': 'breakthrough', revolutionary: 'new',
-  innovative: 'effective', seamless: 'smooth', empower: 'help',
-  disruptive: 'new', 'cutting-edge': 'modern', supercharge: 'boost',
-  revolutionize: 'change', unlock: 'open', paradigm: 'approach',
-};
-
-function stripForbidden(text: string): string {
-  let r = text;
-  for (const [bad, good] of Object.entries(FORBIDDEN)) {
-    r = r.replace(new RegExp(`\\b${bad.replace(/-/g, '[- ]')}\\b`, 'gi'), good);
-  }
-  return r;
-}
 
 const VALID_VISUAL_TYPES = new Set(['cover_photo', 'code_block', 'stats_grid', 'diagram', 'steps_list', 'skill_card', 'big_quote', 'comparison', 'checklist', 'cta_slide', 'none']);
 
@@ -167,35 +152,8 @@ function buildCategoryFallback(topic: string, category: string): { slides: any[]
   return { ...result, category };
 }
 
-// If AI picks an accent_word that isn't in the slide text, extract the most impactful phrase.
-// Priority: dollar amounts → numbers+units → tool/file names → arrow sequences → paths → first strong noun.
-function fixAccentWord(text: string, accentWord: string | undefined): string {
-  if (!accentWord) return '';
-  if (text.toLowerCase().includes(accentWord.toLowerCase())) return accentWord;
-  // Dollar amounts first — "$200/month", "$70K", "$50"
-  const dollarMatch = text.match(/\$[\d,]+(?:[kKmM])?(?:\/\w+)?/);
-  if (dollarMatch) return dollarMatch[0].trim();
-  // Numbers with concrete units — "3 hours", "15s", "4x", "80%"
-  const numMatch = text.match(/\b\d+(?:\.\d+)?(?:x\b|\s*(?:%|hrs?|hours?|min(?:utes?)?|sec(?:onds?)?|days?|weeks?|months?|[kKmM]\b))/i);
-  if (numMatch) return numMatch[0].trim();
-  // Tool/file names (CLAUDE.md, settings.json, etc.)
-  const toolMatch = text.match(/\b[A-Z][A-Z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/);
-  if (toolMatch) return toolMatch[0];
-  // Named commands or paths (/hooks, /api/..., etc.)
-  const cmdMatch = text.match(/\/[a-z][a-z_-]{2,}/);
-  if (cmdMatch) return cmdMatch[0];
-  // Arrow sequences — "A → B → C" — pick the middle term as the pivot concept
-  const arrowMatch = text.match(/\w[\w\s]{2,20}(?:\s*→\s*\w[\w\s]{2,15}){2,}/);
-  if (arrowMatch) return arrowMatch[0].trim().slice(0, 30);
-  // Fallback: first strong noun (>4 chars, not a stopword)
-  const stop = new Set(['their', 'there', 'where', 'every', 'which', 'about', 'after', 'before', 'while', 'doing', 'using', 'start', 'build', 'when', 'from', 'that', 'with', 'your', 'have', 'more', 'this', 'just', 'most', 'also', 'than', 'then', 'what', 'into', 'over', 'them', 'they', 'some', 'never', 'always', 'still', 'right', 'first', 'second']);
-  const words = text.split(/\s+/).filter(w => {
-    const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
-    return clean.length > 4 && !stop.has(clean);
-  });
-  const candidate = words[0] || accentWord;
-  return candidate.replace(/[.,!?;:]$/, '');
-}
+// Local alias so call sites below don't need renaming
+const fixAccentWord = fixAccentWordLib;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -397,11 +355,11 @@ Now write a completely original carousel about: "${topic}"`;
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.85, maxOutputTokens: 8000 },
-        thinkingConfig: { thinkingBudget: 0 },
+        thinkingConfig: { thinkingBudget: 8000 },
       }),
     });
     const d = await r.json();
-    let text = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let text = extractGeminiText(d);
     const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (fenceMatch) text = fenceMatch[1];
     const jsonMatch = text.match(/\{[\s\S]*\}/);

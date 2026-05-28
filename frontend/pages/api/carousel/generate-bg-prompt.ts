@@ -55,6 +55,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (/cost|saving|budget|price|fee|expense/.test(slideWords)) conceptHints.push('dark minimal desk with single warm amber lamp, closed laptop, simple luxury, bokeh office depth');
   if (/context\s*window|compress|summar|token\b/.test(slideWords)) conceptHints.push('dark minimal background with abstract amber horizontal gauge glow, near-black, cinematic, precision');
   if (/myth|wrong|mistake|fail|common|believe|think/.test(slideWords)) conceptHints.push('dark atmospheric background with single amber spotlight cutting through dark mist, theatrical, reveals-the-truth mood');
+  if (/git|version\s*control|commit|branch|diff/.test(slideWords)) conceptHints.push('dark workspace with terminal showing amber git log output, blurred repository tree on secondary screen, cinematic developer setup');
+  if (/deploy|production|server|infrastructure|docker|kubernetes|build/.test(slideWords)) conceptHints.push('dark data center with amber server LEDs glowing through rack gaps, cinematic long corridor, shallow depth of field');
+  if (/claude\.md|\.cursorrules|system\s*prompt|instruction/.test(slideWords)) conceptHints.push('dark desk with open glowing text editor showing structured markdown, single amber desk lamp, mechanical keyboard foreground');
+  if (/speed|fast|instant|second|minute|time\b|latency/.test(slideWords)) conceptHints.push('dark background with abstract amber light streak suggesting velocity, minimal, cinematic motion blur effect');
+  if (/comparison|versus|vs\b|difference|better|worse|option/.test(slideWords)) conceptHints.push('dark split background — left zone subtle cool blue, right zone warm amber glow — clean minimal for two-column content');
+  if (/mindset|focus|discipline|habit|routine|morning/.test(slideWords)) conceptHints.push('dark minimal desk at dawn, single amber lamp casting long warm shadow, closed laptop, coffee cup bokeh');
+  if (/scale|grow|10x|multiply|expand|compoun/.test(slideWords)) conceptHints.push('dark premium office with upward-angled amber accent lighting, blurred city skyline through floor-to-ceiling window');
 
   // Type-specific scene fallbacks — used when slide text doesn't match any concept hint
   const SCENE_FALLBACKS: Record<string, string> = {
