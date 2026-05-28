@@ -16,10 +16,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 55_000);
 
+  // Only append safety rules if the caller didn't already include them.
+  // generate-bg-prompt.ts always appends SAFETY_SUFFIX, so no doubling for bg calls.
+  const alreadySafe = /no text|no faces|no people/i.test(prompt);
+  const safePrompt = alreadySafe
+    ? prompt.trim()
+    : `${prompt.trim()}, no text, no words, no letters, no typography, no faces, no people, no hands, no human figures, no logos, near-black background, cinematic portrait`;
+
   try {
     // Try up to 2 times on empty response
     for (let attempt = 0; attempt < 2; attempt++) {
-      const safePrompt = `${prompt.trim()}, no text, no words, no letters, no typography, no faces, no people, no hands, no human figures, no logos, near-black background, cinematic portrait`;
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/nano-banana-pro-preview:generateContent?key=${apiKey}`,
         {

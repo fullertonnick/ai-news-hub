@@ -165,10 +165,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const category = detectCategory(topic);
 
   const categoryHint: Record<string, string> = {
-    'claude-code': `CATEGORY CONTEXT (claude-code): Use specific Claude Code terminology. Key concepts: CLAUDE.md (persistent memory file), /hooks (pre/post tool use), Claude Code CLI, claude-3-7-sonnet, tool_use blocks, system prompts, context window, session persistence. Mention exact file names, commands, or flags when relevant.`,
-    'make-automation': `CATEGORY CONTEXT (make-automation): Use specific Make.com terminology. Key concepts: scenarios, modules, HTTP requests, webhooks, data stores, error handlers, routers, bundles, operations. Mention specific integrations (Slack, Notion, HubSpot, Airtable) by name.`,
-    'ai-agents': `CATEGORY CONTEXT (ai-agents): Use specific AI agent terminology. Key concepts: orchestration, sub-agents, tool calls, context injection, handoff protocols, memory types (episodic/semantic), agent loops, multi-step tasks. Reference real frameworks: Claude, OpenAI, LangChain, AutoGPT.`,
-    'business-ai': `CATEGORY CONTEXT (business-ai): Focus on measurable business outcomes. Use specific numbers (time saved, cost reduced, revenue increased). Reference real tools and workflows that agency owners actually use.`,
+    'claude-code': `CATEGORY CONTEXT (claude-code): Use specific, accurate Claude Code terminology.
+Key concepts:
+- CLAUDE.md: project memory file, read automatically at session start from project root or ~/.claude/CLAUDE.md
+- .claude/settings.json: project-level permission and hook config
+- /hooks: bash commands that run before/after specific tool calls (PreToolUse, PostToolUse, Stop)
+- Claude Code CLI: runs as "claude" command in terminal
+- Current models: claude-opus-4-7, claude-sonnet-4-6, claude-haiku-4-5
+- Sessions start blank — CLAUDE.md is the ONLY persistence mechanism by default
+- Context window: ~200K tokens; compaction happens automatically when approaching limit
+- Tool use: Bash, Read, Edit, Write, Agent are the core tools Claude Code uses
+Name exact file paths, commands, and flags. Never say "a config file" — say "CLAUDE.md".`,
+    'make-automation': `CATEGORY CONTEXT (make-automation): Use specific Make.com terminology.
+Key concepts: scenarios, modules, HTTP request modules, webhooks, data stores, error handler routes, routers, bundles/collections, operations count, instant triggers vs scheduled.
+Name real integrations: Slack, Notion, HubSpot, Airtable, Gmail, Google Sheets.
+Name specific error types: mapping errors, connection errors, rate limits, timeouts.
+Mention real Make.com UX details: scenario builder, module config panels, run history, bundle inspector.`,
+    'ai-agents': `CATEGORY CONTEXT (ai-agents): Use specific, accurate AI agent terminology.
+Key concepts: agent loops (perceive → plan → act → observe), tool calls, context injection, system prompts, handoff between agents, memory types (short-term: context window; long-term: vector DB or files).
+Real frameworks to reference: Claude's native tool use, LangGraph, CrewAI, AutoGen, n8n AI nodes.
+Common failure modes: scope creep, tool hallucination, infinite loops, context window exhaustion.
+Real-world details: token cost per agent run, latency per tool call, error recovery patterns.`,
+    'business-ai': `CATEGORY CONTEXT (business-ai): Focus on measurable business outcomes for agency owners and entrepreneurs.
+Use specific numbers: time saved in hours per week, cost in $/month, revenue impact in $/month.
+Name real tools: Claude, ChatGPT, Make.com, n8n, Zapier, Notion, Slack, HubSpot, Airtable.
+Reference Nick's context: $70K+/month agency, SimpliScale, KingCaller AI, solopreneur/small team workflows.
+Avoid generic "AI helps your business" — always tie to a specific workflow, role, or dollar amount.`,
   };
 
   const prompt = `You are writing an Instagram carousel for Nick Cornelius (@thenickcornelius) — SimpliScale + KingCaller AI, $70K+/month. Audience: entrepreneurs and agency owners who use AI to scale.
@@ -266,7 +288,15 @@ SLIDES 2 to N-1 (CONTENT):
 LAST SLIDE (CTA):
   text: ONE compelling question that flows naturally from the content. STOP after the question mark.
     Do NOT write "Comment X and I'll send you Y" — the slide template renders that from keyword.
-    Make the question feel like the punchline of the whole carousel.
+    The question should make the reader think "yes, I need that right now."
+  STRONG CTA questions:
+    "Want the exact CLAUDE.md template I use on every project?"
+    "Ready to stop re-explaining your stack every Claude Code session?"
+    "Want the Make.com error handler template that's saved 50+ client builds?"
+    "Ready to build your first real AI agent this weekend?"
+  WEAK CTA questions (avoid):
+    "Want to learn more about this?" ← too vague
+    "Interested in AI tools?" ← no connection to the carousel content
   visual_type: "cta_slide"
   section_label: null
 
