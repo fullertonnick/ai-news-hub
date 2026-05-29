@@ -37,21 +37,49 @@ export default function Step4Export() {
   async function preloadFonts() {
     await document.fonts.ready;
     await Promise.allSettled([
-      // Cover headline sizes
+      // Cover headline sizes (96→56 adaptive by word/char count)
       document.fonts.load('800 96px "Plus Jakarta Sans"'),
       document.fonts.load('800 86px "Plus Jakarta Sans"'),
       document.fonts.load('800 76px "Plus Jakarta Sans"'),
       document.fonts.load('800 66px "Plus Jakarta Sans"'),
-      // Standard content headline sizes
+      document.fonts.load('800 56px "Plus Jakarta Sans"'),
+      // CTA text-only headline (60px) and photo headline (36-56px)
+      document.fonts.load('800 60px "Plus Jakarta Sans"'),
+      document.fonts.load('800 42px "Plus Jakarta Sans"'),
+      // Standard content headline sizes (52→36 adaptive)
       document.fonts.load('800 52px "Plus Jakarta Sans"'),
       document.fonts.load('800 48px "Plus Jakarta Sans"'),
       document.fonts.load('800 44px "Plus Jakarta Sans"'),
       document.fonts.load('800 36px "Plus Jakarta Sans"'),
-      document.fonts.load('700 28px "Plus Jakarta Sans"'),
+      // Kicker (28px 800) and CTA keyword pills (26-28px 800)
+      document.fonts.load('800 28px "Plus Jakarta Sans"'),
+      document.fonts.load('800 26px "Plus Jakarta Sans"'),
+      // Cover sticker badge text + steps circle numbers (20px 800)
+      document.fonts.load('800 20px "Plus Jakarta Sans"'),
+      // Stats grid big value (64px 800)
+      document.fonts.load('800 64px "Plus Jakarta Sans"'),
+      // Steps list title / skill card name (22px 700)
+      document.fonts.load('700 22px "Plus Jakarta Sans"'),
+      // Comparison column headers (18px 700)
+      document.fonts.load('700 18px "Plus Jakarta Sans"'),
+      // Diagram node labels (16px 700)
+      document.fonts.load('700 16px "Plus Jakarta Sans"'),
+      // Body text
+      document.fonts.load('600 26px "Plus Jakarta Sans"'),
       document.fonts.load('600 24px "Plus Jakarta Sans"'),
+      // Section label / skill category (13px 600)
+      document.fonts.load('600 13px "Plus Jakarta Sans"'),
+      // Stats grid label (14px 600)
+      document.fonts.load('600 14px "Plus Jakarta Sans"'),
       document.fonts.load('500 24px "Plus Jakarta Sans"'),
-      document.fonts.load('400 24px "Plus Jakarta Sans"'),
+      document.fonts.load('500 13px "Plus Jakarta Sans"'),
       document.fonts.load('500 12px "Plus Jakarta Sans"'),
+      document.fonts.load('400 24px "Plus Jakarta Sans"'),
+      // Steps desc (18px), checklist (20px), skill/comparison items (17px), skill source (16px)
+      document.fonts.load('400 20px "Plus Jakarta Sans"'),
+      document.fonts.load('400 18px "Plus Jakarta Sans"'),
+      document.fonts.load('400 17px "Plus Jakarta Sans"'),
+      document.fonts.load('400 16px "Plus Jakarta Sans"'),
       // Italic variants (big_quote slides)
       document.fonts.load('italic 800 52px "Plus Jakarta Sans"'),
       document.fonts.load('italic 800 44px "Plus Jakarta Sans"'),

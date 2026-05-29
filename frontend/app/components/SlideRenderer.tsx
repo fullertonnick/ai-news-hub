@@ -290,7 +290,7 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
           color: Brand.colors.accent_primary,
           letterSpacing: '0.10em',
           fontFamily: Brand.typography.font_family,
-          filter: `drop-shadow(0 0 ${20 * sc}px rgba(255,113,7,0.70))`,
+          boxShadow: `0 0 ${16 * sc}px rgba(255,113,7,0.60), 0 0 ${5 * sc}px rgba(255,113,7,0.30)`,
           zIndex: 2,
           opacity: 1,
         }}>{sticker.text}</div>
@@ -407,7 +407,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600 }}>I'll send it over 🔥</span>
         </div>
 
-        <div style={{ fontSize: `${48 * sc}px`, color: Brand.colors.accent_primary, lineHeight: 1, marginTop: `${32 * sc}px`, filter: `drop-shadow(0 0 ${10 * sc}px rgba(255,113,7,0.5))` }}>↓</div>
+        <div style={{ fontSize: `${48 * sc}px`, color: Brand.colors.accent_primary, lineHeight: 1, marginTop: `${32 * sc}px`, textShadow: `0 0 ${16 * sc}px rgba(255,113,7,0.55)` }}>↓</div>
       </div>
 
       {/* Footer */}
@@ -555,7 +555,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 {renderWithAccent(p, slide.accent_word)}
               </p>
             ))}
-            {/* Kicker — mic-drop takeaway, visually separated from body */}
+            {/* Kicker — mic-drop takeaway, 28px/800 punchy, visually separated */}
             {!hasVis && kicker && (
               <div style={{ marginTop: `${40 * sc}px` }}>
                 <div style={{ width: `${48 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${14 * sc}px` }} />
