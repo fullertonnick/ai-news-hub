@@ -193,6 +193,8 @@ export default function Step3Edit() {
       section_label: s.section_label,
       visual,
       backgroundImage: s.backgroundImage,
+      // Stickers and overlays intentionally omitted here: KonvaEditor renders them
+      // interactively on top of the SlideRenderer. Including them would double-render.
       useTextOverlays: s.useTextOverlays,
       // Only apply text offset when baked-in text is visible
       textOffsetX: s.useTextOverlays ? 0 : s.textOffsetX,

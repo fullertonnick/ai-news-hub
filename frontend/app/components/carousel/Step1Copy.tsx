@@ -32,8 +32,9 @@ export default function Step1Copy() {
       }
     } catch {
       setError('Network error. Check your connection and try again.');
+    } finally {
+      store.setCopyLoading(false);
     }
-    store.setCopyLoading(false);
   }, [topic, style, store]);
 
   const regenerateSlide = useCallback(async (slideId: string) => {
@@ -52,7 +53,7 @@ export default function Step1Copy() {
         if (d.accent_word) store.updateSlideAccent(slideId, d.accent_word);
       }
     } catch { /* slide stays unchanged on regen failure */ }
-    store.setBgLoading(slideId, false);
+    finally { store.setBgLoading(slideId, false); }
   }, [slides, topic, style, store]);
 
   return (

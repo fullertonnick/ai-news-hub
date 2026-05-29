@@ -193,6 +193,17 @@ export default function Step4Export() {
     });
   };
 
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  const handleReset = () => {
+    if (confirmReset) {
+      store.reset();
+    } else {
+      setConfirmReset(true);
+      setTimeout(() => setConfirmReset(false), 3500);
+    }
+  };
+
   const isBusy = downloading !== null || proxyingImages;
 
   return (
@@ -280,9 +291,9 @@ export default function Step4Export() {
           className="flex-none bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white font-medium py-3 px-5 rounded-xl transition-colors text-sm">
           ← Back
         </button>
-        <button onClick={store.reset}
-          className="flex-1 border border-white/10 hover:border-white/20 text-gray-400 hover:text-white py-3 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors">
-          <RotateCcw size={14} /> Start New Carousel
+        <button onClick={handleReset}
+          className={`flex-1 border py-3 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors ${confirmReset ? 'border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/20' : 'border-white/10 hover:border-white/20 text-gray-400 hover:text-white'}`}>
+          <RotateCcw size={14} /> {confirmReset ? 'Confirm — lose all slides?' : 'Start New Carousel'}
         </button>
       </div>
 

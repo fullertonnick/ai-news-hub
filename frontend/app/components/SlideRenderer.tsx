@@ -517,13 +517,12 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
       }}>
 
         {/* Tyler Germain layout: headline → orange divider → body → kicker.
-            Text offset (set by drag handle in Step3) is applied only to this block.
-            Section label is part of the baked-in text block — hidden with useTextOverlays
-            so it doesn't orphan above custom overlays. */}
+            Text offset (set by drag handle in Step3) is applied to the whole block including
+            section label so label + headline move together as one unit. */}
         {!slide.useTextOverlays && (
-        <>
+        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: `${26 * sc}px`, ...(txOff || tyOff ? { transform: `translate(${txOff}px, ${tyOff}px)` } : {}) }}>
           {slide.section_label && <SectionLabel label={slide.section_label} sc={sc} />}
-          <div style={{ flexShrink: 0, ...(txOff || tyOff ? { transform: `translate(${txOff}px, ${tyOff}px)` } : {}) }}>
+          <div>
             {/* Headline — always 44-52px bold (Tyler Germain spec) */}
             <p style={{
               margin: 0, marginBottom: `${16 * sc}px`,
@@ -571,7 +570,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               </div>
             )}
           </div>
-        </>
+        </div>
         )}
 
         {/* ── Visual ── */}

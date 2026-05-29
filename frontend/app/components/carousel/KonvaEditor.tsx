@@ -63,10 +63,16 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
 }) {
   const pxW = (overlay.maxWidth / 100) * stageW;
   const fs = overlay.fontSize * (stageW / 1080);
-  // Match SlideRenderer's translate(-50%,-50%) center anchor.
-  // Count explicit newlines for a better line-height estimate; single-line: fs*1.3*1/2 = fs*0.65 (same as before).
-  const numLines = overlay.text.split('\n').length;
-  const estimatedHeight = fs * 1.3 * numLines;
+  // Estimate total rendered height to match SlideRenderer's translate(-50%,-50%) center anchor.
+  // Count explicit newlines PLUS wrapped lines (Konva wraps at pxW like the HTML renderer).
+  // Average char width ≈ 0.58 * fontSize for Plus Jakarta Sans at typical weights.
+  const avgCharW = fs * 0.58;
+  const charsPerLine = Math.max(1, Math.floor(pxW / avgCharW));
+  const wrappedLineCount = overlay.text.split('\n').reduce(
+    (sum, line) => sum + Math.max(1, Math.ceil((line.length || 1) / charsPerLine)),
+    0,
+  );
+  const estimatedHeight = fs * 1.3 * wrappedLineCount;
 
   return (
     <KText
