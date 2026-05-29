@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { stripForbidden, fixAccentWord as fixAccentWordLib, extractGeminiText } from '@/lib/carousel-lib';
+import { stripForbidden, fixAccentWord, extractGeminiText } from '@/lib/carousel-lib';
 
 export const config = { maxDuration: 60 };
 
@@ -137,7 +137,7 @@ function coverAccentFromTopic(topic: string): string {
   if (toolMatch) return toolMatch[0];
   const stopWords = new Set(['the','a','an','how','to','of','in','for','with','and','or','your','my','why','what','when','its','that','this','these','those']);
   const words = t.split(/\s+/).filter(w => !stopWords.has(w.toLowerCase())).filter(w => w.length >= 4);
-  return (words[1] || words[0] || t.split(/\s+/)[0]).replace(/[.,!?;:]$/, '');
+  return (words[0] || t.split(/\s+/)[0]).replace(/[.,!?;:]$/, '');
 }
 
 function buildCategoryFallback(topic: string, category: string): { slides: any[]; caption: string; keyword: string; category: string } {
@@ -151,9 +151,6 @@ function buildCategoryFallback(topic: string, category: string): { slides: any[]
   }
   return { ...result, category };
 }
-
-// Local alias so call sites below don't need renaming
-const fixAccentWord = fixAccentWordLib;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -171,7 +168,7 @@ Key concepts:
 - .claude/settings.json: project-level permission and hook config
 - /hooks: bash commands that run before/after specific tool calls (PreToolUse, PostToolUse, Stop)
 - Claude Code CLI: runs as "claude" command in terminal
-- Current models: claude-opus-4-7, claude-sonnet-4-6, claude-haiku-4-5
+- Current models: claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5
 - Sessions start blank — CLAUDE.md is the ONLY persistence mechanism by default
 - Context window: ~200K tokens; compaction happens automatically when approaching limit
 - Tool use: Bash, Read, Edit, Write, Agent are the core tools Claude Code uses
@@ -384,8 +381,8 @@ Now write a completely original carousel about: "${topic}"`;
       signal: controller.signal,
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.85, maxOutputTokens: 8000 },
-        thinkingConfig: { thinkingBudget: 8000 },
+        generationConfig: { temperature: 1.0, maxOutputTokens: 8000 },
+        thinkingConfig: { thinkingBudget: 5000 },
       }),
     });
     const d = await r.json();

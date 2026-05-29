@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { extractGeminiText } from '@/lib/carousel-lib';
 
 export const config = { maxDuration: 60 };
 
@@ -125,7 +126,7 @@ Output the prompt only — no quotes, no JSON, no explanation.`;
       }),
     });
     const d = await r.json();
-    const generatedPrompt = d.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+    const generatedPrompt = extractGeminiText(d).trim();
     return res.json({ prompt: generatedPrompt + SAFETY_SUFFIX });
   } catch {
     return res.json({

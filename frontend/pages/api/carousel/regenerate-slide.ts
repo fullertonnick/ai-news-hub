@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { stripForbidden, fixAccentWord } from '@/lib/carousel-lib';
+import { stripForbidden, fixAccentWord, extractGeminiText } from '@/lib/carousel-lib';
 
 export const config = { maxDuration: 60 };
 
@@ -68,7 +68,7 @@ Return JSON only: {"text": "...", "accent_word": "..."}`;
       }),
     });
     const d = await r.json();
-    let text = d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let text = extractGeminiText(d);
     const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (fenceMatch) text = fenceMatch[1];
     const jsonMatch = text.match(/\{[\s\S]*\}/);

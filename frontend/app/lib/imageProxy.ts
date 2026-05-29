@@ -1,10 +1,3 @@
-/**
- * Convert any image URL to a base64 data URL for CORS-safe use with html-to-image.
- *
- * - Local same-origin paths (e.g. /nick-photos/nick-1.jpg): fetched directly in-browser.
- * - External URLs: proxied through /api/image-proxy to avoid CORS.
- * - Data URLs: returned as-is.
- */
 export async function toDataUrl(url: string): Promise<string> {
   if (url.startsWith('data:')) return url;
 
