@@ -276,6 +276,11 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
       {/* Bottom gradient — strong dark behind headline and footer */}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.15) 25%, rgba(0,0,0,0.72) 58%, rgba(0,0,0,0.93) 78%, rgba(0,0,0,0.98) 100%)' }} />
 
+      {/* Top gradient — ensures text readable when headline is at top or middle position */}
+      {(headlinePos === 'top' || headlinePos === 'middle') && (
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.40) 22%, rgba(0,0,0,0.0) 45%)' }} />
+      )}
+
       {/* Topic-relevant sticker badges — bold orange pills, clearly visible */}
       {stickers.map((sticker, i) => (
         <div key={i} style={{
@@ -284,13 +289,13 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
           backgroundColor: 'rgba(0,0,0,0.60)',
           border: `${2 * sc}px solid ${Brand.colors.accent_primary}`,
           borderRadius: `${12 * sc}px`,
-          padding: `${11 * sc}px ${24 * sc}px`,
-          fontSize: `${20 * sc}px`,
+          padding: `${12 * sc}px ${26 * sc}px`,
+          fontSize: `${22 * sc}px`,
           fontWeight: 800,
           color: Brand.colors.accent_primary,
           letterSpacing: '0.10em',
           fontFamily: Brand.typography.font_family,
-          boxShadow: `0 0 ${16 * sc}px rgba(255,113,7,0.60), 0 0 ${5 * sc}px rgba(255,113,7,0.30)`,
+          boxShadow: `0 0 ${18 * sc}px rgba(255,113,7,0.65), 0 0 ${6 * sc}px rgba(255,113,7,0.35)`,
           zIndex: 2,
           opacity: 1,
         }}>{sticker.text}</div>
@@ -478,7 +483,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   const headlineLen = headline.length;
   const headlineFs = isBigQuote
     ? (headlineLen > 120 ? 36 * sc : headlineLen > 70 ? 44 * sc : 52 * sc)
-    : (headlineLen > 60 ? 44 * sc : headlineLen > 40 ? 48 * sc : 52 * sc);
+    : (headlineLen > 60 ? 44 * sc : headlineLen > 40 ? 48 * sc : headlineLen > 28 ? 52 * sc : 56 * sc);
 
   // Text block offset (set via Step 3 drag handle; stored in 1080-scale px)
   const txOff = (slide.textOffsetX || 0) * sc;
@@ -547,20 +552,20 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 marginBottom: `${(!hasVis && bodyParas.length > 0) ? 28 * sc : 20 * sc}px`,
               }} />
             )}
-            {/* Body — 24px regular, only for text-only slides (no visual block) */}
+            {/* Body — 26px regular, only for text-only slides (no visual block) */}
             {!hasVis && bodyParas.map((p, i) => (
               <p key={i} style={{
-                margin: 0, marginBottom: `${12 * sc}px`,
-                fontSize: `${24 * sc}px`, fontWeight: 400,
+                margin: 0, marginBottom: `${14 * sc}px`,
+                fontSize: `${26 * sc}px`, fontWeight: 400,
                 fontFamily: Brand.typography.font_family,
-                color: Brand.colors.text_primary, lineHeight: 1.55, letterSpacing: '-0.01em',
+                color: Brand.colors.text_primary, lineHeight: 1.6,
               }}>
                 {renderWithAccent(p, slide.accent_word)}
               </p>
             ))}
             {/* Kicker — mic-drop takeaway, 28px/800 punchy, visually separated */}
             {!hasVis && kicker && (
-              <div style={{ marginTop: `${40 * sc}px` }}>
+              <div style={{ marginTop: `${52 * sc}px` }}>
                 <div style={{ width: `${48 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${14 * sc}px` }} />
                 <p style={{
                   margin: 0,
@@ -618,7 +623,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                         display: 'flex', flexDirection: 'column', gap: `${8 * sc}px`,
                       }}>
                         <div style={{ fontSize: `${28 * sc}px`, lineHeight: 1 }}>{s.icon}</div>
-                        <div style={{ fontSize: `${64 * sc}px`, fontWeight: 800, color: Brand.colors.accent_primary, lineHeight: 1, letterSpacing: '-0.03em' }}>{s.value}</div>
+                        <div style={{ fontSize: `${64 * sc}px`, fontWeight: 800, color: Brand.colors.accent_primary, lineHeight: 1, letterSpacing: '-0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{s.value}</div>
                         <div style={{ fontSize: `${14 * sc}px`, color: Brand.colors.text_muted, textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
                       </div>
                     ))}

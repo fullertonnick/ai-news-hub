@@ -74,6 +74,7 @@ export default function Step4Export() {
       document.fonts.load('500 24px "Plus Jakarta Sans"'),
       document.fonts.load('500 13px "Plus Jakarta Sans"'),
       document.fonts.load('500 12px "Plus Jakarta Sans"'),
+      document.fonts.load('400 26px "Plus Jakarta Sans"'),
       document.fonts.load('400 24px "Plus Jakarta Sans"'),
       // Steps desc (18px), checklist (20px), skill/comparison items (17px), skill source (16px)
       document.fonts.load('400 20px "Plus Jakarta Sans"'),
@@ -153,7 +154,7 @@ export default function Step4Export() {
       await preloadFonts();
       // Give the browser one extra paint cycle after font loading to ensure
       // background images and CSS are fully decoded before html-to-image captures.
-      await new Promise(r => setTimeout(r, 150));
+      await new Promise(r => setTimeout(r, 300));
       const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
     } catch (e) {
@@ -169,16 +170,16 @@ export default function Step4Export() {
     setExportError(null);
     try {
       await preloadFonts();
-      await new Promise(r => setTimeout(r, 150));
+      await new Promise(r => setTimeout(r, 300));
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       let missingRefs = 0;
       for (let i = 0; i < slides.length; i++) {
         const el = exportRefs.current[i];
-        if (!el) { missingRefs++; await new Promise(r => setTimeout(r, 200)); continue; }
+        if (!el) { missingRefs++; await new Promise(r => setTimeout(r, 300)); continue; }
         const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
         zip.file(`slide-${String(i + 1).padStart(2, '0')}.png`, png.replace(/^data:image\/png;base64,/, ''), { base64: true });
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 300));
       }
       if (missingRefs > 0) {
         console.warn(`ZIP export: ${missingRefs} slide ref(s) were null and skipped. Refresh and retry if slides are missing.`);
