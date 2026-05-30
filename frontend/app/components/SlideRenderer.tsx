@@ -463,8 +463,11 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
     if (v.type === 'comparison') return !!((v as ComparisonVisual).before_items?.length || (v as ComparisonVisual).after_items?.length);
     if (v.type === 'checklist') return !!((v as ChecklistVisual).items?.length);
     if (v.type === 'skill_card') return !!(v as SkillCardVisual).name;
-    // big_quote — renders even if partial (supporting text is optional)
-    return true;
+    // big_quote only has a visual block when there's supporting text to show.
+    // Without it, the visual block just emits a tiny orange divider — wasteful flex space.
+    if (v.type === 'big_quote') return !!(v as BigQuoteVisual).supporting;
+    // Unknown visual type (e.g. placeholder {type:'something'} with no data) — treat as no-data
+    return false;
   })();
   const hasVis = visualHasData;
   const hasImagen = !!slide.backgroundImage;

@@ -126,9 +126,10 @@ export default function Step2Visuals() {
       console.error('Background generation failed:', e);
       setBgError(prev => ({ ...prev, [slideId]: 'Network error — try again' }));
       useCarouselStore.getState().setSlideBackgroundStatus(slideId, 'error');
+    } finally {
+      busyRef.current[slideId] = false;
+      setGenerating(prev => ({ ...prev, [slideId]: false }));
     }
-    busyRef.current[slideId] = false;
-    setGenerating(prev => ({ ...prev, [slideId]: false }));
   }, [topic, category]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Generate MISSING middle backgrounds one-at-a-time (skips slides that already have images).

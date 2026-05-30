@@ -162,7 +162,14 @@ export const useCarouselStore = create<CarouselStore>()(
       })),
 
       updateSlideVisualType: (id, vt) => set(s => ({
-        slides: s.slides.map(sl => sl.id === id ? { ...sl, visual_type: vt } : sl),
+        slides: s.slides.map(sl => sl.id === id ? {
+          ...sl,
+          visual_type: vt,
+          // Reset visual to a minimal placeholder when the type changes so the renderer
+          // immediately reflects the selection. visualHasData guards against rendering
+          // incomplete placeholders (e.g. a code_block with no code field).
+          visual: sl.visual?.type === vt ? sl.visual : { type: vt } as SlideVisual,
+        } : sl),
       })),
 
       reorderSlide: (id, dir) => set(s => {
