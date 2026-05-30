@@ -9,10 +9,12 @@ export default function Step1Copy() {
   const store = useCarouselStore();
   const { topic, style, slides, caption, keyword, copyLoading, approvals, bgLoading } = store;
   const [error, setError] = useState<string | null>(null);
+  const [isFallback, setIsFallback] = useState(false);
 
   const generateCopy = useCallback(async () => {
     if (!topic.trim()) return;
     setError(null);
+    setIsFallback(false);
     store.setCopyLoading(true);
     try {
       const r = await fetch('/api/carousel/generate-copy', {
@@ -27,6 +29,7 @@ export default function Step1Copy() {
         store.setCaption(d.caption || '');
         store.setKeyword((d.keyword || '').toUpperCase());
         store.setCategory(d.category || '');
+        setIsFallback(d._fallback === true);
       } else {
         setError('No slides returned. Try rephrasing your topic.');
       }
@@ -82,6 +85,14 @@ export default function Step1Copy() {
         <div className="flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3">
           <AlertCircle size={14} className="text-red-400 flex-shrink-0" />
           <span className="text-sm text-red-400">{error}</span>
+        </div>
+      )}
+
+      {/* Fallback warning — shown when AI timed out and template copy was returned */}
+      {isFallback && !error && (
+        <div className="flex items-center gap-2 rounded-xl bg-yellow-500/10 border border-yellow-500/20 px-4 py-3">
+          <AlertCircle size={14} className="text-yellow-500 flex-shrink-0" />
+          <span className="text-sm text-yellow-500">AI timed out — showing template copy. Edit the slides below or regenerate.</span>
         </div>
       )}
 

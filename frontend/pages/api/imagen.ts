@@ -24,8 +24,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     : `${prompt.trim()}, no text, no words, no letters, no typography, no faces, no people, no hands, no human figures, no logos, near-black background, cinematic portrait`;
 
   try {
-    // Try up to 2 times on empty response
-    for (let attempt = 0; attempt < 2; attempt++) {
+    // Try up to 3 times on empty or rate-limited response
+    for (let attempt = 0; attempt < 3; attempt++) {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/nano-banana-pro-preview:generateContent?key=${apiKey}`,
         {
@@ -43,13 +43,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       );
 
       if (response.status === 429) {
-        await new Promise(r => setTimeout(r, 2000));
+        const delay = (attempt + 1) * 2000;
+        await new Promise(r => setTimeout(r, delay));
         continue;
       }
 
       if (!response.ok) {
-        console.error('Nano Banana API error:', await response.text());
-        return res.status(response.status).json({ error: 'Image generation failed' });
+        const errText = await response.text();
+        console.error('Nano Banana API error:', errText);
+        // Don't retry on permanent errors (4xx other than 429)
+        if (response.status >= 400 && response.status < 500) {
+          return res.status(500).json({ error: 'Image generation rejected — try a different prompt' });
+        }
+        await new Promise(r => setTimeout(r, 1500));
+        continue;
       }
 
       const data = await response.json();
@@ -65,12 +72,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
 
-      // No image in response — retry
+      // No image in response — retry with short delay
       console.error(`Nano Banana empty response (attempt ${attempt + 1})`);
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 1500));
     }
 
-    return res.status(500).json({ error: 'No image generated after 2 attempts' });
+    return res.status(500).json({ error: 'No image generated after 3 attempts — try regenerating' });
   } catch (err: any) {
     if (err?.name === 'AbortError') {
       return res.status(504).json({ error: 'Image generation timed out' });

@@ -268,13 +268,14 @@ export const useCarouselStore = create<CarouselStore>()(
     }),
     {
       name: 'simpliscale-carousel-pipeline',
-      version: 11,
+      version: 12,
       migrate: (persisted: any, fromVersion: number) => {
-        if (fromVersion < 11) {
+        if (fromVersion < 12) {
           return {
             ...INITIAL,
             topic: persisted?.topic || '',
             category: persisted?.category || '',
+            style: persisted?.style || 'tech_breakdown',
           };
         }
         return persisted;

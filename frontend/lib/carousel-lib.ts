@@ -20,12 +20,23 @@ export function stripForbidden(text: string): string {
 // Priority: dollar amounts → numbers+units → tool/file names → arrow sequences → paths → first strong noun.
 export function fixAccentWord(text: string, accentWord: string | undefined): string {
   if (!accentWord) return '';
+  // Exact substring match (case-insensitive) — the happy path
   if (text.toLowerCase().includes(accentWord.toLowerCase())) return accentWord;
+  // Try each word in the accent phrase individually — catches "Claude Code memory" → "Claude Code"
+  const accentParts = accentWord.trim().split(/\s+/);
+  for (let len = accentParts.length - 1; len >= 1; len--) {
+    const sub = accentParts.slice(0, len).join(' ');
+    if (sub.length >= 3 && text.toLowerCase().includes(sub.toLowerCase())) return sub;
+    const subEnd = accentParts.slice(accentParts.length - len).join(' ');
+    if (subEnd.length >= 3 && subEnd !== sub && text.toLowerCase().includes(subEnd.toLowerCase())) return subEnd;
+  }
+  // Fallback: extract the most impactful phrase from text
   const dollarMatch = text.match(/\$[\d,]+(?:[kKmM])?(?:\/\w+)?/);
   if (dollarMatch) return dollarMatch[0].trim();
-  const numMatch = text.match(/\b\d+(?:\.\d+)?(?:x\b|\s*(?:%|hrs?|hours?|min(?:utes?)?|sec(?:onds?)?|days?|weeks?|months?|[kKmM]\b))/i);
+  const numMatch = text.match(/\b\d+(?:\.\d+)?(?:\+)?\s*(?:x\b|%|hrs?|hours?|min(?:utes?)?|sec(?:onds?)?|days?|weeks?|months?|[kKmM]\b)/i);
   if (numMatch) return numMatch[0].trim();
-  const toolMatch = text.match(/\b[A-Z][A-Z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/);
+  // File/tool names (case-sensitive match for ALL-CAPS names like CLAUDE.md)
+  const toolMatch = text.match(/\b[A-Za-z][A-Za-z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/i);
   if (toolMatch) return toolMatch[0];
   const cmdMatch = text.match(/\/[a-z][a-z_-]{2,}/);
   if (cmdMatch) return cmdMatch[0];

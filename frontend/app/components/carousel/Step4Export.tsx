@@ -157,9 +157,9 @@ export default function Step4Export() {
       await new Promise(r => setTimeout(r, 300));
       const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
-    } catch (e) {
+    } catch (e: any) {
       console.error('Export error', e);
-      setExportError('Export failed — check console for details. Try again or refresh the page.');
+      setExportError(`Export failed: ${e?.message || 'unknown error'}. Try refreshing and exporting again.`);
     }
     setDownloading(null);
   }, [ensureDataUrls]);
@@ -194,9 +194,9 @@ export default function Step4Export() {
       if (missingRefs > 0) {
         setExportError(`ZIP created but ${missingRefs} slide(s) were missing — scroll down and retry if any are absent.`);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('ZIP export error', e);
-      setExportError('ZIP export failed — try downloading slides individually.');
+      setExportError(`ZIP export failed: ${e?.message || 'unknown error'}. Try downloading slides individually.`);
     }
     setDownloading(null);
   }, [slides, caption, keyword, store.topic, ensureDataUrls]);

@@ -37,32 +37,57 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Pull concrete nouns from slide text to make the background scene specific
   const slideWords = slideText.slice(0, 300).toLowerCase();
   const conceptHints: string[] = [];
-  if (/terminal|code|file|editor|command|script|repo|\.md|claude\.md/.test(slideWords)) conceptHints.push('glowing terminal screen with blurred amber-lit code, mechanical keyboard in foreground, shallow depth of field');
-  if (/mcp|tool[_\s]call|tool_use|function[_\s]call|api\s*call/.test(slideWords)) conceptHints.push('dark server rack corridor, amber LED strips casting warm glow on blurred hardware, cinematic depth of field');
-  if (/workflow|automat|trigger|webhook|module|connect|scenario/.test(slideWords)) conceptHints.push('dark server room with warm amber floor LEDs, blurred hardware racks, cinematic corridor perspective');
-  if (/agent|ai model|claude|gemini|openai|anthropic|llm/.test(slideWords)) conceptHints.push('dark workspace with softly glowing screen showing abstract code, amber rim lighting, bokeh background');
-  if (/memory|context|forget|remember|session|persist/.test(slideWords)) conceptHints.push('dark desk with glowing monitor showing blurred text document, single warm amber desk lamp, deep shadows');
-  if (/token|context\s*window|limit|exceed|compress/.test(slideWords)) conceptHints.push('dark minimal background with single amber gauge/meter glow, deep shadows, cinematic bokeh');
-  if (/revenue|money|income|roi|cost|profit|\$/.test(slideWords)) conceptHints.push('dark executive desk with warm amber lamp glow, blurred laptop screen, upscale office bokeh');
-  if (/client|onboard|meet|call|team|proposal/.test(slideWords)) conceptHints.push('dark professional meeting room, single overhead warm spotlight, empty modern chairs, cinematic angle');
-  if (/email|message|slack|notification|inbox|reply/.test(slideWords)) conceptHints.push('dark room with glowing amber phone screen bokeh, blurred notification light trails');
-  if (/hook|hooks?|bash_tool|settings\.json|instruction/.test(slideWords)) conceptHints.push('dark mechanical keyboard with amber backlit keys, code on blurred screen behind, macro lens depth of field');
-  if (/error|fail|break|crash|fix|debug/.test(slideWords)) conceptHints.push('dark workspace with single amber warning glow on monitor, blurred error text, moody cinematic lighting');
-  if (/step|setup|install|configure|init/.test(slideWords)) conceptHints.push('dark home office desk, single warm amber lamp illuminating notebook and laptop, cinematic angle, shallow depth of field');
-  if (/output|result|deliver|ship|produce|generat/.test(slideWords)) conceptHints.push('dark workspace with glowing screen showing finished deliverable, warm amber light from monitor, cinematic depth of field');
-  if (/loop|repeat|schedule|automat|cron|trigger/.test(slideWords)) conceptHints.push('dark abstract visualization of circular amber glowing path on near-black, minimal, professional, bokeh, continuous flow');
-  if (/data|file|row|record|process|extract|parse|chunk/.test(slideWords)) conceptHints.push('dark server rack corridor bathed in warm amber light, blurred hardware in background, cinematic perspective, bokeh');
-  if (/team|hire|outsource|agency|client\b|proposal/.test(slideWords)) conceptHints.push('dark executive boardroom with single overhead warm spotlight, empty premium chairs, cinematic wide angle');
-  if (/cost|saving|budget|price|fee|expense/.test(slideWords)) conceptHints.push('dark minimal desk with single warm amber lamp, closed laptop, simple luxury, bokeh office depth');
-  if (/context\s*window|compress|summar|token\b/.test(slideWords)) conceptHints.push('dark minimal background with abstract amber horizontal gauge glow, near-black, cinematic, precision');
-  if (/myth|wrong|mistake|fail|common|believe|think/.test(slideWords)) conceptHints.push('dark atmospheric background with single amber spotlight cutting through dark mist, theatrical, reveals-the-truth mood');
-  if (/git|version\s*control|commit|branch|diff/.test(slideWords)) conceptHints.push('dark workspace with terminal showing amber git log output, blurred repository tree on secondary screen, cinematic developer setup');
-  if (/deploy|production|server|infrastructure|docker|kubernetes|build/.test(slideWords)) conceptHints.push('dark data center with amber server LEDs glowing through rack gaps, cinematic long corridor, shallow depth of field');
-  if (/claude\.md|\.cursorrules|system\s*prompt|instruction/.test(slideWords)) conceptHints.push('dark desk with open glowing text editor showing structured markdown, single amber desk lamp, mechanical keyboard foreground');
-  if (/speed|fast|instant|second|minute|time\b|latency/.test(slideWords)) conceptHints.push('dark background with abstract amber light streak suggesting velocity, minimal, cinematic motion blur effect');
-  if (/comparison|versus|vs\b|difference|better|worse|option/.test(slideWords)) conceptHints.push('dark split background — left zone subtle cool blue, right zone warm amber glow — clean minimal for two-column content');
-  if (/mindset|focus|discipline|habit|routine|morning/.test(slideWords)) conceptHints.push('dark minimal desk at dawn, single amber lamp casting long warm shadow, closed laptop, coffee cup bokeh');
-  if (/scale|grow|10x|multiply|expand|compoun/.test(slideWords)) conceptHints.push('dark premium office with upward-angled amber accent lighting, blurred city skyline through floor-to-ceiling window');
+  // Claude Code specific
+  if (/claude\.md|claudefile|memory file|context file|\.claude/.test(slideWords)) conceptHints.push('dark developer desk with open text editor showing highlighted CLAUDE.md file in sidebar, single warm amber desk lamp, mechanical keyboard foreground, shallow depth of field, cinematic');
+  if (/blank slate|fresh session|session start|new session|every session/.test(slideWords)) conceptHints.push('dark minimal workspace, clean empty desk surface, single amber lamp illuminating blank notebook, moody cinematic, deep shadows, no clutter');
+  if (/hooks?|pretoolusehandler|posttoolusehandler|settings\.json|bash_tool|permiss/.test(slideWords)) conceptHints.push('dark mechanical keyboard macro shot, single amber backlit key glowing in darkness, blurred code on monitor behind, shallow depth of field, professional developer setup');
+  if (/context window|compaction|compress|token\s*limit|200k/.test(slideWords)) conceptHints.push('dark minimal background with single horizontal amber progress bar glowing near capacity, near-black, precise engineering aesthetic, cinematic');
+  // General terminal / code
+  if (/terminal|code|file|editor|command|script|repo|\.md/.test(slideWords)) conceptHints.push('dark home office, glowing terminal screen with blurred amber-lit code, mechanical keyboard foreground, multiple monitors bokeh background, shallow depth of field');
+  // MCP / tool calls
+  if (/mcp|tool[_\s]call|tool_use|function[_\s]call|api\s*call/.test(slideWords)) conceptHints.push('dark server rack corridor, warm amber LED strips casting glow through blurred hardware gaps, cinematic depth of field, premium tech aesthetic');
+  // Make.com / automation
+  if (/workflow|automat|trigger|webhook|module|connect|scenario/.test(slideWords)) conceptHints.push('dark server room with warm amber floor LEDs, blurred hardware racks, cinematic corridor perspective, professional and moody');
+  // AI / agents
+  if (/agent|ai model|claude|gemini|openai|anthropic|llm/.test(slideWords)) conceptHints.push('dark workspace with softly glowing monitor showing abstract code nodes, warm amber rim lighting, bokeh background, cinematic developer environment');
+  // Memory / context / sessions
+  if (/memory|context|forget|remember|session|persist/.test(slideWords)) conceptHints.push('dark desk with glowing monitor showing blurred text document, single warm amber desk lamp, deep shadows, soft bokeh, cinematic');
+  // Tokens / limits
+  if (/token|limit|exceed|capacity/.test(slideWords)) conceptHints.push('dark minimal background with single amber gauge glow, deep shadows, cinematic bokeh, precise and minimal');
+  // Revenue / money
+  if (/revenue|money|income|roi|cost|profit|\$/.test(slideWords)) conceptHints.push('dark executive desk with warm amber lamp glow, blurred laptop screen showing charts, upscale office bokeh, premium and aspirational');
+  // Client / team
+  if (/client|onboard|meet|call|team|proposal/.test(slideWords)) conceptHints.push('dark professional meeting room, single overhead warm spotlight, empty modern chairs, cinematic wide angle, premium');
+  // Messaging / notifications
+  if (/email|message|slack|notification|inbox|reply/.test(slideWords)) conceptHints.push('dark room with glowing amber phone screen bokeh, blurred notification light trails, minimal and atmospheric');
+  // Errors / debugging
+  if (/error|fail|break|crash|fix|debug/.test(slideWords)) conceptHints.push('dark workspace with single amber warning glow on blurred monitor, moody cinematic lighting, single light source, dramatic shadows');
+  // Setup / installation
+  if (/step|setup|install|configure|init/.test(slideWords)) conceptHints.push('dark home office desk, single warm amber lamp illuminating workspace, blurred laptop screen, cinematic angle, shallow depth of field');
+  // Output / results
+  if (/output|result|deliver|ship|produce|generat/.test(slideWords)) conceptHints.push('dark workspace with glowing screen showing finished deliverable, warm amber light from monitor, cinematic depth of field, professional');
+  // Loops / automation
+  if (/loop|repeat|schedule|automat|cron|trigger/.test(slideWords)) conceptHints.push('dark abstract — circular amber light path on near-black background, minimal, professional, continuous flow impression, bokeh');
+  // Data processing
+  if (/data|file|row|record|process|extract|parse|chunk/.test(slideWords)) conceptHints.push('dark server rack corridor bathed in warm amber light, blurred hardware in background, cinematic corridor perspective, bokeh');
+  // Team / agency
+  if (/team|hire|outsource|agency/.test(slideWords)) conceptHints.push('dark executive boardroom with single overhead warm spotlight, empty premium chairs, cinematic wide angle, aspirational');
+  // Costs / budgets
+  if (/cost|saving|budget|price|fee|expense/.test(slideWords)) conceptHints.push('dark minimal desk with single warm amber lamp, closed laptop, simple luxury, bokeh office depth, high-end aesthetic');
+  // Myth busting
+  if (/myth|wrong|mistake|common belief|believe|think/.test(slideWords)) conceptHints.push('dark atmospheric scene, single amber spotlight beam cutting through dark mist, theatrical, reveals-the-truth mood, dramatic');
+  // Git / version control
+  if (/git|version\s*control|commit|branch|diff/.test(slideWords)) conceptHints.push('dark workspace with terminal showing amber git log output, blurred repository tree on secondary monitor, cinematic developer setup');
+  // Deploy / production
+  if (/deploy|production|server|infrastructure|docker|kubernetes|build/.test(slideWords)) conceptHints.push('dark data center with amber server LEDs glowing through rack gaps, cinematic long corridor, premium infrastructure aesthetic');
+  // Speed / performance
+  if (/speed|fast|instant|second|minute|time\b|latency/.test(slideWords)) conceptHints.push('dark background with abstract amber light streak suggesting velocity, minimal, cinematic motion blur effect, precision');
+  // Comparison / vs
+  if (/comparison|versus|vs\b|difference|better|worse|option/.test(slideWords)) conceptHints.push('dark split background — left zone subtle cool blue, right zone warm amber glow — clean minimal for content overlay');
+  // Mindset / habits
+  if (/mindset|focus|discipline|habit|routine|morning/.test(slideWords)) conceptHints.push('dark minimal desk at dawn, single amber lamp casting long warm shadow, coffee cup bokeh, contemplative and aspirational');
+  // Scale / growth
+  if (/scale|grow|10x|multiply|expand|compoun/.test(slideWords)) conceptHints.push('dark premium office with upward-angled amber accent lighting, blurred city skyline through floor-to-ceiling window, aspirational');
 
   // Type-specific scene fallbacks — used when slide text doesn't match any concept hint
   const SCENE_FALLBACKS: Record<string, string> = {

@@ -220,14 +220,17 @@ WRITING STYLE — Tyler Germain
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ACCENT WORD — highlighted orange, one per slide
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-RULE: accent_word MUST appear verbatim in the slide text (case-insensitive).
+RULE: accent_word MUST appear verbatim (exact substring) in the slide text, case-insensitive.
 Pick the phrase that delivers the BIGGEST punch — the stat, the tool name, the counter-intuitive fact.
-Can be 1–3 words. Prefer specifics over abstractions.
+Can be 1–4 words. Prefer specifics over abstractions. SHORT is better than LONG.
   - Slide about cutting 3 hrs to 20 min → "3 hours"
   - Slide about CLAUDE.md → "CLAUDE.md"
+  - Slide about blank slate sessions → "blank slate"
   - Slide about a myth → the thing being busted (e.g. "never forgets")
-  - Slide about a step → the tool or command (e.g. "git commit", "CLAUDE.md", "/api/imagen")
-NOT: random adjectives, the slide title, a filler word, a word not in the text.
+  - Slide about a step → the tool or command (e.g. "CLAUDE.md", "/hooks", "git commit")
+  - Slide about a number → the exact number ("$200/month", "5+ hours", "4x faster")
+NOT: random adjectives, the slide title, a filler word, a phrase not in the text.
+CRITICAL: After you write the text, re-read it. Only then pick accent_word from what's actually there.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${styleHint(style)}
@@ -279,7 +282,11 @@ SLIDES 2 to N-1 (CONTENT):
                   "5+ hours back. Every week. From one file."
                   "The tool didn't fail. The scope did."
     BAD kickers: "This is a very powerful approach." / "Consider applying this today." (no punch, no reframe)
-  visual_type: "none"
+  visual_type: Use "none" for pure text slides (most cases — Tyler Germain text-first style).
+    Exception: if the slide IS a list of steps/items where visuals add clarity, use "steps_list".
+    Exception: if the slide IS a direct before/after, use "comparison".
+    Exception: if the slide IS a checklist, use "checklist".
+    Never use visual types just to fill space — only when the slide content IS that structure.
   section_label: the label from your chosen structure (e.g. "Step 1", "01.", "The Myth", "Before", "What it is") — or null if none needed
 
 LAST SLIDE (CTA):
@@ -444,9 +451,17 @@ Now write a completely original carousel about: "${topic}"`;
     let caption = stripForbidden(parsed.caption || '');
     // Ensure the caption uses the resolved keyword (not whatever the AI wrote)
     caption = caption.replace(/Comment\s+[A-Z0-9]+\s+and/gi, `Comment ${keyword} and`);
+    // Ensure the mandatory CTA line exists before hashtags
+    if (caption && !/comment\s+[A-Z0-9]+/i.test(caption)) {
+      const hashtagIdx = caption.indexOf('#');
+      const ctaLine = `\nComment ${keyword} and I'll send it over 🔥\n📌 Save this before you lose it`;
+      caption = hashtagIdx >= 0
+        ? caption.slice(0, hashtagIdx).trimEnd() + '\n' + ctaLine + '\n\n' + caption.slice(hashtagIdx)
+        : caption.trimEnd() + '\n' + ctaLine;
+    }
     if (caption && !caption.includes('#simpliscale')) caption += '\n\n#simpliscale #thenickcornelius';
     else if (caption && !caption.includes('#thenickcornelius')) caption += ' #thenickcornelius';
-    return res.json({ slides: finalSlides, caption, keyword, category });
+    return res.json({ slides: finalSlides, caption, keyword, category, _fallback: false });
   } catch (err: any) {
     if (err?.name === 'AbortError') {
       console.error('Generate copy: Gemini request timed out');
