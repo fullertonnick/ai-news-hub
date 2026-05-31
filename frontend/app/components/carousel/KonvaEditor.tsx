@@ -44,6 +44,10 @@ function StickerNode({ sticker, stageW, stageH, isSelected, onSelect, onMouseEnt
       rotation={sticker.rotation}
       opacity={sticker.opacity}
       draggable
+      dragBoundFunc={(pos) => ({
+        x: Math.max(0, Math.min(stageW, pos.x)),
+        y: Math.max(0, Math.min(stageH, pos.y)),
+      })}
       onMouseDown={(e: any) => { e.cancelBubble = true; onSelect(); }}
       onTouchStart={(e: any) => { e.cancelBubble = true; onSelect(); }}
       onMouseEnter={onMouseEnter}
@@ -93,6 +97,10 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
       shadowBlur={8}
       shadowOffsetY={2}
       draggable
+      dragBoundFunc={(pos) => ({
+        x: Math.max(0, Math.min(stageW, pos.x)),
+        y: Math.max(0, Math.min(stageH, pos.y)),
+      })}
       onMouseDown={(e: any) => { e.cancelBubble = true; onSelect(); }}
       onTouchStart={(e: any) => { e.cancelBubble = true; onSelect(); }}
       onMouseEnter={onMouseEnter}
@@ -219,7 +227,9 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
       const t = textOverlays.find(t => t.id === id);
       if (t) {
         const newW = Math.round(Math.max(10, Math.min(100, t.maxWidth * scaleX)));
-        onUpdateTextOverlay(id, { maxWidth: newW, rotation: rot, x: pctX, y: pctY });
+        // Scale fontSize so resizing handles visually grow/shrink the text, not just the wrap width
+        const newFontSize = Math.round(Math.max(8, Math.min(120, t.fontSize * scaleX)));
+        onUpdateTextOverlay(id, { maxWidth: newW, fontSize: newFontSize, rotation: rot, x: pctX, y: pctY });
       }
     }
   }, [stickers, textOverlays, width, height, onUpdateSticker, onUpdateTextOverlay]);

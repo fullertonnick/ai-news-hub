@@ -10,6 +10,7 @@ export default function Step1Copy() {
   const { topic, style, slides, caption, keyword, copyLoading, approvals, bgLoading } = store;
   const [error, setError] = useState<string | null>(null);
   const [isFallback, setIsFallback] = useState(false);
+  const [regenError, setRegenError] = useState<Record<string, string>>({});
 
   const generateCopy = useCallback(async () => {
     if (!topic.trim()) return;
@@ -44,6 +45,7 @@ export default function Step1Copy() {
     const slide = slides.find(s => s.id === slideId);
     if (!slide) return;
     store.setBgLoading(slideId, true);
+    setRegenError(prev => ({ ...prev, [slideId]: '' }));
     try {
       const idx = slides.findIndex(s => s.id === slideId);
       const r = await fetch('/api/carousel/regenerate-slide', {
@@ -54,8 +56,12 @@ export default function Step1Copy() {
       if (d.text) {
         store.updateSlideText(slideId, d.text);
         if (d.accent_word) store.updateSlideAccent(slideId, d.accent_word);
+      } else if (d.error) {
+        setRegenError(prev => ({ ...prev, [slideId]: d.error }));
       }
-    } catch { /* slide stays unchanged on regen failure */ }
+    } catch {
+      setRegenError(prev => ({ ...prev, [slideId]: 'Network error — try again.' }));
+    }
     finally { store.setBgLoading(slideId, false); }
   }, [slides, topic, style, store]);
 
@@ -135,6 +141,13 @@ export default function Step1Copy() {
               <textarea value={slide.text} onChange={e => store.updateSlideText(slide.id, e.target.value)}
                 className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-gray-200 leading-relaxed resize-none focus:outline-none focus:border-brand-orange/30"
                 rows={Math.max(3, (slide.text.match(/\n/g) || []).length + Math.ceil(slide.text.length / 80))} />
+
+              {/* Per-slide regen error */}
+              {regenError[slide.id] && (
+                <div className="flex items-center gap-1.5 text-[10px] text-red-400">
+                  <AlertCircle size={10} className="flex-shrink-0" /> {regenError[slide.id]}
+                </div>
+              )}
 
               {/* Accent word + section label */}
               <div className="flex items-center gap-4 flex-wrap">

@@ -175,8 +175,15 @@ export default function Step4Export() {
       const zip = new JSZip();
       let missingRefs = 0;
       for (let i = 0; i < slides.length; i++) {
-        const el = exportRefs.current[i];
-        if (!el) { missingRefs++; await new Promise(r => setTimeout(r, 300)); continue; }
+        // Retry up to 10 times (2s total) waiting for the ref to be populated before giving up
+        let el = exportRefs.current[i];
+        if (!el) {
+          for (let attempt = 0; attempt < 10 && !el; attempt++) {
+            await new Promise(r => setTimeout(r, 200));
+            el = exportRefs.current[i];
+          }
+        }
+        if (!el) { missingRefs++; continue; }
         const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
         zip.file(`slide-${String(i + 1).padStart(2, '0')}.png`, png.replace(/^data:image\/png;base64,/, ''), { base64: true });
         await new Promise(r => setTimeout(r, 300));
