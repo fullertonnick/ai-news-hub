@@ -64,19 +64,23 @@ export default function Step4Export() {
       document.fonts.load('700 18px "Plus Jakarta Sans"'),
       // Diagram node labels (16px 700)
       document.fonts.load('700 16px "Plus Jakarta Sans"'),
-      // Body text
+      // Body text (24px per spec)
       document.fonts.load('600 26px "Plus Jakarta Sans"'),
       document.fonts.load('600 24px "Plus Jakarta Sans"'),
-      // Section label / skill category (13px 600)
-      document.fonts.load('600 13px "Plus Jakarta Sans"'),
-      // Stats grid label (14px 600)
-      document.fonts.load('600 14px "Plus Jakarta Sans"'),
+      // Section label (16px 600)
+      document.fonts.load('600 16px "Plus Jakarta Sans"'),
+      // Stats grid label (17px 600)
+      document.fonts.load('600 17px "Plus Jakarta Sans"'),
+      // Footer handle / save CTA (20px 600/500), slide number (18px 600)
+      document.fonts.load('600 20px "Plus Jakarta Sans"'),
+      document.fonts.load('600 18px "Plus Jakarta Sans"'),
+      document.fonts.load('500 20px "Plus Jakarta Sans"'),
       document.fonts.load('500 24px "Plus Jakarta Sans"'),
       document.fonts.load('500 13px "Plus Jakarta Sans"'),
       document.fonts.load('500 12px "Plus Jakarta Sans"'),
-      document.fonts.load('400 26px "Plus Jakarta Sans"'),
       document.fonts.load('400 24px "Plus Jakarta Sans"'),
-      // Steps desc (18px), checklist (20px), skill/comparison items (17px), skill source (16px)
+      // Steps desc (20px), checklist (22px), skill/comparison items (17px), skill source (16px)
+      document.fonts.load('400 22px "Plus Jakarta Sans"'),
       document.fonts.load('400 20px "Plus Jakarta Sans"'),
       document.fonts.load('400 18px "Plus Jakarta Sans"'),
       document.fonts.load('400 17px "Plus Jakarta Sans"'),
@@ -87,9 +91,9 @@ export default function Step4Export() {
       document.fonts.load('italic 800 36px "Plus Jakarta Sans"'),
       document.fonts.load('italic 700 44px "Plus Jakarta Sans"'),
       document.fonts.load('italic 400 24px "Plus Jakarta Sans"'),
-      // Code block font
-      document.fonts.load('400 15px "JetBrains Mono"'),
-      document.fonts.load('500 15px "JetBrains Mono"'),
+      // Code block font (18px per updated SlideRenderer)
+      document.fonts.load('400 18px "JetBrains Mono"'),
+      document.fonts.load('500 18px "JetBrains Mono"'),
       // Text overlay fonts (all weights used by the overlay font size range)
       document.fonts.load('400 40px "Caveat"'),
       document.fonts.load('700 40px "Caveat"'),
