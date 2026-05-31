@@ -474,7 +474,6 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
     // Unknown visual type (e.g. placeholder {type:'something'} with no data) — treat as no-data
     return false;
   })();
-  const hasVis = visualHasData;
   const hasImagen = !!slide.backgroundImage;
   const paras = (slide.text || '').split('\n\n').filter(Boolean);
   const headline = paras[0] || slide.text || '';
@@ -549,11 +548,11 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 width: `${72 * sc}px`, height: `${4 * sc}px`,
                 background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`,
                 borderRadius: '3px',
-                marginBottom: `${(!hasVis && bodyParas.length > 0) ? 30 * sc : 22 * sc}px`,
+                marginBottom: `${(!visualHasData && bodyParas.length > 0) ? 30 * sc : 22 * sc}px`,
               }} />
             )}
             {/* Body — 24px regular, only for text-only slides (no visual block) */}
-            {!hasVis && bodyParas.map((p, i) => (
+            {!visualHasData && bodyParas.map((p, i) => (
               <p key={i} style={{
                 margin: 0, marginBottom: `${16 * sc}px`,
                 fontSize: `${24 * sc}px`, fontWeight: 400,
@@ -564,7 +563,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               </p>
             ))}
             {/* Kicker — mic-drop takeaway, 28px/800 punchy, visually separated */}
-            {!hasVis && kicker && (
+            {!visualHasData && kicker && (
               <div style={{ marginTop: `${40 * sc}px` }}>
                 <div style={{ width: `${56 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${14 * sc}px` }} />
                 <p style={{
@@ -582,7 +581,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
         )}
 
         {/* ── Visual ── */}
-        {hasVis && (
+        {visualHasData && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 0, overflow: 'hidden' }}>
 
             {/* CODE BLOCK */}

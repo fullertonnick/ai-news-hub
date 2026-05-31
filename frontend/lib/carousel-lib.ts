@@ -2,10 +2,13 @@
 
 export const FORBIDDEN: Record<string, string> = {
   leverage: 'use', utilize: 'use', synergy: 'teamwork',
-  'game-changer': 'breakthrough', revolutionary: 'new',
+  'game-changer': 'breakthrough', 'game changer': 'breakthrough', revolutionary: 'new',
   innovative: 'effective', seamless: 'smooth', empower: 'help',
-  disruptive: 'new', 'cutting-edge': 'modern', supercharge: 'boost',
-  revolutionize: 'change', unlock: 'open', paradigm: 'approach',
+  disruptive: 'new', 'cutting-edge': 'modern', 'cutting edge': 'modern',
+  supercharge: 'boost', revolutionize: 'change', unlock: 'open', paradigm: 'approach',
+  delve: 'dig into', streamline: 'simplify', robust: 'solid',
+  harness: 'use', actionable: 'concrete', skyrocket: 'grow',
+  'next-level': 'better', 'next level': 'better',
 };
 
 export function stripForbidden(text: string): string {
@@ -17,7 +20,7 @@ export function stripForbidden(text: string): string {
 }
 
 // Ensure accent_word appears verbatim in text; fallback to most impactful phrase.
-// Priority: dollar amounts → numbers+units → tool/file names → arrow sequences → paths → first strong noun.
+// Priority: kicker-line content → dollar amounts → numbers+units → tool/file names → arrow sequences → first strong noun.
 export function fixAccentWord(text: string, accentWord: string | undefined): string {
   if (!accentWord) return '';
   // Exact substring match (case-insensitive) — the happy path
@@ -30,11 +33,17 @@ export function fixAccentWord(text: string, accentWord: string | undefined): str
     const subEnd = accentParts.slice(accentParts.length - len).join(' ');
     if (subEnd.length >= 3 && subEnd !== sub && text.toLowerCase().includes(subEnd.toLowerCase())) return subEnd;
   }
-  // Fallback: extract the most impactful phrase from text
-  const dollarMatch = text.match(/\$[\d,]+(?:[kKmM])?(?:\/\w+)?/);
-  if (dollarMatch) return dollarMatch[0].trim();
-  const numMatch = text.match(/\b\d+(?:\.\d+)?(?:\+)?\s*(?:x\b|%|hrs?|hours?|min(?:utes?)?|sec(?:onds?)?|days?|weeks?|months?|[kKmM]\b)/i);
-  if (numMatch) return numMatch[0].trim();
+  // Fallback: extract the most impactful phrase from text.
+  // Check kicker (last paragraph) first — it's the mic-drop, most likely to be screenshot-worthy.
+  const paras = text.split('\n\n').filter(Boolean);
+  const kicker = paras.length >= 3 ? paras[paras.length - 1] : null;
+  const searchZones = kicker ? [kicker, text] : [text];
+  for (const zone of searchZones) {
+    const dollar = zone.match(/\$[\d,]+(?:[kKmM])?(?:\/\w+)?/);
+    if (dollar) return dollar[0].trim();
+    const num = zone.match(/\b\d+(?:\.\d+)?(?:\+)?\s*(?:x\b|%|hrs?|hours?|min(?:utes?)?|sec(?:onds?)?|days?|weeks?|months?|[kKmM]\b)/i);
+    if (num) return num[0].trim();
+  }
   // File/tool names (case-sensitive match for ALL-CAPS names like CLAUDE.md)
   const toolMatch = text.match(/\b[A-Za-z][A-Za-z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/i);
   if (toolMatch) return toolMatch[0];

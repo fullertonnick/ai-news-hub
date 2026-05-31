@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const guidance = slideTypeGuidance[slideType] || slideTypeGuidance.none;
 
   // Pull concrete nouns from slide text to make the background scene specific
-  const slideWords = slideText.slice(0, 300).toLowerCase();
+  const slideWords = slideText.slice(0, 450).toLowerCase();
   const conceptHints: string[] = [];
   // Claude Code specific
   if (/claude\.md|claudefile|memory file|context file|\.claude/.test(slideWords)) conceptHints.push('dark developer desk with open text editor showing highlighted CLAUDE.md file in sidebar, single warm amber desk lamp, mechanical keyboard foreground, shallow depth of field, cinematic');
@@ -113,7 +113,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 SLIDE CONTEXT:
 - Topic: "${topic}"
-- Slide text: "${slideText.slice(0, 200)}"
+- Slide text: "${slideText.slice(0, 300)}"
 - Slide type: ${slideType}
 
 VISUAL DIRECTION:

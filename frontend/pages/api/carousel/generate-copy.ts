@@ -223,14 +223,26 @@ ACCENT WORD — highlighted orange, one per slide
 RULE: accent_word MUST appear verbatim (exact substring) in the slide text, case-insensitive.
 Pick the phrase that delivers the BIGGEST punch — the stat, the tool name, the counter-intuitive fact.
 Can be 1–4 words. Prefer specifics over abstractions. SHORT is better than LONG.
-  - Slide about cutting 3 hrs to 20 min → "3 hours"
-  - Slide about CLAUDE.md → "CLAUDE.md"
-  - Slide about blank slate sessions → "blank slate"
-  - Slide about a myth → the thing being busted (e.g. "never forgets")
-  - Slide about a step → the tool or command (e.g. "CLAUDE.md", "/hooks", "git commit")
-  - Slide about a number → the exact number ("$200/month", "5+ hours", "4x faster")
-NOT: random adjectives, the slide title, a filler word, a phrase not in the text.
-CRITICAL: After you write the text, re-read it. Only then pick accent_word from what's actually there.
+
+PRIORITY ORDER (use the first one that exists in your slide):
+  1. Numbers with dollar amounts: "$200/month", "$70k", "5+ hours"
+  2. Numbers with units: "3 minutes", "4x faster", "15 seconds", "30 days"
+  3. Tool/command/file names: "CLAUDE.md", "/hooks", "git commit", "Make.com"
+  4. Arrow sequences (the kicker mechanism): "perceive → decide → act", "A → B → C"
+  5. The counter-intuitive claim: "blank slate", "never forgets", "one job"
+  6. The most concrete noun in the last sentence (kicker)
+
+BAD accent words (never use these):
+  - Generic: "today", "powerful", "great", "better", "simple", "easy"
+  - Adjectives: "effective", "efficient", "important", "useful"
+  - The section_label (e.g., don't repeat "Step 1" as the accent word)
+  - Any word NOT in the slide text
+
+CRITICAL — do this AFTER writing each slide's text, NOT before:
+  1. Re-read the slide text.
+  2. Find the single phrase a reader would screenshot.
+  3. Confirm that exact phrase is in the text.
+  4. Set that as accent_word.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${styleHint(style)}
@@ -323,6 +335,19 @@ Comment [KEYWORD] and I'll send you [exact deliverable — e.g. "the template", 
 📌 Save this before you lose it
 \\n\\n
 [HASHTAGS] 10-15 on one line — must include #simpliscale #thenickcornelius #aitools
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BEFORE GENERATING JSON — run this checklist mentally:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+□ Did I pick ONE structure that fits this topic naturally (not just "the default")?
+□ Does the cover headline reveal tension or a counter-intuitive fact?
+□ Does every content slide pass all 3 Bullshit Test criteria?
+□ Is the last sentence of each content slide a punchy kicker?
+□ Does every accent_word appear verbatim in its slide's text?
+□ Does the CTA question feel like the punchline of the whole carousel?
+□ Does the caption tease surprising insights (not just restate slide headlines)?
+□ Is the keyword ≤8 chars, ALL CAPS, and would a reader actually comment it?
+□ Does the keyword appear in the caption's "Comment X and I'll send you..." line?
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 FORMAT EXAMPLE — shows JSON structure ONLY. This example uses Deep Dive structure.
