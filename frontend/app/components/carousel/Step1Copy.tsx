@@ -57,10 +57,8 @@ export default function Step1Copy() {
       if (d.text) {
         store.updateSlideText(slideId, d.text);
         if (d.accent_word) store.updateSlideAccent(slideId, d.accent_word);
-      } else if (d.error) {
-        setRegenError(prev => ({ ...prev, [slideId]: d.error }));
       } else {
-        setRegenError(prev => ({ ...prev, [slideId]: 'No response from AI — check your API key or try again.' }));
+        setRegenError(prev => ({ ...prev, [slideId]: d.error || 'No response — try again.' }));
       }
     } catch {
       setRegenError(prev => ({ ...prev, [slideId]: 'Network error — try again.' }));

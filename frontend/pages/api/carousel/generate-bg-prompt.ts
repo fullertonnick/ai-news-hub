@@ -146,7 +146,7 @@ Output the prompt only — no quotes, no JSON, no explanation.`;
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 500 },
+        generationConfig: { temperature: 0.7, maxOutputTokens: 300 },
         thinkingConfig: { thinkingBudget: 0 },
       }),
     });

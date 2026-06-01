@@ -39,11 +39,12 @@ DECISION TREE — work through in order, pick the FIRST that fits perfectly:
    Labels: "Option A", "Option B", "The Verdict"…
 
 CALIBRATION EXAMPLES — use these to pick your structure:
-"Claude Code memory system" → DEEP DIVE (mechanism: what, why, how, example, apply)
-"Make.com client onboarding automation" → STEPS (sequential: trigger → modules → test → live)
-"Why 80% of AI agents fail in production" → MYTH-BUSTING (belief → reality → proof → fix)
-"5 Claude prompts every agency owner needs" → NUMBERED LIST (01. → 05.)
-"ChatGPT vs Claude for business writing" → COMPARISON (side A vs side B → verdict)
+"Claude Code memory system" → DEEP DIVE (mechanism: what it is → why it matters → how it works → real example → apply it)
+"Make.com client onboarding automation" → STEPS (sequential: Step 1 → Step 2 → Step 3 → Step 4)
+"Why 80% of AI agents fail in production" → MYTH-BUSTING (The Myth → Reality → The Proof → Apply It)
+"5 Claude prompts every agency owner needs" → NUMBERED LIST (01. → 02. → 03. → 04. → 05.)
+"ChatGPT vs Claude for business writing" → COMPARISON (Option A → Option B → The Verdict)
+"Claude Code hooks system" → STEPS (how to add a hook: Step 1 install → Step 2 configure → Step 3 test → Step 4 deploy)
 
 BANNED: "The Problem / The Fix" as a default structure — it flattens every topic into the same shape. Reserve it ONLY when the topic IS a pain-point story (e.g., "Why your automations fail silently at 3am"). Most topics are not.`;
 }
@@ -413,8 +414,8 @@ Now write a completely original carousel about: "${topic}"`;
       signal: controller.signal,
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 1.0, maxOutputTokens: 8000 },
-        thinkingConfig: { thinkingBudget: 5000 },
+        generationConfig: { temperature: 1.0, maxOutputTokens: 4096 },
+        thinkingConfig: { thinkingBudget: 2048 },
       }),
     });
     const d = await r.json();
@@ -434,6 +435,8 @@ Now write a completely original carousel about: "${topic}"`;
         rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
         rawText = rawText.replace(/\s*\n*Comment\s+["']?\w+["']?\s+below[\s\S]*/i, '').trim();
       }
+      // Strip "Level X:" prefix from slide text — AI sometimes ignores the ban despite instructions
+      rawText = rawText.replace(/^Level\s+\d+\s*[:.\s—–]+/gim, '').trim();
       const cleanText = stripForbidden(rawText);
       // Normalize section_label: null/"null"/"none" → undefined; strip "Level X" prefix
       const rawLabel: string | null | undefined = s.section_label;
@@ -474,15 +477,23 @@ Now write a completely original carousel about: "${topic}"`;
     const rawKw = (parsed.keyword || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
     const keyword = rawKw.length >= 2 ? rawKw : fallbackKeyword(topic);
     let caption = stripForbidden(parsed.caption || '');
-    // Ensure the caption uses the resolved keyword (not whatever the AI wrote)
+    // Ensure the caption uses the resolved keyword
     caption = caption.replace(/Comment\s+[A-Z0-9]+\s+and/gi, `Comment ${keyword} and`);
-    // Ensure the mandatory CTA line exists before hashtags
+    // Ensure the CTA line exists before hashtags
     if (caption && !/comment\s+[A-Z0-9]+/i.test(caption)) {
       const hashtagIdx = caption.indexOf('#');
-      const ctaLine = `\nComment ${keyword} and I'll send it over 🔥\n📌 Save this before you lose it`;
+      const ctaLine = `Comment ${keyword} and I'll send it over 🔥\n📌 Save this before you lose it`;
       caption = hashtagIdx >= 0
-        ? caption.slice(0, hashtagIdx).trimEnd() + '\n' + ctaLine + '\n\n' + caption.slice(hashtagIdx)
-        : caption.trimEnd() + '\n' + ctaLine;
+        ? caption.slice(0, hashtagIdx).trimEnd() + '\n\n' + ctaLine + '\n\n' + caption.slice(hashtagIdx)
+        : caption.trimEnd() + '\n\n' + ctaLine;
+    }
+    // Ensure "📌 Save this" line exists
+    if (caption && !caption.includes('📌') && !caption.includes('Save this')) {
+      const hashtagIdx = caption.indexOf('#');
+      const saveLine = '📌 Save this before you lose it';
+      caption = hashtagIdx >= 0
+        ? caption.slice(0, hashtagIdx).trimEnd() + '\n' + saveLine + '\n\n' + caption.slice(hashtagIdx)
+        : caption.trimEnd() + '\n' + saveLine;
     }
     if (caption && !caption.includes('#simpliscale')) caption += '\n\n#simpliscale #thenickcornelius';
     else if (caption && !caption.includes('#thenickcornelius')) caption += ' #thenickcornelius';

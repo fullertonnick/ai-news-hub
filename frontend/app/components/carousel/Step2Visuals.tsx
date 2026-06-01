@@ -355,17 +355,12 @@ export default function Step2Visuals() {
           ← Back
         </button>
         <button onClick={() => { store.approve('visuals'); store.setStep(3); }}
-          disabled={allGenerating}
-          className={`flex-1 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 ${
-            allGenerating
-              ? 'bg-white/5 border border-white/10 text-gray-500 cursor-not-allowed opacity-60'
-              : 'bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400'
-          }`}>
+          className="flex-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
           <Check size={14} />
           {allGenerating
-            ? `Generating backgrounds… (${bgDone}/${middleSlides.length} ready)`
+            ? `Continue to Editor (generating…)`
             : bgDone < middleSlides.length && middleSlides.length > 0
-            ? `Continue to Editor (${bgMissing} background${bgMissing > 1 ? 's' : ''} missing)`
+            ? `Continue to Editor (${bgMissing} bg${bgMissing > 1 ? 's' : ''} pending)`
             : 'Continue to Editor'}
         </button>
       </div>

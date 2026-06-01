@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.json({ text: null, accent_word: null });
+    return res.json({ text: null, accent_word: null, error: 'No API key configured — set GEMINI_API_KEY' });
   }
 
   const total = totalSlides || 5;
@@ -85,7 +85,6 @@ Return JSON only: {"text": "...", "accent_word": "..."}`;
       accent_word: fixAccentWord(cleanText, parsed.accent_word),
     });
   } catch {
-    // Return null text so the client skips the update and preserves current state + approvals
-    return res.json({ text: null, accent_word: null });
+    return res.json({ text: null, accent_word: null, error: 'Generation failed — try again' });
   }
 }
