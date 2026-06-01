@@ -298,7 +298,7 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
           color: Brand.colors.accent_primary,
           letterSpacing: '0.10em',
           fontFamily: Brand.typography.font_family,
-          boxShadow: `0 0 ${22 * sc}px rgba(255,113,7,0.70), 0 0 ${8 * sc}px rgba(255,113,7,0.40), inset 0 0 ${12 * sc}px rgba(255,113,7,0.08)`,
+          boxShadow: `0 0 ${16 * sc}px rgba(255,113,7,0.45), 0 0 ${6 * sc}px rgba(255,113,7,0.25)`,
           zIndex: 2,
           opacity: 1,
         }}>{sticker.text}</div>
@@ -314,11 +314,11 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
         ...(headlinePos === 'bottom' ? { bottom: `${120 * sc}px` } : {}),
         left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3,
       }}>
-        <div style={{ fontSize: `${fontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: `${14 * sc}px`, textShadow: '0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.85)' }}>
+        <div style={{ fontSize: `${fontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.10, letterSpacing: '-0.03em', marginBottom: `${14 * sc}px`, textShadow: '0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.85)' }}>
           {renderWithAccent(coverHeadline, slide.accent_word, { color: Brand.colors.text_primary })}
         </div>
         {(coverSubtitle || v.subtext) && (
-          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: `${24 * sc}px`, fontWeight: 500, lineHeight: 1.4, margin: 0 }}>
+          <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: `${24 * sc}px`, fontWeight: 500, lineHeight: 1.4, margin: 0, fontFamily: Brand.typography.font_family }}>
             {coverSubtitle || v.subtext}
           </p>
         )}
@@ -369,17 +369,15 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
           </div>
           <div style={{ width: `${52 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px' }} />
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
-            <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600 }}>Comment</span>
-            {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, padding: `${7 * sc}px ${20 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${20 * sc}px rgba(255,113,7,0.55), 0 ${2 * sc}px ${8 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
-            <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600 }}>I'll send it over 🔥</span>
+            <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>Comment</span>
+            {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, padding: `${7 * sc}px ${20 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${20 * sc}px rgba(255,113,7,0.55), 0 ${2 * sc}px ${8 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
+            <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>I'll send it over 🔥</span>
           </div>
         </div>
 
         {/* Footer */}
-        <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${PH}px`, right: `${PH}px`, borderTop: `1px solid ${Brand.colors.divider}`, paddingTop: `${16 * sc}px`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 4 }}>
-          <span style={{ color: Brand.colors.text_muted, fontSize: `${20 * sc}px`, fontWeight: 600, letterSpacing: '-0.01em' }}>@thenickcornelius</span>
-          {slideNumber != null && totalSlides != null && <span style={{ color: Brand.colors.text_muted, fontSize: `${18 * sc}px`, fontWeight: 600, letterSpacing: '0.04em' }}>{slideNumber} / {totalSlides}</span>}
-          <span style={{ color: Brand.colors.text_muted, fontSize: `${20 * sc}px`, fontWeight: 500 }}>{Brand.brand.save_cta}</span>
+        <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${PH}px`, right: `${PH}px`, zIndex: 4 }}>
+          <Footer sc={sc} slideNumber={slideNumber} totalSlides={totalSlides} />
         </div>
       </div>
     );
@@ -404,26 +402,24 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
       {/* Centered content */}
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${80 * sc}px ${70 * sc}px` }}>
 
-        <div style={{ fontSize: `${60 * sc}px`, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.03em', textAlign: 'center', marginBottom: `${36 * sc}px` }}>
+        <div style={{ fontSize: `${60 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.1, letterSpacing: '-0.03em', textAlign: 'center', marginBottom: `${36 * sc}px` }}>
           {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
         </div>
 
         <div style={{ width: `${60 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${40 * sc}px` }} />
 
         <div style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: `${10 * sc}px`, flexWrap: 'wrap' as const }}>
-          <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600 }}>Comment</span>
-          {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, padding: `${8 * sc}px ${24 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${24 * sc}px rgba(255,113,7,0.60), 0 ${2 * sc}px ${10 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
-          <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600 }}>I'll send it over 🔥</span>
+          <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>Comment</span>
+          {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, padding: `${8 * sc}px ${24 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${24 * sc}px rgba(255,113,7,0.60), 0 ${2 * sc}px ${10 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
+          <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>I'll send it over 🔥</span>
         </div>
 
-        <div style={{ fontSize: `${48 * sc}px`, color: Brand.colors.accent_primary, lineHeight: 1, marginTop: `${32 * sc}px`, textShadow: `0 0 ${16 * sc}px rgba(255,113,7,0.55)` }}>↓</div>
+        <div style={{ fontSize: `${36 * sc}px`, color: Brand.colors.accent_primary, lineHeight: 1, marginTop: `${28 * sc}px`, fontFamily: Brand.typography.font_family, letterSpacing: '-0.02em', opacity: 0.85 }}>↓</div>
       </div>
 
       {/* Footer */}
-      <div style={{ position: 'absolute', bottom: `${36 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: `1px solid ${Brand.colors.divider}`, paddingTop: `${16 * sc}px` }}>
-        <span style={{ color: Brand.colors.text_muted, fontSize: `${20 * sc}px`, fontWeight: 600, letterSpacing: '-0.01em' }}>@thenickcornelius</span>
-        {slideNumber != null && totalSlides != null && <span style={{ color: Brand.colors.text_muted, fontSize: `${18 * sc}px`, fontWeight: 600, letterSpacing: '0.04em' }}>{slideNumber} / {totalSlides}</span>}
-        <span style={{ color: Brand.colors.text_muted, fontSize: `${20 * sc}px`, fontWeight: 500 }}>{Brand.brand.save_cta}</span>
+      <div style={{ position: 'absolute', bottom: `${36 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px` }}>
+        <Footer sc={sc} slideNumber={slideNumber} totalSlides={totalSlides} />
       </div>
     </div>
   );
@@ -549,7 +545,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
             {/* Orange divider — Tyler Germain signature (skip for big_quote which has its own) */}
             {!isBigQuote && (
               <div style={{
-                width: `${72 * sc}px`, height: `${4 * sc}px`,
+                width: `${80 * sc}px`, height: `${4 * sc}px`,
                 background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`,
                 borderRadius: '3px',
                 marginBottom: `${(!visualHasData && bodyParas.length > 0) ? 30 * sc : 22 * sc}px`,
@@ -568,7 +564,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
             ))}
             {/* Kicker — mic-drop takeaway, 28px/800 punchy, visually separated */}
             {!visualHasData && kicker && (
-              <div style={{ marginTop: `${40 * sc}px` }}>
+              <div style={{ marginTop: `${48 * sc}px` }}>
                 <div style={{ width: `${56 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${14 * sc}px` }} />
                 <p style={{
                   margin: 0,
