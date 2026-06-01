@@ -88,8 +88,8 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
       text={overlay.text}
       fontSize={fs}
       lineHeight={1.3}
-      fontStyle={overlay.fontWeight >= 700 ? 'bold' : 'normal'}
-      fontFamily={overlay.fontFamily || '"Plus Jakarta Sans", system-ui, -apple-system, sans-serif'}
+      fontStyle={overlay.fontWeight >= 600 ? String(overlay.fontWeight) : 'normal'}
+      fontFamily={overlay.fontFamily || '"Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif'}
       fill={overlay.color}
       width={pxW}
       align="center"

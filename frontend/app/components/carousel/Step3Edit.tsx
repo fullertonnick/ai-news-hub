@@ -113,6 +113,12 @@ export default function Step3Edit() {
     }
   }, [slides.length, currentIdx]);
 
+  // Reset selection and error when navigating to a different slide
+  useEffect(() => {
+    setSelectedId(null);
+    setVisualError(null);
+  }, [currentIdx]);
+
   const slide = slides[currentIdx];
   const stickers = slide?.stickers || [];
   const textOverlays = slide?.textOverlays || [];
@@ -220,7 +226,7 @@ export default function Step3Edit() {
 
   const addText = useCallback(() => {
     if (!slide) return;
-    const t: TextOverlay = { id: uid(), text: 'Edit this text', x: 50, y: 30, fontSize: 40, fontWeight: 700, color: '#FFFFFF', maxWidth: 80, zIndex: 5 + textOverlays.length };
+    const t: TextOverlay = { id: uid(), text: 'Edit this text', x: 50, y: 30, fontSize: 40, fontWeight: 700, color: '#FFFFFF', maxWidth: 80, zIndex: 5 + textOverlays.length, fontFamily: FONT_OPTIONS[0].family, rotation: 0 };
     store.addTextOverlay(slide.id, t);
     // Defer select so Konva has time to mount the new node before drag
     requestAnimationFrame(() => {
@@ -346,7 +352,7 @@ export default function Step3Edit() {
                 style={{
                   position: 'absolute',
                   left: `${Math.round(52 * PW / 1080) + Math.round((slide?.textOffsetX || 0) * PW / 1080)}px`,
-                  top: `${Math.round(PH * 0.47) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
+                  top: `${Math.round(PH * 0.49) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
                   width: '72px',
                   height: '20px',
                   cursor: 'move',

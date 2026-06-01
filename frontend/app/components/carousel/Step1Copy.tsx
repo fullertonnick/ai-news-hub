@@ -7,10 +7,11 @@ const VISUAL_TYPES = ['cover_photo', 'code_block', 'stats_grid', 'diagram', 'ste
 
 export default function Step1Copy() {
   const store = useCarouselStore();
-  const { topic, style, slides, caption, keyword, copyLoading, approvals, bgLoading } = store;
+  const { topic, style, slides, caption, keyword, copyLoading, approvals } = store;
   const [error, setError] = useState<string | null>(null);
   const [isFallback, setIsFallback] = useState(false);
   const [regenError, setRegenError] = useState<Record<string, string>>({});
+  const [slideRegenLoading, setSlideRegenLoading] = useState<Record<string, boolean>>({});
 
   const generateCopy = useCallback(async () => {
     if (!topic.trim()) return;
@@ -44,7 +45,7 @@ export default function Step1Copy() {
   const regenerateSlide = useCallback(async (slideId: string) => {
     const slide = slides.find(s => s.id === slideId);
     if (!slide) return;
-    store.setBgLoading(slideId, true);
+    setSlideRegenLoading(prev => ({ ...prev, [slideId]: true }));
     setRegenError(prev => ({ ...prev, [slideId]: '' }));
     try {
       const idx = slides.findIndex(s => s.id === slideId);
@@ -64,7 +65,7 @@ export default function Step1Copy() {
     } catch {
       setRegenError(prev => ({ ...prev, [slideId]: 'Network error — try again.' }));
     }
-    finally { store.setBgLoading(slideId, false); }
+    finally { setSlideRegenLoading(prev => ({ ...prev, [slideId]: false })); }
   }, [slides, topic, style, store]);
 
   return (
@@ -129,9 +130,9 @@ export default function Step1Copy() {
                   <button onClick={() => store.reorderSlide(slide.id, 'down')}
                     disabled={i === 0 || i === slides.length - 1 || i === slides.length - 2}
                     className="p-1 rounded hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ArrowDown size={12} /></button>
-                  <button onClick={() => regenerateSlide(slide.id)} disabled={!!bgLoading[slide.id]}
+                  <button onClick={() => regenerateSlide(slide.id)} disabled={!!slideRegenLoading[slide.id]}
                     className="p-1 rounded hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-40">
-                    {bgLoading[slide.id] ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                    {slideRegenLoading[slide.id] ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
                   </button>
                   <button onClick={() => store.removeSlide(slide.id)}
                     disabled={slides.length <= 2 || i === 0 || i === slides.length - 1}

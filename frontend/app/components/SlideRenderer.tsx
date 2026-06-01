@@ -126,11 +126,13 @@ function RenderOverlays({ slide, W, H }: { slide: CarouselSlide; W: number; H: n
               left: `${(s.x / 100) * W}px`,
               top: `${(s.y / 100) * H}px`,
               width: `${pxW}px`,
+              height: 'auto',
               transform: `translate(-50%, -50%) rotate(${s.rotation}deg)`,
               opacity: s.opacity,
               zIndex: s.zIndex ?? 10,
               pointerEvents: 'none',
               userSelect: 'none',
+              display: 'block',
             }}
           />
         );
@@ -265,7 +267,8 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
 
       {/* Fallback: nick.jpg if no uploaded photo and photo is enabled */}
       {showFallbackPhoto && (
-        <img src="/nick.jpg" alt=""
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src="/nick.jpg" alt="" crossOrigin="anonymous"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
         />
       )}
@@ -352,7 +355,8 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
         backgroundColor: Brand.colors.bg_primary,
       }}>
         {/* Nick's photo on right — uses the selected photo from Step2 shuffle */}
-        <img src={photoSrc} alt="" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.60}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.72, zIndex: 1 }} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={photoSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.60}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.72, zIndex: 1 }} />
         {/* Gradient fade left — keeps text readable */}
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 32%, rgba(26,26,26,0.88) 52%, rgba(26,26,26,0.40) 72%, rgba(26,26,26,0.08) 100%)`, zIndex: 2 }} />
         {/* Subtle orange glow on left */}

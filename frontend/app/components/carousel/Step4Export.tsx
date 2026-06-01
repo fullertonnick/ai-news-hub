@@ -159,7 +159,14 @@ export default function Step4Export() {
       // Give the browser one extra paint cycle after font loading to ensure
       // background images and CSS are fully decoded before html-to-image captures.
       await new Promise(r => setTimeout(r, 300));
-      const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
+      let png: string;
+      try {
+        png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
+      } catch {
+        // First attempt can fail if images/fonts haven't decoded yet — retry once after extra delay
+        await new Promise(r => setTimeout(r, 600));
+        png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
+      }
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
     } catch (e: any) {
       console.error('Export error', e);
@@ -188,7 +195,13 @@ export default function Step4Export() {
           }
         }
         if (!el) { missingRefs++; continue; }
-        const png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
+        let png: string;
+        try {
+          png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
+        } catch {
+          await new Promise(r => setTimeout(r, 600));
+          png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
+        }
         zip.file(`slide-${String(i + 1).padStart(2, '0')}.png`, png.replace(/^data:image\/png;base64,/, ''), { base64: true });
         await new Promise(r => setTimeout(r, 300));
       }
@@ -340,7 +353,7 @@ export default function Step4Export() {
       {/* Hidden export renders — absolutely positioned off-screen at full 1080×1350 resolution.
           position:absolute (not fixed) is more reliable for html-to-image: fixed elements are
           viewport-relative which can cause capture artifacts when the page is scrolled. */}
-      <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }}>
+      <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }} aria-hidden="true">
         {renderSlides.map((slide, i) => (
           <SlideRenderer key={slides[i]?.id || i} ref={el => { exportRefs.current[i] = el; }} slide={slide} slideNumber={i + 1} totalSlides={slides.length} forExport />
         ))}
