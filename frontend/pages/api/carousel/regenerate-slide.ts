@@ -79,6 +79,8 @@ Return JSON only: {"text": "...", "accent_word": "..."}`;
       rawText = rawText.replace(/\s*\n*Comment\s+\w+\s+and\s+I['']ll\s+send[\s\S]*/i, '').trim();
       rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
     }
+    // Strip markdown bold/italic that would show up literally in slide renders
+    rawText = rawText.replace(/\*{1,2}(.*?)\*{1,2}/g, '$1').replace(/_{1,2}(.*?)_{1,2}/g, '$1').trim();
     const cleanText = stripForbidden(rawText);
     return res.json({
       text: cleanText,

@@ -38,10 +38,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const slideWords = slideText.slice(0, 450).toLowerCase();
   const conceptHints: string[] = [];
   // Claude Code specific
-  if (/claude\.md|claudefile|memory file|context file|\.claude/.test(slideWords)) conceptHints.push('dark developer desk with open text editor showing highlighted CLAUDE.md file in sidebar, single warm amber desk lamp, mechanical keyboard foreground, shallow depth of field, cinematic');
-  if (/blank slate|fresh session|session start|new session|every session/.test(slideWords)) conceptHints.push('dark minimal workspace, clean empty desk surface, single amber lamp illuminating blank notebook, moody cinematic, deep shadows, no clutter');
+  if (/claude\.md|claudefile|memory file|context file|\.claude|memory system/.test(slideWords)) conceptHints.push('dark developer desk with open text editor showing highlighted CLAUDE.md file in sidebar, single warm amber desk lamp, mechanical keyboard foreground, shallow depth of field, cinematic');
+  if (/blank slate|fresh session|session start|new session|every session|no persistent/.test(slideWords)) conceptHints.push('dark minimal workspace, clean empty desk surface, single amber lamp illuminating blank notebook, moody cinematic, deep shadows, no clutter');
   if (/hooks?|pretoolusehandler|posttoolusehandler|settings\.json|bash_tool|permiss/.test(slideWords)) conceptHints.push('dark mechanical keyboard macro shot, single amber backlit key glowing in darkness, blurred code on monitor behind, shallow depth of field, professional developer setup');
   if (/context window|compaction|compress|token\s*limit|200k/.test(slideWords)) conceptHints.push('dark minimal background with single horizontal amber progress bar glowing near capacity, near-black, precise engineering aesthetic, cinematic');
+  if (/apply|implement|start today|set up|create.*file|put in|add to/.test(slideWords)) conceptHints.push('dark home office desk, open laptop with terminal window glowing amber, mechanical keyboard in foreground, single desk lamp, shallow depth of field, cinematic developer environment');
   // General terminal / code
   if (/terminal|code|file|editor|command|script|repo|\.md/.test(slideWords)) conceptHints.push('dark home office, glowing terminal screen with blurred amber-lit code, mechanical keyboard foreground, multiple monitors bokeh background, shallow depth of field');
   // MCP / tool calls
