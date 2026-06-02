@@ -62,7 +62,7 @@ function highlightCode(code: string, highlights: string[] = [], sc: number): Rea
     }
     return (
       <div key={li} style={{ display: 'flex', minHeight: '1.5em' }}>
-        <span style={{ color: '#4B5563', userSelect: 'none', marginRight: `${16 * sc}px`, minWidth: `${32 * sc}px`, textAlign: 'right', flexShrink: 0, fontSize: `${14 * sc}px` }}>{li + 1}</span>
+        <span style={{ color: '#4B5563', userSelect: 'none', marginRight: `${16 * sc}px`, minWidth: `${32 * sc}px`, textAlign: 'right', flexShrink: 0, fontSize: `${15 * sc}px` }}>{li + 1}</span>
         <span style={{ flex: 1 }}>{tokens.length > 0 ? tokens : <span>&nbsp;</span>}</span>
       </div>
     );
@@ -277,12 +277,13 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
       <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)' }} />
 
       {/* Bottom gradient — strong dark behind headline and footer */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.15) 25%, rgba(0,0,0,0.72) 58%, rgba(0,0,0,0.93) 78%, rgba(0,0,0,0.98) 100%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.10) 20%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.78) 62%, rgba(0,0,0,0.95) 80%, rgba(0,0,0,0.99) 100%)' }} />
 
-      {/* Top gradient — ensures text readable when headline is at top or middle position */}
-      {(headlinePos === 'top' || headlinePos === 'middle') && (
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.40) 22%, rgba(0,0,0,0.0) 45%)' }} />
-      )}
+      {/* Top gradient — darkens badge area for all positions; heavier for top/middle where headline lives there */}
+      <div style={{ position: 'absolute', inset: 0, background: headlinePos === 'top' || headlinePos === 'middle'
+        ? 'linear-gradient(to bottom, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.42) 24%, rgba(0,0,0,0.0) 48%)'
+        : 'linear-gradient(to bottom, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.18) 20%, rgba(0,0,0,0.0) 38%)'
+      }} />
 
       {/* Topic-relevant sticker badges — bold orange pills, clearly visible */}
       {stickers.map((sticker, i) => (
@@ -311,10 +312,10 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
         position: 'absolute',
         ...(headlinePos === 'top'    ? { top: `${H * 0.10}px` } : {}),
         ...(headlinePos === 'middle' ? { top: `${H * 0.35}px` } : {}),
-        ...(headlinePos === 'bottom' ? { bottom: `${120 * sc}px` } : {}),
+        ...(headlinePos === 'bottom' ? { bottom: `${144 * sc}px` } : {}),
         left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3,
       }}>
-        <div style={{ fontSize: `${fontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.10, letterSpacing: '-0.03em', marginBottom: `${14 * sc}px`, textShadow: '0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.85)' }}>
+        <div style={{ fontSize: `${fontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.13, letterSpacing: '-0.03em', marginBottom: `${14 * sc}px`, textShadow: '0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.85)' }}>
           {renderWithAccent(coverHeadline, slide.accent_word, { color: Brand.colors.text_primary })}
         </div>
         {(coverSubtitle || v.subtext) && (
@@ -558,14 +559,15 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 fontSize: `${24 * sc}px`, fontWeight: 400,
                 fontFamily: Brand.typography.font_family,
                 color: Brand.colors.text_primary, lineHeight: 1.65,
+                letterSpacing: '-0.01em',
               }}>
                 {renderWithAccent(p, slide.accent_word)}
               </p>
             ))}
             {/* Kicker — mic-drop takeaway, 28px/800 punchy, visually separated */}
             {!visualHasData && kicker && (
-              <div style={{ marginTop: `${48 * sc}px` }}>
-                <div style={{ width: `${56 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${14 * sc}px` }} />
+              <div style={{ marginTop: `${44 * sc}px` }}>
+                <div style={{ width: `${72 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${14 * sc}px` }} />
                 <p style={{
                   margin: 0,
                   fontSize: `${28 * sc}px`, fontWeight: 800,
@@ -600,7 +602,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                       {['#FF5F56', '#FFBD2E', '#27C93F'].map((c, i) => <div key={i} style={{ width: `${9 * sc}px`, height: `${9 * sc}px`, borderRadius: '50%', backgroundColor: c }} />)}
                       <span style={{ marginLeft: `${8 * sc}px`, fontSize: `${13 * sc}px`, color: Brand.colors.text_muted, fontFamily: Brand.typography.mono_font }}>{v.language || 'prompt'}</span>
                     </div>
-                    <div style={{ padding: `${14 * sc}px ${16 * sc}px`, fontFamily: Brand.typography.mono_font, fontSize: `${18 * sc}px`, lineHeight: 1.65 }}>
+                    <div style={{ padding: `${14 * sc}px ${16 * sc}px`, fontFamily: Brand.typography.mono_font, fontSize: `${20 * sc}px`, lineHeight: 1.60 }}>
                       {highlightCode(v.code || '', v.highlights || [], sc)}
                     </div>
                   </div>
@@ -680,7 +682,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                           <text
                             x={p.x + nW / 2} y={p.y + nH / 2}
                             textAnchor="middle" dominantBaseline="middle"
-                            fill={c.text} fontSize={16 * sc}
+                            fill={c.text} fontSize={18 * sc}
                             fontFamily={Brand.typography.font_family} fontWeight="700"
                           >{n.label}</text>
                         </g>
@@ -741,7 +743,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 <div style={{ display: 'flex', flexDirection: 'column', gap: `${12 * sc}px` }}>
                   <div style={{ width: `${40 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px' }} />
                   {v.supporting && (
-                    <p style={{ margin: 0, fontSize: `${18 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5 }}>{v.supporting}</p>
+                    <p style={{ margin: 0, fontSize: `${20 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.55, letterSpacing: '-0.01em' }}>{v.supporting}</p>
                   )}
                 </div>
               );
@@ -783,7 +785,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                   {(v.items || []).map((item, i) => (
                     <div key={i} style={{ display: 'flex', gap: `${16 * sc}px`, alignItems: 'center' }}>
                       <div style={{ width: `${36 * sc}px`, height: `${36 * sc}px`, borderRadius: '50%', background: Brand.colors.accent_primary, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: `${18 * sc}px`, color: 'white', fontWeight: 800 }}>✓</div>
-                      <span style={{ fontSize: `${22 * sc}px`, color: Brand.colors.text_primary, lineHeight: 1.4 }}>{item.text}</span>
+                      <span style={{ fontSize: `${24 * sc}px`, color: Brand.colors.text_primary, lineHeight: 1.45, letterSpacing: '-0.01em' }}>{item.text}</span>
                     </div>
                   ))}
                 </div>
