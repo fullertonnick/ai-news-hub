@@ -71,6 +71,7 @@ export default function Step1Copy() {
       {/* Topic + style */}
       <div className="rounded-xl bg-white/[0.03] border border-white/10 p-4 space-y-3">
         <input type="text" value={topic} onChange={e => store.setTopic(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && !copyLoading && topic.trim()) generateCopy(); }}
           placeholder="Topic: e.g. Make.com automating client onboarding"
           className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-brand-orange/50" />
         <div className="flex gap-1.5">

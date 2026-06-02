@@ -238,6 +238,8 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
     if (e.target === e.target.getStage()) onSelect(null);
   }, [onSelect]);
 
+  if (width <= 0 || height <= 0) return null;
+
   return (
     <Stage ref={stageRef} width={width} height={height}
       onClick={handleStageClick} onTap={handleStageClick}

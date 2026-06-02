@@ -415,7 +415,7 @@ Now write a completely original carousel about: "${topic}"`;
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 1.0, maxOutputTokens: 4096 },
-        thinkingConfig: { thinkingBudget: 2048 },
+        thinkingConfig: { thinkingBudget: 5000 },
       }),
     });
     const d = await r.json();

@@ -1,5 +1,6 @@
 'use client';
 import { useRef, useCallback, useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useCarouselStore } from '../../stores/useCarouselStore';
 import { Download, Package, Copy, Check, Loader2, ChevronLeft, ChevronRight, RotateCcw, AlertCircle } from 'lucide-react';
 import SlideRenderer from '../SlideRenderer';
@@ -147,23 +148,28 @@ export default function Step4Export() {
 
   const downloadSlide = useCallback(async (i: number) => {
     await ensureDataUrls();
-    const el = exportRefs.current[i];
-    if (!el) {
-      setExportError('Slide element not ready — wait a moment and try again.');
-      return;
-    }
     setDownloading(i);
     setExportError(null);
+    // Wait for the portal-rendered export ref to be populated (up to 2s)
+    let el = exportRefs.current[i];
+    if (!el) {
+      for (let attempt = 0; attempt < 10 && !el; attempt++) {
+        await new Promise(r => setTimeout(r, 200));
+        el = exportRefs.current[i];
+      }
+    }
+    if (!el) {
+      setExportError('Slide element not ready — wait a moment and try again.');
+      setDownloading(null);
+      return;
+    }
     try {
       await preloadFonts();
-      // Give the browser one extra paint cycle after font loading to ensure
-      // background images and CSS are fully decoded before html-to-image captures.
       await new Promise(r => setTimeout(r, 300));
       let png: string;
       try {
         png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
       } catch {
-        // First attempt can fail if images/fonts haven't decoded yet — retry once after extra delay
         await new Promise(r => setTimeout(r, 600));
         png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
       }
@@ -247,6 +253,8 @@ export default function Step4Export() {
   };
 
   const [confirmReset, setConfirmReset] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => { setIsMounted(true); }, []);
 
   const handleReset = () => {
     if (confirmReset) {
@@ -260,6 +268,7 @@ export default function Step4Export() {
   const isBusy = downloading !== null || proxyingImages;
 
   return (
+    <>
     <div className="p-6 max-w-4xl mx-auto space-y-5" style={{ position: 'relative' }}>
       <div className="flex items-center justify-between">
         <div>
@@ -350,14 +359,18 @@ export default function Step4Export() {
         </button>
       </div>
 
-      {/* Hidden export renders — absolutely positioned off-screen at full 1080×1350 resolution.
-          position:absolute (not fixed) is more reliable for html-to-image: fixed elements are
-          viewport-relative which can cause capture artifacts when the page is scrolled. */}
-      <div style={{ position: 'absolute', left: '-9999px', top: 0, pointerEvents: 'none' }} aria-hidden="true">
+    </div>
+
+    {/* Hidden export renders in a portal — escapes overflow:auto parent so html-to-image
+        captures the full 1080×1350 without clipping. Fixed positioning avoids affecting page layout. */}
+    {isMounted && createPortal(
+      <div style={{ position: 'fixed', left: '-99999px', top: 0, pointerEvents: 'none', zIndex: -1 }} aria-hidden="true">
         {renderSlides.map((slide, i) => (
           <SlideRenderer key={slides[i]?.id || i} ref={el => { exportRefs.current[i] = el; }} slide={slide} slideNumber={i + 1} totalSlides={slides.length} forExport />
         ))}
-      </div>
-    </div>
+      </div>,
+      document.body
+    )}
+    </>
   );
 }

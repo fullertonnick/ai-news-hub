@@ -163,8 +163,8 @@ export default function Step2Visuals() {
     if (!middle.length) return;
     if (!middle.some(s => !s.backgroundImage)) return; // all already have images
     lastAutoStartKey.current = slidesKey;
-    // Small delay so cover/CTA photo effects finish first
-    const t = setTimeout(generateAll, 600);
+    // Small delay so cover/CTA photo effects finish proxying first
+    const t = setTimeout(generateAll, 800);
     return () => clearTimeout(t);
   }, [slides, generateAll]); // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -138,8 +138,6 @@ export default function Step3Edit() {
     return () => ro.disconnect();
   }, []);
 
-  // No auto-convert anymore — we make the baked-in text directly draggable below.
-
   // ── Draggable text handle for the slide's main text block ──
   const textDragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
 
