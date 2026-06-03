@@ -103,7 +103,9 @@ export default function Step3Edit() {
   const [showPrompt, setShowPrompt] = useState(false);
   // Responsive canvas — matches Step2 pattern
   const [canvasW, setCanvasW] = useState(PREVIEW_W);
-  const canvasH = Math.round(canvasW * (450 / 360)); // maintain 4:5 ratio
+  // Slide is 1080×1350 (4:5 portrait). Preview height = width × (1350/1080) = width × (5/4).
+  // Using integer ratio 5/4 avoids floating-point drift from 450/360.
+  const canvasH = Math.round(canvasW * 5 / 4);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   // Clamp currentIdx when slides array shrinks (e.g. after slide removal)
@@ -350,6 +352,7 @@ export default function Step3Edit() {
                 style={{
                   position: 'absolute',
                   left: `${Math.round(52 * PW / 1080) + Math.round((slide?.textOffsetX || 0) * PW / 1080)}px`,
+                  // ~0.49 approximates the vertical center of the text block (content div uses justify-center minus footer).
                   top: `${Math.round(PH * 0.49) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
                   width: '72px',
                   height: '20px',

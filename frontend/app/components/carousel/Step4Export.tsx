@@ -92,9 +92,10 @@ export default function Step4Export() {
       document.fonts.load('italic 800 36px "Plus Jakarta Sans"'),
       document.fonts.load('italic 700 44px "Plus Jakarta Sans"'),
       document.fonts.load('italic 400 24px "Plus Jakarta Sans"'),
-      // Code block font (18px per updated SlideRenderer)
-      document.fonts.load('400 18px "JetBrains Mono"'),
-      document.fonts.load('500 18px "JetBrains Mono"'),
+      // Code block content (20px) and line numbers (15px) per SlideRenderer
+      document.fonts.load('400 20px "JetBrains Mono"'),
+      document.fonts.load('500 20px "JetBrains Mono"'),
+      document.fonts.load('400 15px "JetBrains Mono"'),
       // Text overlay fonts (all weights used by the overlay font size range)
       document.fonts.load('400 40px "Caveat"'),
       document.fonts.load('700 40px "Caveat"'),
@@ -147,9 +148,9 @@ export default function Step4Export() {
   }), [slides, keyword, ctaLayout, coverPosition]);
 
   const downloadSlide = useCallback(async (i: number) => {
-    await ensureDataUrls();
     setDownloading(i);
     setExportError(null);
+    await ensureDataUrls();
     // Wait for the portal-rendered export ref to be populated (up to 2s)
     let el = exportRefs.current[i];
     if (!el) {
@@ -182,9 +183,9 @@ export default function Step4Export() {
   }, [ensureDataUrls]);
 
   const downloadZip = useCallback(async () => {
-    await ensureDataUrls();
     setDownloading('zip');
     setExportError(null);
+    await ensureDataUrls();
     try {
       await preloadFonts();
       await new Promise(r => setTimeout(r, 300));
