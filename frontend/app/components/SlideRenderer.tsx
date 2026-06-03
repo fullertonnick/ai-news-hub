@@ -543,8 +543,11 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
             }}>
               {renderWithAccent(headline, slide.accent_word)}
             </p>
-            {/* Orange divider — Tyler Germain signature (skip for big_quote which has its own) */}
-            {!isBigQuote && (
+            {/* Orange divider — Tyler Germain signature.
+                Skip only when big_quote AND visualHasData (visual block renders its own accent line).
+                When big_quote has no supporting text, visualHasData=false and body/kicker render —
+                so we still need the divider to separate headline from body copy. */}
+            {(!isBigQuote || !visualHasData) && (
               <div style={{
                 width: `${80 * sc}px`, height: `${4 * sc}px`,
                 background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`,
@@ -731,7 +734,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                       <div style={{ marginLeft: 'auto', background: Brand.colors.bg_surface, borderRadius: `${8 * sc}px`, padding: `${5 * sc}px ${12 * sc}px`, fontSize: `${13 * sc}px`, color: Brand.colors.text_muted, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>{v.category}</div>
                     </div>
                   </div>
-                  {v.description && <p style={{ fontSize: `${17 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5, margin: 0, textAlign: 'center' }}>{v.description}</p>}
+                  {v.description && <p style={{ fontSize: `${19 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5, margin: 0, textAlign: 'center' }}>{v.description}</p>}
                 </div>
               );
             })()}
@@ -767,7 +770,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                         {items.map((item, i) => (
                           <div key={i} style={{ display: 'flex', gap: `${10 * sc}px`, alignItems: 'flex-start', backgroundColor: itemBg[side], borderRadius: `${8 * sc}px`, padding: `${10 * sc}px ${12 * sc}px`, border: `1px solid ${itemBorder[side]}` }}>
                             <span style={{ color: markColor[side], fontSize: `${14 * sc}px`, flexShrink: 0, marginTop: `${2 * sc}px`, fontWeight: 800 }}>{side === 'before' ? '✕' : '✓'}</span>
-                            <span style={{ fontSize: `${17 * sc}px`, color: side === 'before' ? Brand.colors.text_muted : Brand.colors.text_primary, lineHeight: 1.4 }}>{item}</span>
+                            <span style={{ fontSize: `${19 * sc}px`, color: side === 'before' ? Brand.colors.text_muted : Brand.colors.text_primary, lineHeight: 1.4 }}>{item}</span>
                           </div>
                         ))}
                       </div>
