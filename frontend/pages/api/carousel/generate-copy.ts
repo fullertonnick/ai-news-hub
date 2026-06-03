@@ -252,8 +252,9 @@ ${styleHint(style)}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 STRUCTURE — pick ONE that best fits this specific topic:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-ABSOLUTELY BANNED: "Level 1, Level 2..." — never use this.
-AVOID DEFAULTING TO: "The Problem / The Fix" — only use if the topic is a direct pain/solution story.
+HARD BAN: "Level 1, Level 2, Level 3..." — this is never allowed under any circumstances.
+HARD BAN: "Beginner / Intermediate / Advanced" — same reason, never use.
+AVOID: "The Problem / The Fix" — only use when the topic IS literally a pain/solution story.
 
 Choose the structure where each slide writes itself:
 • Steps → "Step 1…Step N": setup guides, how-to tutorials, sequential processes

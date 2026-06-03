@@ -51,7 +51,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (/workflow|automat|trigger|webhook|module|connect|scenario/.test(slideWords)) conceptHints.push('dark server room with warm amber floor LEDs, blurred hardware racks, cinematic corridor perspective, professional and moody');
   // AI / agents
   if (/agent|ai model|claude|gemini|openai|anthropic|llm/.test(slideWords)) conceptHints.push('dark workspace with softly glowing monitor showing abstract code nodes, warm amber rim lighting, bokeh background, cinematic developer environment');
-  // Memory / context / sessions
+  // Memory system / knowledge base / long-term storage
+  if (/memory system|knowledge base|long.term|short.term|vector|embed|recall|retrieval/.test(slideWords)) conceptHints.push('dark minimal desk with glowing amber monitor showing layered document stack or nested file tree, deep shadows, cinematic, shallow depth of field');
+  // Memory / context / sessions (general)
   if (/memory|context|forget|remember|session|persist/.test(slideWords)) conceptHints.push('dark desk with glowing monitor showing blurred text document, single warm amber desk lamp, deep shadows, soft bokeh, cinematic');
   // Tokens / limits
   if (/token|limit|exceed|capacity/.test(slideWords)) conceptHints.push('dark minimal background with single amber gauge glow, deep shadows, cinematic bokeh, precise and minimal');

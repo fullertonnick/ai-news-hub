@@ -51,7 +51,6 @@ interface CarouselStore {
 
   // Loading
   copyLoading: boolean;
-  bgLoading: Record<string, boolean>;
 
   // Cover controls
   coverPosition: 'top' | 'middle' | 'bottom';
@@ -82,7 +81,6 @@ interface CarouselStore {
   setSlideBackground: (id: string, dataUrl: string) => void;
   setSlideBackgroundPrompt: (id: string, prompt: string) => void;
   setSlideBackgroundStatus: (id: string, status: BgStatus) => void;
-  setBgLoading: (id: string, loading: boolean) => void;
 
   // Actions — caption/keyword
   setCaption: (c: string) => void;
@@ -111,7 +109,7 @@ interface CarouselStore {
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
-const INITIAL: Pick<CarouselStore, 'currentStep' | 'approvals' | 'topic' | 'category' | 'style' | 'slides' | 'caption' | 'keyword' | 'copyLoading' | 'bgLoading' | 'coverPosition' | 'ctaLayout'> = {
+const INITIAL: Pick<CarouselStore, 'currentStep' | 'approvals' | 'topic' | 'category' | 'style' | 'slides' | 'caption' | 'keyword' | 'copyLoading' | 'coverPosition' | 'ctaLayout'> = {
   currentStep: 1,
   approvals: { copy: false, visuals: false, edit: false },
   topic: '',
@@ -121,7 +119,6 @@ const INITIAL: Pick<CarouselStore, 'currentStep' | 'approvals' | 'topic' | 'cate
   caption: '',
   keyword: '',
   copyLoading: false,
-  bgLoading: {},
   coverPosition: 'bottom',
   ctaLayout: 'photo',
 };
@@ -144,7 +141,6 @@ export const useCarouselStore = create<CarouselStore>()(
       setSlides: (slides) => set({
         slides,
         approvals: { copy: false, visuals: false, edit: false },
-        bgLoading: {},
       }),
 
       updateSlideText: (id, text) => set(s => {
@@ -207,8 +203,6 @@ export const useCarouselStore = create<CarouselStore>()(
         slides: s.slides.map(sl => sl.id === id ? { ...sl, backgroundStatus: status } : sl),
       })),
 
-      setBgLoading: (id, loading) => set(s => ({ bgLoading: { ...s.bgLoading, [id]: loading } })),
-
       // ── Caption/keyword ───────────────────────────────────────────────────
       setCaption: (caption) => set({ caption }),
       setKeyword: (keyword) => set({ keyword }),
@@ -268,7 +262,7 @@ export const useCarouselStore = create<CarouselStore>()(
     }),
     {
       name: 'simpliscale-carousel-pipeline',
-      version: 12,
+      version: 13,
       migrate: (persisted: any, fromVersion: number) => {
         if (fromVersion < 12) {
           return {
@@ -277,6 +271,11 @@ export const useCarouselStore = create<CarouselStore>()(
             category: persisted?.category || '',
             style: persisted?.style || 'tech_breakdown',
           };
+        }
+        if (fromVersion === 12) {
+          // v13: removed bgLoading (was unused) — drop it from persisted state
+          const { bgLoading: _dropped, ...rest } = persisted || {};
+          return rest;
         }
         return persisted;
       },

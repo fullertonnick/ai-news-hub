@@ -8,34 +8,9 @@ import { toPng } from 'html-to-image';
 import { toDataUrl } from '../../lib/imageProxy';
 import type { CarouselSlide } from '../../types';
 
-export default function Step4Export() {
-  const store = useCarouselStore();
-  const { slides, keyword, ctaLayout, caption, coverPosition } = store;
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [downloading, setDownloading] = useState<number | 'zip' | null>(null);
-  const [exportError, setExportError] = useState<string | null>(null);
-  const [captionCopied, setCaptionCopied] = useState(false);
-  // Start at 0 so the preview is invisible until the ResizeObserver fires and computes
-  // the correct scale — prevents a jarring layout shift on first render.
-  const [previewScale, setPreviewScale] = useState(0);
-  const [proxyingImages, setProxyingImages] = useState(false);
-  const previewContainerRef = useRef<HTMLDivElement>(null);
-  const exportRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  useEffect(() => {
-    const el = previewContainerRef.current;
-    if (!el) return;
-    const update = () => {
-      const w = el.offsetWidth || 400;
-      setPreviewScale(Math.min(w / 540, 1));
-    };
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  async function preloadFonts() {
+// Font preloading — called before every PNG export so custom fonts render correctly.
+// Lives outside the component so it isn't recreated on each render.
+async function preloadFonts() {
     await document.fonts.ready;
     await Promise.allSettled([
       // Cover headline sizes (96→56 adaptive by word/char count)
@@ -110,8 +85,32 @@ export default function Step4Export() {
       document.fonts.load('italic 400 40px "Playfair Display"'),
       document.fonts.load('italic 700 40px "Playfair Display"'),
     ]);
-  }
+}
 
+export default function Step4Export() {
+  const store = useCarouselStore();
+  const { slides, keyword, ctaLayout, caption, coverPosition } = store;
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [downloading, setDownloading] = useState<number | 'zip' | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [captionCopied, setCaptionCopied] = useState(false);
+  const [previewScale, setPreviewScale] = useState(0);
+  const [proxyingImages, setProxyingImages] = useState(false);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const exportRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const el = previewContainerRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.offsetWidth || 400;
+      setPreviewScale(Math.min(w / 540, 1));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Safety net: proxy any non-data-URL backgrounds before first export
   const ensureDataUrls = useCallback(async () => {
