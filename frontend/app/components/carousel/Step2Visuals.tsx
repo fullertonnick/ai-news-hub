@@ -250,7 +250,10 @@ export default function Step2Visuals() {
               <button key={s.id} onClick={() => setCurrentIdx(i)}
                 className={`flex-shrink-0 w-12 rounded-lg border overflow-hidden transition-all ${i === currentIdx ? 'border-brand-orange ring-1 ring-brand-orange/30' : 'border-white/10 opacity-50 hover:opacity-100'}`}
                 style={{ aspectRatio: '4/5' }}>
-                {s.backgroundImage ? <img src={s.backgroundImage} alt="" className="w-full h-full object-cover" />
+                {s.backgroundImage
+                  ? <img src={s.backgroundImage} alt="" className="w-full h-full object-cover" />
+                  : generating[s.id]
+                  ? <div className="w-full h-full bg-[#111] flex items-center justify-center"><Loader2 size={10} className="animate-spin text-brand-orange/60" /></div>
                   : <div className="w-full h-full bg-[#111] flex items-center justify-center text-[9px] text-gray-600">{i + 1}</div>}
               </button>
             ))}

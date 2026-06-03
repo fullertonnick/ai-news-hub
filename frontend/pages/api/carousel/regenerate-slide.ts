@@ -38,7 +38,7 @@ Current text: "${currentText}"
 - Pass the Bullshit Test: specific numbers, novel insight, every sentence earns its place
 - 2–4 sentences max. End with a kicker. Last line should land hard.
 - Second person, present tense. Fragments OK.
-- FORBIDDEN: leverage, synergy, seamless, empower, unlock, revolutionize, supercharge, utilize, paradigm
+- FORBIDDEN: leverage, utilize, synergy, game-changer, seamless, empower, unlock, revolutionize, supercharge, innovative, paradigm, delve, streamline, robust, harness, actionable, skyrocket, next-level, disruptive, cutting-edge
 - Concrete: "Claude reads your repo in 15s" NOT "AI understands your codebase"
 
 ━━━ ACCENT WORD ━━━

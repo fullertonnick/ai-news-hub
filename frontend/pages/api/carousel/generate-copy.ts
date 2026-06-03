@@ -212,8 +212,9 @@ WRITING STYLE — Tyler Germain
 - Second person, present tense. Talk to one smart friend.
 - Many sentences under 6 words. Fragments for punch.
 - Last sentence of each slide = the kicker. Make it land hard.
-- FORBIDDEN WORDS: leverage, synergy, game-changer, seamless, empower,
-  unlock, revolutionize, supercharge, innovative, utilize, paradigm.
+- FORBIDDEN WORDS: leverage, utilize, synergy, game-changer, seamless, empower,
+  unlock, revolutionize, supercharge, innovative, paradigm, delve, streamline,
+  robust, harness, actionable, skyrocket, next-level, disruptive, cutting-edge.
 - Concrete: "Claude reads your repo in 15s" NOT "AI understands your codebase"
 - Numbers beat adjectives: "saves 3 hours" beats "saves significant time"
 - Name the actual thing: "CLAUDE.md" beats "a config file", "$200/month" beats "affordable"
