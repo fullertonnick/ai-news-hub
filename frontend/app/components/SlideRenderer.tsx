@@ -560,14 +560,15 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 marginBottom: `${(!visualHasData && bodyParas.length > 0) ? 30 * sc : 22 * sc}px`,
               }} />
             )}
-            {/* Body — 24px regular, only for text-only slides (no visual block) */}
+            {/* Body — 24px regular, only for text-only slides (no visual block).
+                whiteSpace pre-line preserves \n line breaks in arrow lists. */}
             {!visualHasData && bodyParas.map((p, i) => (
               <p key={i} style={{
                 margin: 0, marginBottom: `${16 * sc}px`,
                 fontSize: `${24 * sc}px`, fontWeight: 400,
                 fontFamily: Brand.typography.font_family,
                 color: Brand.colors.text_primary, lineHeight: 1.65,
-                letterSpacing: '-0.01em',
+                letterSpacing: '-0.01em', whiteSpace: 'pre-line' as const,
               }}>
                 {renderWithAccent(p, slide.accent_word)}
               </p>
