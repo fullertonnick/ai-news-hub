@@ -16,8 +16,10 @@ export const Brand = {
   },
 
   typography: {
-    font_family: '"Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif',
-    mono_font: '"JetBrains Mono", "Courier New", monospace',
+    // Use CSS variables so inline styles resolve to Next.js self-hosted woff2 files
+    // (the @font-face uses internal names like __Plus_Jakarta_Sans_3c98db, not the original name).
+    font_family: 'var(--font-plus-jakarta-sans), var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif',
+    mono_font: 'var(--font-jetbrains-mono), "Courier New", monospace',
     weights: {
       heading: 800,    // ExtraBold — all H1 slide headlines
       subheading: 700, // Bold — section labels, sub-titles

@@ -10,86 +10,96 @@ import type { CarouselSlide } from '../../types';
 
 // Font preloading — called before every PNG export so custom fonts render correctly.
 // Lives outside the component so it isn't recreated on each render.
+//
+// Next.js self-hosts fonts under internal names (e.g. __Plus_Jakarta_Sans_3c98db)
+// not the original names. We read the CSS variables at runtime to get the actual
+// font-family string used in @font-face, then pass that to document.fonts.load().
 async function preloadFonts() {
     await document.fonts.ready;
+    const s = getComputedStyle(document.documentElement);
+    const pjs     = s.getPropertyValue('--font-plus-jakarta-sans').trim().split(',')[0].trim()    || '"Plus Jakarta Sans"';
+    const mono    = s.getPropertyValue('--font-jetbrains-mono').trim().split(',')[0].trim()       || '"JetBrains Mono"';
+    const caveat  = s.getPropertyValue('--font-caveat').trim().split(',')[0].trim()               || 'Caveat';
+    const archivo = s.getPropertyValue('--font-archivo-black').trim().split(',')[0].trim()        || '"Archivo Black"';
+    const interF  = s.getPropertyValue('--font-inter').trim().split(',')[0].trim()                || 'Inter';
+    const dmSans  = s.getPropertyValue('--font-dm-sans').trim().split(',')[0].trim()              || '"DM Sans"';
+    const playfair = s.getPropertyValue('--font-playfair-display').trim().split(',')[0].trim()    || '"Playfair Display"';
     await Promise.allSettled([
       // ── Plus Jakarta Sans 800 (ExtraBold) ──────────────────────────────────────
       // Cover headline: 56–96px adaptive; CTA text-only: 36–60px; content headline: 36–56px;
       // kicker: 28px; CTA keyword pill: 26–28px; badge/step circle: 20px; stats value: 64px
-      document.fonts.load('800 96px "Plus Jakarta Sans"'),
-      document.fonts.load('800 86px "Plus Jakarta Sans"'),
-      document.fonts.load('800 76px "Plus Jakarta Sans"'),
-      document.fonts.load('800 66px "Plus Jakarta Sans"'),
-      document.fonts.load('800 64px "Plus Jakarta Sans"'),
-      document.fonts.load('800 60px "Plus Jakarta Sans"'),
-      document.fonts.load('800 56px "Plus Jakarta Sans"'),
-      document.fonts.load('800 52px "Plus Jakarta Sans"'),
-      document.fonts.load('800 48px "Plus Jakarta Sans"'),
-      document.fonts.load('800 44px "Plus Jakarta Sans"'),
-      document.fonts.load('800 42px "Plus Jakarta Sans"'),
-      document.fonts.load('800 36px "Plus Jakarta Sans"'),
-      document.fonts.load('800 28px "Plus Jakarta Sans"'),
-      document.fonts.load('800 26px "Plus Jakarta Sans"'),
-      document.fonts.load('800 20px "Plus Jakarta Sans"'),
+      document.fonts.load(`800 96px ${pjs}`),
+      document.fonts.load(`800 86px ${pjs}`),
+      document.fonts.load(`800 76px ${pjs}`),
+      document.fonts.load(`800 66px ${pjs}`),
+      document.fonts.load(`800 64px ${pjs}`),
+      document.fonts.load(`800 60px ${pjs}`),
+      document.fonts.load(`800 56px ${pjs}`),
+      document.fonts.load(`800 52px ${pjs}`),
+      document.fonts.load(`800 48px ${pjs}`),
+      document.fonts.load(`800 44px ${pjs}`),
+      document.fonts.load(`800 42px ${pjs}`),
+      document.fonts.load(`800 36px ${pjs}`),
+      document.fonts.load(`800 28px ${pjs}`),
+      document.fonts.load(`800 26px ${pjs}`),
+      document.fonts.load(`800 20px ${pjs}`),
       // ── Plus Jakarta Sans 700 (Bold) ────────────────────────────────────────────
       // Steps title / skill name: 22px; comparison headers + diagram nodes: 18px;
-      // skill card bg label: 16px (but font-weight not always set → 700 not always used)
-      document.fonts.load('700 22px "Plus Jakarta Sans"'),
-      document.fonts.load('700 18px "Plus Jakarta Sans"'),
-      document.fonts.load('700 16px "Plus Jakarta Sans"'),
-      // Code instruction arrow (13px) and small UI labels
-      document.fonts.load('700 13px "Plus Jakarta Sans"'),
+      // skill card bg label: 16px; code instruction arrow: 13px
+      document.fonts.load(`700 22px ${pjs}`),
+      document.fonts.load(`700 18px ${pjs}`),
+      document.fonts.load(`700 16px ${pjs}`),
+      document.fonts.load(`700 13px ${pjs}`),
       // ── Plus Jakarta Sans 600 (SemiBold) ───────────────────────────────────────
       // Footer handle: 20px; slide count: 18px; section label: 16px; stats label: 17px;
       // CTA "Comment…" text: 24–26px; diagram title: 13px; skill category: 13px
-      document.fonts.load('600 26px "Plus Jakarta Sans"'),
-      document.fonts.load('600 24px "Plus Jakarta Sans"'),
-      document.fonts.load('600 20px "Plus Jakarta Sans"'),
-      document.fonts.load('600 18px "Plus Jakarta Sans"'),
-      document.fonts.load('600 17px "Plus Jakarta Sans"'),
-      document.fonts.load('600 16px "Plus Jakarta Sans"'),
-      document.fonts.load('600 13px "Plus Jakarta Sans"'),
+      document.fonts.load(`600 26px ${pjs}`),
+      document.fonts.load(`600 24px ${pjs}`),
+      document.fonts.load(`600 20px ${pjs}`),
+      document.fonts.load(`600 18px ${pjs}`),
+      document.fonts.load(`600 17px ${pjs}`),
+      document.fonts.load(`600 16px ${pjs}`),
+      document.fonts.load(`600 13px ${pjs}`),
       // ── Plus Jakarta Sans 500 (Medium) ─────────────────────────────────────────
       // Footer save CTA: 20px; cover subtitle: 24px; code instruction label: 13px
-      document.fonts.load('500 24px "Plus Jakarta Sans"'),
-      document.fonts.load('500 20px "Plus Jakarta Sans"'),
-      document.fonts.load('500 13px "Plus Jakarta Sans"'),
-      document.fonts.load('500 12px "Plus Jakarta Sans"'),
-      document.fonts.load('italic 500 13px "Plus Jakarta Sans"'),
+      document.fonts.load(`500 24px ${pjs}`),
+      document.fonts.load(`500 20px ${pjs}`),
+      document.fonts.load(`500 13px ${pjs}`),
+      document.fonts.load(`500 12px ${pjs}`),
+      document.fonts.load(`italic 500 13px ${pjs}`),
       // ── Plus Jakarta Sans 400 (Regular) ────────────────────────────────────────
-      // Body text: 24px; checklist: 22px (no weight set → inherit 400);
-      // steps desc: 20px; comparison items: 19px; skill desc: 19px;
-      // comparison/skill sub-text: 17–18px; skill source: 16px
-      document.fonts.load('400 24px "Plus Jakarta Sans"'),
-      document.fonts.load('400 22px "Plus Jakarta Sans"'),
-      document.fonts.load('400 20px "Plus Jakarta Sans"'),
-      document.fonts.load('400 19px "Plus Jakarta Sans"'),
-      document.fonts.load('400 18px "Plus Jakarta Sans"'),
-      document.fonts.load('400 17px "Plus Jakarta Sans"'),
-      document.fonts.load('400 16px "Plus Jakarta Sans"'),
+      // Body text: 24px; checklist items: 22px; steps desc: 20px;
+      // comparison items/skill desc: 19px; comparison sub-text: 17–18px; skill source: 16px
+      document.fonts.load(`400 24px ${pjs}`),
+      document.fonts.load(`400 22px ${pjs}`),
+      document.fonts.load(`400 20px ${pjs}`),
+      document.fonts.load(`400 19px ${pjs}`),
+      document.fonts.load(`400 18px ${pjs}`),
+      document.fonts.load(`400 17px ${pjs}`),
+      document.fonts.load(`400 16px ${pjs}`),
       // ── Italic variants (big_quote slides) ─────────────────────────────────────
-      document.fonts.load('italic 800 52px "Plus Jakarta Sans"'),
-      document.fonts.load('italic 800 44px "Plus Jakarta Sans"'),
-      document.fonts.load('italic 800 36px "Plus Jakarta Sans"'),
-      document.fonts.load('italic 700 44px "Plus Jakarta Sans"'),
-      document.fonts.load('italic 400 24px "Plus Jakarta Sans"'),
+      document.fonts.load(`italic 800 52px ${pjs}`),
+      document.fonts.load(`italic 800 44px ${pjs}`),
+      document.fonts.load(`italic 800 36px ${pjs}`),
+      document.fonts.load(`italic 700 44px ${pjs}`),
+      document.fonts.load(`italic 400 24px ${pjs}`),
       // ── JetBrains Mono (code blocks) ───────────────────────────────────────────
-      document.fonts.load('400 20px "JetBrains Mono"'),
-      document.fonts.load('500 20px "JetBrains Mono"'),
-      document.fonts.load('400 15px "JetBrains Mono"'),
+      document.fonts.load(`400 20px ${mono}`),
+      document.fonts.load(`500 20px ${mono}`),
+      document.fonts.load(`400 15px ${mono}`),
       // ── Text overlay fonts ──────────────────────────────────────────────────────
-      document.fonts.load('400 40px "Caveat"'),
-      document.fonts.load('700 40px "Caveat"'),
-      document.fonts.load('400 40px "Archivo Black"'),
-      document.fonts.load('400 40px "Inter"'),
-      document.fonts.load('600 40px "Inter"'),
-      document.fonts.load('700 40px "Inter"'),
-      document.fonts.load('400 40px "DM Sans"'),
-      document.fonts.load('700 40px "DM Sans"'),
-      document.fonts.load('400 40px "Playfair Display"'),
-      document.fonts.load('700 40px "Playfair Display"'),
-      document.fonts.load('italic 400 40px "Playfair Display"'),
-      document.fonts.load('italic 700 40px "Playfair Display"'),
+      document.fonts.load(`400 40px ${caveat}`),
+      document.fonts.load(`700 40px ${caveat}`),
+      document.fonts.load(`400 40px ${archivo}`),
+      document.fonts.load(`400 40px ${interF}`),
+      document.fonts.load(`600 40px ${interF}`),
+      document.fonts.load(`700 40px ${interF}`),
+      document.fonts.load(`400 40px ${dmSans}`),
+      document.fonts.load(`700 40px ${dmSans}`),
+      document.fonts.load(`400 40px ${playfair}`),
+      document.fonts.load(`700 40px ${playfair}`),
+      document.fonts.load(`italic 400 40px ${playfair}`),
+      document.fonts.load(`italic 700 40px ${playfair}`),
     ]);
 }
 

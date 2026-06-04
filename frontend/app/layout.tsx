@@ -94,7 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head />
       <body
         className="bg-[#1A1A1A] text-white antialiased"
-        style={{ fontFamily: '"Plus Jakarta Sans", Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}
+        style={{ fontFamily: 'var(--font-plus-jakarta-sans), var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif' }}
       >
         {children}
       </body>
