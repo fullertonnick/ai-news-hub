@@ -13,12 +13,17 @@ export default function StepIndicator() {
   const { currentStep, setStep, approvals, slides } = useCarouselStore();
   const hasSlides = slides.length > 0;
 
+  // Highest step that's been reached: step N is approved means N+1 was visited.
+  // Allow navigating to any step up to (highest approved + 1), or currentStep + 1.
+  const approvedCount = Object.values(approvals).filter(Boolean).length;
+  const maxReachable = Math.max(currentStep + 1, hasSlides ? approvedCount + 2 : 1) as number;
+
   return (
     <div className="flex items-center gap-1 px-4 py-3 border-b border-white/5 overflow-x-auto flex-shrink-0">
       {STEPS.map((s, i) => {
         const approved = s.approvalKey ? approvals[s.approvalKey as keyof typeof approvals] : false;
         const active = currentStep === s.num;
-        const reachable = s.num === 1 || (hasSlides && s.num <= currentStep + 1);
+        const reachable = s.num === 1 || (hasSlides && s.num <= maxReachable);
 
         return (
           <div key={s.num} className="flex items-center">
