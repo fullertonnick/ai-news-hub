@@ -29,52 +29,10 @@ export const Brand = {
     },
   },
 
-  canvas: {
-    width: 1080,
-    height: 1350,
-    format: '4:5 portrait',
-    safe_zone_padding: 60,  // px from edges
-    footer_height: 80,      // reserved bottom area
-  },
-
   brand: {
-    handle: '@thenickcornelius',
-    brand_name: 'SimpliScale',
     save_cta: '🔖 save for later',
   },
 
-  // Slide templates — used as visual.type in CarouselSlide
-  templates: {
-    COVER_PHOTO: 'cover_photo',
-    PROMPT_CODE: 'code_block',
-    SKILL_CARD: 'skill_card',
-    STEP: 'steps_list',
-    CTA: 'cta_slide',
-    STATS: 'stats_grid',
-    DIAGRAM: 'diagram',
-    TEXT_ONLY: 'none',
-  },
-
-  // Quality gate: forbidden words → replacements
-  forbidden_words: {
-    'leverage': 'use',
-    'utilize': 'use',
-    'synergy': 'teamwork',
-    'game-changer': 'breakthrough',
-    'revolutionary': 'new',
-    'paradigm': 'approach',
-    'disruptive': 'new',
-    'cutting-edge': 'modern',
-    'innovative': 'effective',
-  },
-
-  // Hashtag tiers for Instagram captions
-  hashtags: {
-    tier1_core: ['#claudecode', '#claudeai', '#aiautomation', '#aiforbusiness', '#aiagents', '#automation', '#anthropic', '#n8n'],
-    tier2_broad: ['#artificialintelligence', '#aitools', '#machinelearning', '#futureofwork', '#productivity', '#techtools'],
-    tier3_business: ['#businessowner', '#entrepreneurship', '#businessgrowth', '#scaleyourbusiness', '#simpliscale', '#thenickcornelius'],
-    tier4_topical: ['#chatgpt', '#openai', '#llm', '#makecreator', '#nocode', '#solopreneur', '#agencyowner'],
-  },
 } as const;
 
 export type BrandColors = typeof Brand.colors;
