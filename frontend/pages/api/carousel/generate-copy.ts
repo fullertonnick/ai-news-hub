@@ -289,6 +289,9 @@ SLIDE 1 (COVER):
     "How to use Claude Code\\n\\n(tips and tricks)" ← vague, no tension, no payoff
   visual_type: "cover_photo"
   section_label: null
+  accent_word: pick the TENSION phrase — the counter-intuitive claim, the surprising number, or the specific mechanism that makes the headline land. NOT the topic name itself.
+    GOOD cover accents: "never the model's fault", "fails in silence", "blank slate", "5-minute fix"
+    BAD cover accents: "Claude Code", "AI agents", "automation", "memory" (too generic — anyone could guess these)
 
 SLIDES 2 to N-1 (CONTENT):
   text: 2-4 punchy sentences. One key insight. Last line = the kicker.
@@ -416,7 +419,7 @@ Now write a completely original carousel about: "${topic}"`;
       signal: controller.signal,
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 1.0, maxOutputTokens: 4096 },
+        generationConfig: { temperature: 1.0, maxOutputTokens: 8192 },
         thinkingConfig: { thinkingBudget: 5000 },
       }),
     });
