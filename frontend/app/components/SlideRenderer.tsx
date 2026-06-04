@@ -273,8 +273,8 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
         />
       )}
 
-      {/* Dark overlay — strong for text readability */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)' }} />
+      {/* Dark overlay — let the photo breathe; bottom gradient handles text zone */}
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.40)' }} />
 
       {/* Bottom gradient — strong dark behind headline and footer */}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.10) 20%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.78) 62%, rgba(0,0,0,0.95) 80%, rgba(0,0,0,0.99) 100%)' }} />
@@ -385,6 +385,11 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
   }
 
   // ── Option B: Text-only (centered) ──
+  const ctaTextFontSize = slide.text.length <= 25 ? 60 * sc
+    : slide.text.length <= 42 ? 52 * sc
+    : slide.text.length <= 60 ? 44 * sc
+    : 36 * sc;
+
   return (
     <div style={{
       position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden', fontFamily: Brand.typography.font_family,
@@ -403,7 +408,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
       {/* Centered content */}
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${80 * sc}px ${70 * sc}px` }}>
 
-        <div style={{ fontSize: `${60 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.1, letterSpacing: '-0.03em', textAlign: 'center', marginBottom: `${36 * sc}px` }}>
+        <div style={{ fontSize: `${ctaTextFontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.1, letterSpacing: '-0.03em', textAlign: 'center', marginBottom: `${36 * sc}px` }}>
           {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
         </div>
 
@@ -567,9 +572,9 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 {renderWithAccent(p, slide.accent_word)}
               </p>
             ))}
-            {/* Kicker — mic-drop takeaway, 28px/800 punchy, visually separated */}
+            {/* Kicker — mic-drop takeaway, 28px/800 punchy; 32px gap keeps it connected to body */}
             {!visualHasData && kicker && (
-              <div style={{ marginTop: `${44 * sc}px` }}>
+              <div style={{ marginTop: `${32 * sc}px` }}>
                 <div style={{ width: `${72 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${14 * sc}px` }} />
                 <p style={{
                   margin: 0,

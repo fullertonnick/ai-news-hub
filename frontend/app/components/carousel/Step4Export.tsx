@@ -13,65 +13,71 @@ import type { CarouselSlide } from '../../types';
 async function preloadFonts() {
     await document.fonts.ready;
     await Promise.allSettled([
-      // Cover headline sizes (96→56 adaptive by word/char count)
+      // ── Plus Jakarta Sans 800 (ExtraBold) ──────────────────────────────────────
+      // Cover headline: 56–96px adaptive; CTA text-only: 36–60px; content headline: 36–56px;
+      // kicker: 28px; CTA keyword pill: 26–28px; badge/step circle: 20px; stats value: 64px
       document.fonts.load('800 96px "Plus Jakarta Sans"'),
       document.fonts.load('800 86px "Plus Jakarta Sans"'),
       document.fonts.load('800 76px "Plus Jakarta Sans"'),
       document.fonts.load('800 66px "Plus Jakarta Sans"'),
-      document.fonts.load('800 56px "Plus Jakarta Sans"'),
-      // CTA text-only headline (60px) and photo headline (36-56px)
+      document.fonts.load('800 64px "Plus Jakarta Sans"'),
       document.fonts.load('800 60px "Plus Jakarta Sans"'),
-      document.fonts.load('800 42px "Plus Jakarta Sans"'),
-      // Standard content headline sizes (52→36 adaptive)
+      document.fonts.load('800 56px "Plus Jakarta Sans"'),
       document.fonts.load('800 52px "Plus Jakarta Sans"'),
       document.fonts.load('800 48px "Plus Jakarta Sans"'),
       document.fonts.load('800 44px "Plus Jakarta Sans"'),
+      document.fonts.load('800 42px "Plus Jakarta Sans"'),
       document.fonts.load('800 36px "Plus Jakarta Sans"'),
-      // Kicker (28px 800) and CTA keyword pills (26-28px 800)
       document.fonts.load('800 28px "Plus Jakarta Sans"'),
       document.fonts.load('800 26px "Plus Jakarta Sans"'),
-      // Cover sticker badge text + steps circle numbers (20px 800)
       document.fonts.load('800 20px "Plus Jakarta Sans"'),
-      // Stats grid big value (64px 800)
-      document.fonts.load('800 64px "Plus Jakarta Sans"'),
-      // Steps list title / skill card name (22px 700)
+      // ── Plus Jakarta Sans 700 (Bold) ────────────────────────────────────────────
+      // Steps title / skill name: 22px; comparison headers + diagram nodes: 18px;
+      // skill card bg label: 16px (but font-weight not always set → 700 not always used)
       document.fonts.load('700 22px "Plus Jakarta Sans"'),
-      // Comparison column headers (18px 700)
       document.fonts.load('700 18px "Plus Jakarta Sans"'),
-      // Diagram node labels (16px 700)
       document.fonts.load('700 16px "Plus Jakarta Sans"'),
-      // Body text (24px per spec)
+      // Code instruction arrow (13px) and small UI labels
+      document.fonts.load('700 13px "Plus Jakarta Sans"'),
+      // ── Plus Jakarta Sans 600 (SemiBold) ───────────────────────────────────────
+      // Footer handle: 20px; slide count: 18px; section label: 16px; stats label: 17px;
+      // CTA "Comment…" text: 24–26px; diagram title: 13px; skill category: 13px
       document.fonts.load('600 26px "Plus Jakarta Sans"'),
       document.fonts.load('600 24px "Plus Jakarta Sans"'),
-      // Section label (16px 600)
-      document.fonts.load('600 16px "Plus Jakarta Sans"'),
-      // Stats grid label (17px 600)
-      document.fonts.load('600 17px "Plus Jakarta Sans"'),
-      // Footer handle / save CTA (20px 600/500), slide number (18px 600)
       document.fonts.load('600 20px "Plus Jakarta Sans"'),
       document.fonts.load('600 18px "Plus Jakarta Sans"'),
-      document.fonts.load('500 20px "Plus Jakarta Sans"'),
+      document.fonts.load('600 17px "Plus Jakarta Sans"'),
+      document.fonts.load('600 16px "Plus Jakarta Sans"'),
+      document.fonts.load('600 13px "Plus Jakarta Sans"'),
+      // ── Plus Jakarta Sans 500 (Medium) ─────────────────────────────────────────
+      // Footer save CTA: 20px; cover subtitle: 24px; code instruction label: 13px
       document.fonts.load('500 24px "Plus Jakarta Sans"'),
+      document.fonts.load('500 20px "Plus Jakarta Sans"'),
       document.fonts.load('500 13px "Plus Jakarta Sans"'),
       document.fonts.load('500 12px "Plus Jakarta Sans"'),
+      document.fonts.load('italic 500 13px "Plus Jakarta Sans"'),
+      // ── Plus Jakarta Sans 400 (Regular) ────────────────────────────────────────
+      // Body text: 24px; checklist: 22px (no weight set → inherit 400);
+      // steps desc: 20px; comparison items: 19px; skill desc: 19px;
+      // comparison/skill sub-text: 17–18px; skill source: 16px
       document.fonts.load('400 24px "Plus Jakarta Sans"'),
-      // Steps desc (20px), checklist (22px), skill/comparison items (17px), skill source (16px)
       document.fonts.load('400 22px "Plus Jakarta Sans"'),
       document.fonts.load('400 20px "Plus Jakarta Sans"'),
+      document.fonts.load('400 19px "Plus Jakarta Sans"'),
       document.fonts.load('400 18px "Plus Jakarta Sans"'),
       document.fonts.load('400 17px "Plus Jakarta Sans"'),
       document.fonts.load('400 16px "Plus Jakarta Sans"'),
-      // Italic variants (big_quote slides)
+      // ── Italic variants (big_quote slides) ─────────────────────────────────────
       document.fonts.load('italic 800 52px "Plus Jakarta Sans"'),
       document.fonts.load('italic 800 44px "Plus Jakarta Sans"'),
       document.fonts.load('italic 800 36px "Plus Jakarta Sans"'),
       document.fonts.load('italic 700 44px "Plus Jakarta Sans"'),
       document.fonts.load('italic 400 24px "Plus Jakarta Sans"'),
-      // Code block content (20px) and line numbers (15px) per SlideRenderer
+      // ── JetBrains Mono (code blocks) ───────────────────────────────────────────
       document.fonts.load('400 20px "JetBrains Mono"'),
       document.fonts.load('500 20px "JetBrains Mono"'),
       document.fonts.load('400 15px "JetBrains Mono"'),
-      // Text overlay fonts (all weights used by the overlay font size range)
+      // ── Text overlay fonts ──────────────────────────────────────────────────────
       document.fonts.load('400 40px "Caveat"'),
       document.fonts.load('700 40px "Caveat"'),
       document.fonts.load('400 40px "Archivo Black"'),
