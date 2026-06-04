@@ -35,7 +35,9 @@ async function preloadFonts() {
       document.fonts.load(`800 64px ${pjs}`),
       document.fonts.load(`800 60px ${pjs}`),
       document.fonts.load(`800 56px ${pjs}`),
+      document.fonts.load(`800 54px ${pjs}`),
       document.fonts.load(`800 52px ${pjs}`),
+      document.fonts.load(`800 50px ${pjs}`),
       document.fonts.load(`800 48px ${pjs}`),
       document.fonts.load(`800 44px ${pjs}`),
       document.fonts.load(`800 42px ${pjs}`),
@@ -77,11 +79,10 @@ async function preloadFonts() {
       document.fonts.load(`400 18px ${pjs}`),
       document.fonts.load(`400 17px ${pjs}`),
       document.fonts.load(`400 16px ${pjs}`),
-      // ── Italic variants (big_quote slides) ─────────────────────────────────────
-      document.fonts.load(`italic 800 52px ${pjs}`),
-      document.fonts.load(`italic 800 44px ${pjs}`),
-      document.fonts.load(`italic 800 36px ${pjs}`),
-      document.fonts.load(`italic 700 44px ${pjs}`),
+      // ── Italic variants (big_quote slides use 54/46/38px 800 italic) ───────────
+      document.fonts.load(`italic 800 54px ${pjs}`),
+      document.fonts.load(`italic 800 46px ${pjs}`),
+      document.fonts.load(`italic 800 38px ${pjs}`),
       document.fonts.load(`italic 400 24px ${pjs}`),
       // ── JetBrains Mono (code blocks) ───────────────────────────────────────────
       document.fonts.load(`400 20px ${mono}`),
