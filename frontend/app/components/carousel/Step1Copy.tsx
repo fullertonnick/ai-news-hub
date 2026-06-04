@@ -51,12 +51,13 @@ export default function Step1Copy() {
       const idx = slides.findIndex(s => s.id === slideId);
       const r = await fetch('/api/carousel/regenerate-slide', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic, slideIndex: idx, totalSlides: slides.length, currentText: slide.text, style, category: store.category }),
+        body: JSON.stringify({ topic, slideIndex: idx, totalSlides: slides.length, currentText: slide.text, currentLabel: slide.section_label || null, style, category: store.category }),
       });
       const d = await r.json();
       if (d.text) {
         store.updateSlideText(slideId, d.text);
         if (d.accent_word) store.updateSlideAccent(slideId, d.accent_word);
+        if (d.section_label !== undefined) store.updateSlideSectionLabel(slideId, d.section_label || '');
       } else {
         setRegenError(prev => ({ ...prev, [slideId]: d.error || 'No response — try again.' }));
       }

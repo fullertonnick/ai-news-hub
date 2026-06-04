@@ -6,7 +6,7 @@ export const config = { maxDuration: 60 };
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { topic, slideIndex, totalSlides, currentText, style, category } = req.body;
+  const { topic, slideIndex, totalSlides, currentText, currentLabel, style, category } = req.body;
   if (!topic) return res.status(400).json({ error: 'topic required' });
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -32,6 +32,7 @@ Topic: "${topic}"
 Category: ${category || 'general'}
 ${categoryHints[category] ? `${categoryHints[category]}\n` : ''}Style: ${style || 'tech_breakdown'}
 Slide position: ${position}
+Current label: "${currentLabel || 'none'}"
 Current text: "${currentText}"
 
 ━━━ REWRITE RULES ━━━
@@ -48,13 +49,19 @@ NEVER pick generic adjectives, filler words, or anything not in the text.
 ${isFirst ? `
 ━━━ COVER FORMAT ━━━
 Bold headline 5-8 words + optional subtitle after \\n\\n in parens: (specific payoff, one line)
-Example: "Claude Code forgets everything when you close the session\\n\\n(here's the 5-minute fix that makes it remember forever)"` : ''}${isLast ? `
+Example: "Claude Code forgets everything when you close the session\\n\\n(here's the 5-minute fix that makes it remember forever)"
+section_label: null (covers never have labels)` : ''}${isLast ? `
 ━━━ CTA FORMAT ━━━
 ONE compelling question that creates desire for the offer. Stop after the ?.
 Never write "Comment X and I'll send you Y" — the slide template renders that automatically.
-Make it feel like the punchline of the whole carousel.` : ''}
+Make it feel like the punchline of the whole carousel.
+section_label: null (CTAs never have labels)` : ''}${!isFirst && !isLast ? `
+━━━ SECTION LABEL ━━━
+Keep the same structural label as the current label ("${currentLabel || 'none'}") — just improve the content.
+If the current label is "none" or empty and the carousel uses a structure (Step N, Before, The Myth, etc.), add the appropriate label.
+section_label: the label text, or null if this slide genuinely has no structural position.` : ''}
 
-Return JSON only: {"text": "...", "accent_word": "..."}`;
+Return JSON only: {"text": "...", "accent_word": "...", "section_label": "...or null"}`;
 
 
   try {
@@ -82,9 +89,14 @@ Return JSON only: {"text": "...", "accent_word": "..."}`;
     // Strip markdown bold/italic that would show up literally in slide renders
     rawText = rawText.replace(/\*{1,2}(.*?)\*{1,2}/g, '$1').replace(/_{1,2}(.*?)_{1,2}/g, '$1').trim();
     const cleanText = stripForbidden(rawText);
+    const rawLabel: string | null | undefined = parsed.section_label;
+    const sectionLabel = (rawLabel && rawLabel !== 'null' && rawLabel !== 'none')
+      ? rawLabel.replace(/^level\s+\d+\s*[:.]?\s*/i, '').trim() || undefined
+      : undefined;
     return res.json({
       text: cleanText,
       accent_word: fixAccentWord(cleanText, parsed.accent_word),
+      section_label: sectionLabel ?? null,
     });
   } catch {
     return res.json({ text: null, accent_word: null, error: 'Generation failed — try again' });
