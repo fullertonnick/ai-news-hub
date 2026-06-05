@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { stripForbidden, fixAccentWord, extractGeminiText } from '@/lib/carousel-lib';
+import { stripForbidden, fixAccentWord, extractGeminiText, stripMarkdown } from '@/lib/carousel-lib';
 
 export const config = { maxDuration: 60 };
 
@@ -451,8 +451,7 @@ Now write a completely original carousel about: "${topic}"`;
       }
       // Strip "Level X:" prefix from slide text — AI sometimes ignores the ban despite instructions
       rawText = rawText.replace(/^Level\s+\d+\s*[:.\s—–]+/gim, '').trim();
-      // Strip markdown bold/italic that would show up literally in slide renders
-      rawText = rawText.replace(/\*{1,2}(.*?)\*{1,2}/g, '$1').replace(/_{1,2}(.*?)_{1,2}/g, '$1').trim();
+      rawText = stripMarkdown(rawText);
       const cleanText = stripForbidden(rawText);
       // Normalize section_label: null/"null"/"none" → undefined; strip "Level X" prefix
       const rawLabel: string | null | undefined = s.section_label;

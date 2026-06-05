@@ -78,3 +78,12 @@ export function extractGeminiText(d: any): string {
   const outputPart = parts.find((p: any) => !p.thought && p.text != null);
   return outputPart?.text ?? parts[0]?.text ?? '';
 }
+
+// Strip markdown bold/italic formatting that would render as literal asterisks/underscores
+// when displayed in slide text (Gemini sometimes emits **bold** despite plain-text instructions).
+export function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*{1,2}(.*?)\*{1,2}/g, '$1')
+    .replace(/_{1,2}(.*?)_{1,2}/g, '$1')
+    .trim();
+}
