@@ -367,7 +367,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
         {/* Left content column */}
         <div style={{ position: 'absolute', left: `${PH}px`, right: `${W * 0.52}px`, top: 0, bottom: `${80 * sc}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: `${22 * sc}px`, zIndex: 4 }}>
           <div style={{ fontSize: `${ctaPhotoFontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.1, letterSpacing: '-0.03em' }}>
-            {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
+            {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary }, { textShadow: '0 0 22px rgba(255,113,7,0.65)' })}
           </div>
           <div style={{ width: `${64 * sc}px`, height: `${4 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px' }} />
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
@@ -410,7 +410,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${80 * sc}px ${70 * sc}px` }}>
 
         <div style={{ fontSize: `${ctaTextFontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.1, letterSpacing: '-0.03em', textAlign: 'center', marginBottom: `${36 * sc}px` }}>
-          {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary })}
+          {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary }, { textShadow: '0 0 22px rgba(255,113,7,0.65)' })}
         </div>
 
         <div style={{ width: `${72 * sc}px`, height: `${4 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${40 * sc}px` }} />
@@ -666,7 +666,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               return (
                 <div>
                   {v.title && (
-                    <div style={{ textAlign: 'center', fontSize: `${13 * sc}px`, color: Brand.colors.text_muted, marginBottom: `${14 * sc}px`, textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontWeight: 600 }}>
+                    <div style={{ textAlign: 'center', fontSize: `${16 * sc}px`, color: Brand.colors.text_muted, marginBottom: `${16 * sc}px`, textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontWeight: 600 }}>
                       {v.title}
                     </div>
                   )}
@@ -716,7 +716,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                         flexShrink: 0, fontSize: `${20 * sc}px`, fontWeight: 800, color: 'white',
                       }}>{s.number}</div>
                       <div style={{ flex: 1, paddingTop: `${4 * sc}px` }}>
-                        <div style={{ fontSize: `${24 * sc}px`, fontWeight: 700, color: Brand.colors.text_primary, marginBottom: `${8 * sc}px`, lineHeight: 1.25 }}>{s.title}</div>
+                        <div style={{ fontSize: `${26 * sc}px`, fontWeight: 700, color: Brand.colors.text_primary, marginBottom: `${8 * sc}px`, lineHeight: 1.25 }}>{s.title}</div>
                         <div style={{ fontSize: `${22 * sc}px`, color: Brand.colors.text_muted, lineHeight: 1.5 }}>{s.desc}</div>
                       </div>
                     </div>
