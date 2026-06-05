@@ -128,14 +128,23 @@ const CATEGORY_FALLBACKS: Record<FallbackCategory, (topic: string, kw: string) =
   },
 };
 
-// Pick the most impactful word or phrase from the topic for the cover accent.
-// Priority: numbers/metrics → known tool names → longest meaningful word.
+// Pick the most impactful phrase from the topic for the cover accent.
+// Priority: numbers/metrics → concept after tool name → tool name → first strong noun.
 function coverAccentFromTopic(topic: string): string {
   const t = topic.trim();
   const numMatch = t.match(/\$[\d,]+[k]?|\b\d+(?:\.\d+)?[kx]?\b|\b\d+%/);
   if (numMatch) return numMatch[0];
-  const toolMatch = t.match(/\b(?:Claude(?:\s+Code)?|Make\.com|n8n|Zapier|OpenAI|Gemini|ChatGPT|CLAUDE\.md|Anthropic)\b/i);
-  if (toolMatch) return toolMatch[0];
+  // When topic is "Tool concept-words", prefer the concept part over the tool name.
+  // e.g. "Claude Code memory system" → "memory system" beats "Claude Code"
+  const toolRe = /\b(?:Claude(?:\s+Code)?|Make\.com|n8n|Zapier|OpenAI|Gemini|ChatGPT|CLAUDE\.md|Anthropic)\b/i;
+  const toolMatch = t.match(toolRe);
+  if (toolMatch) {
+    const afterTool = t.slice(t.toLowerCase().indexOf(toolMatch[0].toLowerCase()) + toolMatch[0].length).trim();
+    const stopWords = new Set(['the','a','an','how','to','of','in','for','with','and','or','your','my','why','what','when']);
+    const conceptWords = afterTool.split(/\s+/).filter(w => w.length >= 3 && !stopWords.has(w.toLowerCase()));
+    if (conceptWords.length >= 1) return conceptWords.slice(0, 2).join(' ').replace(/[.,!?;:]$/, '');
+    return toolMatch[0]; // fallback: just the tool name
+  }
   const stopWords = new Set(['the','a','an','how','to','of','in','for','with','and','or','your','my','why','what','when','its','that','this','these','those']);
   const words = t.split(/\s+/).filter(w => !stopWords.has(w.toLowerCase())).filter(w => w.length >= 4);
   return (words[0] || t.split(/\s+/)[0]).replace(/[.,!?;:]$/, '');
