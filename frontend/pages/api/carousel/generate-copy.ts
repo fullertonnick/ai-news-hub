@@ -169,7 +169,7 @@ Key concepts:
 - .claude/settings.json: project-level permission and hook config
 - /hooks: bash commands that run before/after specific tool calls (PreToolUse, PostToolUse, Stop)
 - Claude Code CLI: runs as "claude" command in terminal
-- Current models: claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5
+- Current models: claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5-20251001
 - Sessions start blank — CLAUDE.md is the ONLY persistence mechanism by default
 - Context window: ~200K tokens; compaction happens automatically when approaching limit
 - Tool use: Bash, Read, Edit, Write, Agent are the core tools Claude Code uses
@@ -419,8 +419,8 @@ Now write a completely original carousel about: "${topic}"`;
       signal: controller.signal,
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 1.0, maxOutputTokens: 8192 },
-        thinkingConfig: { thinkingBudget: 5000 },
+        generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
+        thinkingConfig: { thinkingBudget: 3000 },
       }),
     });
     const d = await r.json();
