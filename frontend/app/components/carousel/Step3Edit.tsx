@@ -446,7 +446,17 @@ export default function Step3Edit() {
               <div>
                 <label className="text-[9px] text-gray-500 block mb-0.5">Font</label>
                 <select value={selText.fontFamily || FONT_OPTIONS[0].family}
-                  onChange={e => store.updateTextOverlay(slide.id, selectedId!, { fontFamily: e.target.value })}
+                  onChange={e => {
+                    const family = e.target.value;
+                    store.updateTextOverlay(slide.id, selectedId!, { fontFamily: family });
+                    // Preload lazy-loaded fonts (preload:false in layout.tsx) so Konva can render them.
+                    // Resolves var() references to actual Next.js internal font names before loading.
+                    if (typeof document !== 'undefined' && family.includes('var(')) {
+                      const style = window.getComputedStyle(document.documentElement);
+                      const resolved = family.replace(/var\((--[\w-]+)\)/g, (_, n: string) => style.getPropertyValue(n).trim().split(',')[0].trim() || 'sans-serif');
+                      document.fonts.load(`700 40px ${resolved}`).catch(() => {});
+                    }
+                  }}
                   className="w-full bg-black border border-white/10 rounded px-2 py-1 text-[10px] text-gray-300 focus:outline-none focus:border-brand-orange/30">
                   {FONT_OPTIONS.map(f => (
                     <option key={f.label} value={f.family} style={{ fontFamily: f.family }}>{f.label}</option>
