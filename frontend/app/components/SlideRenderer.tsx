@@ -156,6 +156,7 @@ function RenderOverlays({ slide, W, H }: { slide: CarouselSlide; W: number; H: n
               textAlign: 'center',
               lineHeight: 1.3,
               wordBreak: 'break-word',
+              whiteSpace: 'pre-wrap',
               zIndex: t.zIndex ?? 10,
               pointerEvents: 'none',
               userSelect: 'none' as const,
