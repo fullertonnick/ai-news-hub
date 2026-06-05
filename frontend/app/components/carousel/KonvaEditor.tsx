@@ -4,6 +4,23 @@ import { Stage, Layer, Image as KImage, Text as KText, Transformer } from 'react
 import type { StickerOverlay } from '../../types';
 import type { TextOverlay } from '../../stores/useCarouselStore';
 
+// Resolve CSS var() references to their actual values so the Canvas API can use the font.
+// Next.js self-hosts fonts under internal names (e.g. __Plus_Jakarta_Sans_3c98db); the HTML
+// renderer resolves var() natively but the Canvas API does not understand CSS variables.
+function resolveForCanvas(fontFamily: string): string {
+  if (!fontFamily?.includes('var(')) return fontFamily;
+  if (typeof window === 'undefined') return fontFamily;
+  try {
+    const style = window.getComputedStyle(document.documentElement);
+    return fontFamily.replace(/var\((--[\w-]+)\)/g, (_, varName: string) => {
+      const val = style.getPropertyValue(varName).trim().split(',')[0].trim();
+      return val || 'sans-serif';
+    });
+  } catch {
+    return fontFamily;
+  }
+}
+
 // ─── Image loader hook ──────────────────────────────────────────────────────
 function useKonvaImage(src: string): HTMLImageElement | null {
   const [img, setImg] = useState<HTMLImageElement | null>(null);
@@ -89,7 +106,7 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
       fontSize={fs}
       lineHeight={1.3}
       fontStyle={overlay.fontWeight >= 700 ? 'bold' : 'normal'}
-      fontFamily={overlay.fontFamily || '"Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif'}
+      fontFamily={resolveForCanvas(overlay.fontFamily || '"Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif')}
       fill={overlay.color}
       width={pxW}
       align="center"
