@@ -189,8 +189,8 @@ export default function Step4Export() {
     }
     try {
       await preloadFonts();
-      // 500ms gives CSS backgrounds and custom fonts time to settle before capture
-      await new Promise(r => setTimeout(r, 500));
+      // 700ms gives CSS backgrounds and custom fonts time to settle before capture
+      await new Promise(r => setTimeout(r, 700));
       let png: string;
       try {
         png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
