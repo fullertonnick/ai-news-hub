@@ -141,7 +141,7 @@ export default function Step1Copy() {
               </div>
 
               {/* Editable text */}
-              <textarea value={slide.text} onChange={e => store.updateSlideText(slide.id, e.target.value)}
+              <textarea value={slide.text} onChange={e => { store.updateSlideText(slide.id, e.target.value); if (regenError[slide.id]) setRegenError(prev => ({ ...prev, [slide.id]: '' })); }}
                 className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-gray-200 leading-relaxed resize-none focus:outline-none focus:border-brand-orange/30"
                 rows={Math.max(3, (slide.text.match(/\n/g) || []).length + Math.ceil(slide.text.length / 80))} />
 

@@ -116,6 +116,13 @@ export default function Step4Export() {
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const exportRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Clamp currentIdx when slides shrink (e.g. user navigates back and regenerates with fewer slides).
+  // safeIdx is derived synchronously on every render so SlideRenderer never receives an undefined slide.
+  const safeIdx = slides.length > 0 ? Math.min(currentIdx, slides.length - 1) : 0;
+  useEffect(() => {
+    if (safeIdx !== currentIdx) setCurrentIdx(safeIdx);
+  }, [safeIdx, currentIdx]);
+
   useEffect(() => {
     const el = previewContainerRef.current;
     if (!el) return;
@@ -182,8 +189,8 @@ export default function Step4Export() {
     }
     try {
       await preloadFonts();
-      // 500ms gives CSS backgrounds and custom fonts time to settle before capture
-      await new Promise(r => setTimeout(r, 500));
+      // 900ms gives CSS backgrounds and custom fonts time to fully settle before capture
+      await new Promise(r => setTimeout(r, 900));
       let png: string;
       try {
         png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
@@ -205,7 +212,7 @@ export default function Step4Export() {
     await ensureDataUrls();
     try {
       await preloadFonts();
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 900));
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       let missingRefs = 0;
@@ -227,7 +234,7 @@ export default function Step4Export() {
           png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
         }
         zip.file(`slide-${String(i + 1).padStart(2, '0')}.png`, png.replace(/^data:image\/png;base64,/, ''), { base64: true });
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 400));
       }
       if (missingRefs > 0) {
         console.warn(`ZIP export: ${missingRefs} slide ref(s) were null and skipped. Refresh and retry if slides are missing.`);
@@ -294,9 +301,9 @@ export default function Step4Export() {
           <p className="text-xs text-gray-500 mt-0.5">{slides.length} slides ready. Download individually or as a ZIP package.</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => downloadSlide(currentIdx)} disabled={isBusy}
+          <button onClick={() => downloadSlide(safeIdx)} disabled={isBusy}
             className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors disabled:opacity-40">
-            {downloading === currentIdx || proxyingImages ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />} This Slide
+            {downloading === safeIdx || proxyingImages ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />} This Slide
           </button>
           <button onClick={downloadZip} disabled={isBusy}
             className="flex items-center gap-1.5 text-xs font-semibold text-white px-3 py-1.5 rounded-lg bg-brand-orange/20 border border-brand-orange/30 hover:bg-brand-orange/30 transition-colors disabled:opacity-40">
@@ -316,18 +323,18 @@ export default function Step4Export() {
 
       {/* Slide viewer */}
       <div className="flex items-center gap-4">
-        <button onClick={() => setCurrentIdx(i => Math.max(0, i - 1))} disabled={currentIdx === 0}
+        <button onClick={() => setCurrentIdx(i => Math.max(0, i - 1))} disabled={safeIdx === 0}
           className="p-2 rounded-xl hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronLeft size={20} /></button>
         <div className="flex-1 flex justify-center">
           <div ref={previewContainerRef} style={{ width: '100%', maxWidth: 400, aspectRatio: '4/5', position: 'relative' }}>
             <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 12, opacity: previewScale > 0 ? 1 : 0, transition: 'opacity 0.15s' }}>
               <div style={{ transform: `scale(${previewScale || 0.74})`, transformOrigin: 'top left', width: 540, height: 675 }}>
-                <SlideRenderer slide={renderSlides[currentIdx]} slideNumber={currentIdx + 1} totalSlides={slides.length} />
+                {renderSlides[safeIdx] && <SlideRenderer slide={renderSlides[safeIdx]} slideNumber={safeIdx + 1} totalSlides={slides.length} />}
               </div>
             </div>
           </div>
         </div>
-        <button onClick={() => setCurrentIdx(i => Math.min(slides.length - 1, i + 1))} disabled={currentIdx === slides.length - 1}
+        <button onClick={() => setCurrentIdx(i => Math.min(slides.length - 1, i + 1))} disabled={safeIdx === slides.length - 1}
           className="p-2 rounded-xl hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronRight size={20} /></button>
       </div>
 
@@ -335,13 +342,13 @@ export default function Step4Export() {
       <div className="flex gap-1.5 overflow-x-auto pb-1 justify-center">
         {slides.map((s, i) => (
           <button key={s.id} onClick={() => setCurrentIdx(i)}
-            className={`relative flex-shrink-0 w-12 rounded-lg border overflow-hidden transition-all ${i === currentIdx ? 'border-brand-orange ring-1 ring-brand-orange/30' : 'border-white/10 opacity-60 hover:opacity-100'}`}
+            className={`relative flex-shrink-0 w-12 rounded-lg border overflow-hidden transition-all ${i === safeIdx ? 'border-brand-orange ring-1 ring-brand-orange/30' : 'border-white/10 opacity-60 hover:opacity-100'}`}
             style={{ aspectRatio: '4/5' }}
             title={`Slide ${i + 1}`}>
             {s.backgroundImage
               ? <img src={s.backgroundImage} alt="" className="w-full h-full object-cover" />
               : <div className="w-full h-full bg-[#111] flex items-center justify-center text-[9px] text-gray-600">{i + 1}</div>}
-            {i === currentIdx && (
+            {i === safeIdx && (
               <div className="absolute inset-0 bg-brand-orange/10 flex items-end justify-center pb-0.5">
                 <div className="text-[7px] font-bold text-brand-orange">{i + 1}</div>
               </div>

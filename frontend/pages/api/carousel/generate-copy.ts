@@ -128,14 +128,23 @@ const CATEGORY_FALLBACKS: Record<FallbackCategory, (topic: string, kw: string) =
   },
 };
 
-// Pick the most impactful word or phrase from the topic for the cover accent.
-// Priority: numbers/metrics → known tool names → longest meaningful word.
+// Pick the most impactful phrase from the topic for the cover accent.
+// Priority: numbers/metrics → concept after tool name → tool name → first strong noun.
 function coverAccentFromTopic(topic: string): string {
   const t = topic.trim();
   const numMatch = t.match(/\$[\d,]+[k]?|\b\d+(?:\.\d+)?[kx]?\b|\b\d+%/);
   if (numMatch) return numMatch[0];
-  const toolMatch = t.match(/\b(?:Claude(?:\s+Code)?|Make\.com|n8n|Zapier|OpenAI|Gemini|ChatGPT|CLAUDE\.md|Anthropic)\b/i);
-  if (toolMatch) return toolMatch[0];
+  // When topic is "Tool concept-words", prefer the concept part over the tool name.
+  // e.g. "Claude Code memory system" → "memory system" beats "Claude Code"
+  const toolRe = /\b(?:Claude(?:\s+Code)?|Make\.com|n8n|Zapier|OpenAI|Gemini|ChatGPT|CLAUDE\.md|Anthropic)\b/i;
+  const toolMatch = t.match(toolRe);
+  if (toolMatch) {
+    const afterTool = t.slice(t.toLowerCase().indexOf(toolMatch[0].toLowerCase()) + toolMatch[0].length).trim();
+    const stopWords = new Set(['the','a','an','how','to','of','in','for','with','and','or','your','my','why','what','when']);
+    const conceptWords = afterTool.split(/\s+/).filter(w => w.length >= 3 && !stopWords.has(w.toLowerCase()));
+    if (conceptWords.length >= 1) return conceptWords.slice(0, 2).join(' ').replace(/[.,!?;:]$/, '');
+    return toolMatch[0]; // fallback: just the tool name
+  }
   const stopWords = new Set(['the','a','an','how','to','of','in','for','with','and','or','your','my','why','what','when','its','that','this','these','those']);
   const words = t.split(/\s+/).filter(w => !stopWords.has(w.toLowerCase())).filter(w => w.length >= 4);
   return (words[0] || t.split(/\s+/)[0]).replace(/[.,!?;:]$/, '');
@@ -169,7 +178,7 @@ Key concepts:
 - .claude/settings.json: project-level permission and hook config
 - /hooks: bash commands that run before/after specific tool calls (PreToolUse, PostToolUse, Stop)
 - Claude Code CLI: runs as "claude" command in terminal
-- Current models: claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5
+- Current models: claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5-20251001
 - Sessions start blank — CLAUDE.md is the ONLY persistence mechanism by default
 - Context window: ~200K tokens; compaction happens automatically when approaching limit
 - Tool use: Bash, Read, Edit, Write, Agent are the core tools Claude Code uses
@@ -419,8 +428,8 @@ Now write a completely original carousel about: "${topic}"`;
       signal: controller.signal,
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 1.0, maxOutputTokens: 8192 },
-        thinkingConfig: { thinkingBudget: 5000 },
+        generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
+        thinkingConfig: { thinkingBudget: 3000 },
       }),
     });
     const d = await r.json();
@@ -442,8 +451,7 @@ Now write a completely original carousel about: "${topic}"`;
       }
       // Strip "Level X:" prefix from slide text — AI sometimes ignores the ban despite instructions
       rawText = rawText.replace(/^Level\s+\d+\s*[:.\s—–]+/gim, '').trim();
-      // Strip markdown bold/italic that would show up literally in slide renders
-      rawText = rawText.replace(/\*{1,2}(.*?)\*{1,2}/g, '$1').replace(/_{1,2}(.*?)_{1,2}/g, '$1').trim();
+      rawText = stripMarkdown(rawText);
       const cleanText = stripForbidden(rawText);
       // Normalize section_label: null/"null"/"none" → undefined; strip "Level X" prefix
       const rawLabel: string | null | undefined = s.section_label;

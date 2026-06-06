@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { stripForbidden, fixAccentWord, extractGeminiText } from '@/lib/carousel-lib';
+import { stripForbidden, fixAccentWord, extractGeminiText, stripMarkdown } from '@/lib/carousel-lib';
 
 export const config = { maxDuration: 60 };
 
@@ -86,8 +86,7 @@ Return JSON only: {"text": "...", "accent_word": "...", "section_label": "...or 
       rawText = rawText.replace(/\s*\n*Comment\s+\w+\s+and\s+I['']ll\s+send[\s\S]*/i, '').trim();
       rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
     }
-    // Strip markdown bold/italic that would show up literally in slide renders
-    rawText = rawText.replace(/\*{1,2}(.*?)\*{1,2}/g, '$1').replace(/_{1,2}(.*?)_{1,2}/g, '$1').trim();
+    rawText = stripMarkdown(rawText);
     const cleanText = stripForbidden(rawText);
     const rawLabel: string | null | undefined = parsed.section_label;
     const sectionLabel = (rawLabel && rawLabel !== 'null' && rawLabel !== 'none')

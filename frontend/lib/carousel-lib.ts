@@ -43,14 +43,24 @@ export function fixAccentWord(text: string, accentWord: string | undefined): str
     if (dollar) return dollar[0].trim();
     const num = zone.match(/\b\d+(?:\.\d+)?(?:\+)?\s*(?:x\b|%|hrs?|hours?|min(?:utes?)?|sec(?:onds?)?|days?|weeks?|months?|[kKmM]\b)/i);
     if (num) return num[0].trim();
+    // Tool/file names in kicker get priority over generic words
+    const kickerTool = zone.match(/\b[A-Za-z][A-Za-z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/i);
+    if (kickerTool) return kickerTool[0];
+    const kickerCmd = zone.match(/\/[a-z][a-z_-]{2,}/);
+    if (kickerCmd) return kickerCmd[0];
+    // Arrow sequences (perceive → decide → act)
+    const kickerArrow = zone.match(/\w[\w\s]{2,20}(?:\s*→\s*\w[\w\s]{2,15}){1,}/);
+    if (kickerArrow) return kickerArrow[0].trim().slice(0, 35);
   }
-  // File/tool names (case-sensitive match for ALL-CAPS names like CLAUDE.md)
-  const toolMatch = text.match(/\b[A-Za-z][A-Za-z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/i);
+  // Named tools/products before generic word fallback
+  const toolMatch = text.match(/\b(?:Make\.com|Claude Code|n8n|Zapier|Notion|Airtable|HubSpot|Slack|Gemini|OpenAI|LangGraph|CrewAI|AutoGen)\b/i);
   if (toolMatch) return toolMatch[0];
+  const fileMatch = text.match(/\b[A-Za-z][A-Za-z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/i);
+  if (fileMatch) return fileMatch[0];
   const cmdMatch = text.match(/\/[a-z][a-z_-]{2,}/);
   if (cmdMatch) return cmdMatch[0];
-  const arrowMatch = text.match(/\w[\w\s]{2,20}(?:\s*→\s*\w[\w\s]{2,15}){2,}/);
-  if (arrowMatch) return arrowMatch[0].trim().slice(0, 30);
+  const arrowMatch = text.match(/\w[\w\s]{2,20}(?:\s*→\s*\w[\w\s]{2,15}){1,}/);
+  if (arrowMatch) return arrowMatch[0].trim().slice(0, 35);
   const stop = new Set(['their', 'there', 'where', 'every', 'which', 'about', 'after', 'before', 'while', 'doing', 'using', 'start', 'build', 'when', 'from', 'that', 'with', 'your', 'have', 'more', 'this', 'just', 'most', 'also', 'than', 'then', 'what', 'into', 'over', 'them', 'they', 'some', 'never', 'always', 'still', 'right', 'first', 'second']);
   const words = text.split(/\s+/).filter(w => {
     const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
@@ -69,6 +79,8 @@ export function extractGeminiText(d: any): string {
   return outputPart?.text ?? parts[0]?.text ?? '';
 }
 
+// Strip markdown bold/italic formatting that would render as literal asterisks/underscores
+// when displayed in slide text (Gemini sometimes emits **bold** despite plain-text instructions).
 export function stripMarkdown(text: string): string {
   return text
     .replace(/\*{1,2}(.*?)\*{1,2}/g, '$1')
