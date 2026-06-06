@@ -212,7 +212,7 @@ export default function Step4Export() {
     await ensureDataUrls();
     try {
       await preloadFonts();
-      await new Promise(r => setTimeout(r, 300));
+      await new Promise(r => setTimeout(r, 700));
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       let missingRefs = 0;
