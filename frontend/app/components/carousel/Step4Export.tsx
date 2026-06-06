@@ -189,8 +189,8 @@ export default function Step4Export() {
     }
     try {
       await preloadFonts();
-      // 700ms gives CSS backgrounds and custom fonts time to settle before capture
-      await new Promise(r => setTimeout(r, 700));
+      // 900ms gives CSS backgrounds and custom fonts time to fully settle before capture
+      await new Promise(r => setTimeout(r, 900));
       let png: string;
       try {
         png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
@@ -212,7 +212,7 @@ export default function Step4Export() {
     await ensureDataUrls();
     try {
       await preloadFonts();
-      await new Promise(r => setTimeout(r, 700));
+      await new Promise(r => setTimeout(r, 900));
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       let missingRefs = 0;
@@ -234,7 +234,7 @@ export default function Step4Export() {
           png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
         }
         zip.file(`slide-${String(i + 1).padStart(2, '0')}.png`, png.replace(/^data:image\/png;base64,/, ''), { base64: true });
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(r => setTimeout(r, 400));
       }
       if (missingRefs > 0) {
         console.warn(`ZIP export: ${missingRefs} slide ref(s) were null and skipped. Refresh and retry if slides are missing.`);

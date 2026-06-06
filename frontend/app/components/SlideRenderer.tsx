@@ -74,13 +74,13 @@ function highlightCode(code: string, highlights: string[] = [], sc: number): Rea
 function SectionLabel({ label, sc }: { label: string; sc: number }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: `${8 * sc}px`, flexShrink: 0 }}>
-      <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.18)' }} />
+      <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.25)' }} />
       <span style={{
         color: Brand.colors.text_muted, fontSize: `${18 * sc}px`, fontWeight: 600,
         letterSpacing: '0.08em', textTransform: 'uppercase' as const, whiteSpace: 'nowrap' as const,
         fontFamily: Brand.typography.font_family,
       }}>{label}</span>
-      <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.18)' }} />
+      <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.25)' }} />
     </div>
   );
 }
@@ -274,16 +274,16 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
         />
       )}
 
-      {/* Dark overlay — let the photo breathe; bottom gradient handles text zone */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.40)' }} />
+      {/* Dark overlay — slightly heavier so text always pops over bright photos */}
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)' }} />
 
       {/* Bottom gradient — strong dark behind headline and footer */}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.10) 20%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.78) 62%, rgba(0,0,0,0.95) 80%, rgba(0,0,0,0.99) 100%)' }} />
 
-      {/* Top gradient — darkens badge area for all positions; heavier for top/middle where headline lives there */}
+      {/* Top gradient — darkens badge/headline area; heavier for top/middle positions */}
       <div style={{ position: 'absolute', inset: 0, background: headlinePos === 'top' || headlinePos === 'middle'
-        ? 'linear-gradient(to bottom, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.42) 24%, rgba(0,0,0,0.0) 48%)'
-        : 'linear-gradient(to bottom, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.18) 20%, rgba(0,0,0,0.0) 38%)'
+        ? 'linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.58) 28%, rgba(0,0,0,0.0) 52%)'
+        : 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.22) 22%, rgba(0,0,0,0.0) 40%)'
       }} />
 
       {/* Topic-relevant sticker badges — bold orange pills, clearly visible */}
@@ -294,8 +294,8 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
           backgroundColor: 'rgba(0,0,0,0.72)',
           border: `${2.5 * sc}px solid ${Brand.colors.accent_primary}`,
           borderRadius: `${14 * sc}px`,
-          padding: `${14 * sc}px ${30 * sc}px`,
-          fontSize: `${26 * sc}px`,
+          padding: `${16 * sc}px ${32 * sc}px`,
+          fontSize: `${28 * sc}px`,
           fontWeight: 800,
           color: Brand.colors.accent_primary,
           letterSpacing: '0.10em',
@@ -338,19 +338,17 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
 
 function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: CarouselSlide; W: number; H: number; sc: number; slideNumber?: number; totalSlides?: number }) {
   const v = slide.visual as CTASlideVisual;
-  const PH = 52 * sc;
+  const PH = 60 * sc;
 
   const hasImagen = !!slide.backgroundImage;
 
   // ── Option A: Photo variant — Nick on right, dark brand bg on left ──
-  // The right-side <img> uses slide.backgroundImage (set via Step2 photo shuffle), falling back
-  // to /nick.jpg. We keep the slide background as solid dark (#1A1A1A) to avoid double-Nick.
   if (v.layout_variant === 'photo') {
     const photoSrc = slide.backgroundImage || '/nick.jpg';
-    const ctaPhotoFontSize = slide.text.length <= 30 ? 56 * sc
-      : slide.text.length <= 50 ? 48 * sc
-      : slide.text.length <= 70 ? 42 * sc
-      : 36 * sc;
+    const ctaPhotoFontSize = slide.text.length <= 30 ? 58 * sc
+      : slide.text.length <= 50 ? 50 * sc
+      : slide.text.length <= 70 ? 44 * sc
+      : 38 * sc;
     return (
       <div style={{
         position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden', fontFamily: Brand.typography.font_family,
@@ -358,21 +356,21 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
       }}>
         {/* Nick's photo on right — uses the selected photo from Step2 shuffle */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={photoSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.60}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.72, zIndex: 1 }} />
-        {/* Gradient fade left — keeps text readable */}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 32%, rgba(26,26,26,0.88) 52%, rgba(26,26,26,0.40) 72%, rgba(26,26,26,0.08) 100%)`, zIndex: 2 }} />
-        {/* Subtle orange glow on left */}
-        <div style={{ position: 'absolute', left: 0, top: 0, width: '60%', height: '100%', background: 'radial-gradient(ellipse 80% 60% at 25% 50%, rgba(255,113,7,0.13) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 3 }} />
+        <img src={photoSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.62}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.78, zIndex: 1 }} />
+        {/* Gradient fade — solid dark on text side, fades to transparent toward photo */}
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 30%, rgba(26,26,26,0.92) 48%, rgba(26,26,26,0.45) 68%, rgba(26,26,26,0.08) 100%)`, zIndex: 2 }} />
+        {/* Brand orange glow on left */}
+        <div style={{ position: 'absolute', left: 0, top: 0, width: '65%', height: '100%', background: 'radial-gradient(ellipse 80% 60% at 20% 50%, rgba(255,113,7,0.15) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 3 }} />
 
         {/* Left content column */}
-        <div style={{ position: 'absolute', left: `${PH}px`, right: `${W * 0.52}px`, top: 0, bottom: `${80 * sc}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: `${22 * sc}px`, zIndex: 4 }}>
-          <div style={{ fontSize: `${ctaPhotoFontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.1, letterSpacing: '-0.03em' }}>
-            {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary }, { textShadow: '0 0 22px rgba(255,113,7,0.65)' })}
+        <div style={{ position: 'absolute', left: `${PH}px`, right: `${W * 0.50}px`, top: 0, bottom: `${80 * sc}px`, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: `${24 * sc}px`, zIndex: 4 }}>
+          <div style={{ fontSize: `${ctaPhotoFontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.08, letterSpacing: '-0.03em' }}>
+            {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary }, { textShadow: '0 0 24px rgba(255,113,7,0.70)' })}
           </div>
-          <div style={{ width: `${64 * sc}px`, height: `${4 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px' }} />
+          <div style={{ width: `${96 * sc}px`, height: `${4 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px' }} />
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
             <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>Comment</span>
-            {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, padding: `${7 * sc}px ${20 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${20 * sc}px rgba(255,113,7,0.55), 0 ${2 * sc}px ${8 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
+            {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, padding: `${8 * sc}px ${22 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${22 * sc}px rgba(255,113,7,0.60), 0 ${2 * sc}px ${8 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
             <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>I'll send it over 🔥</span>
           </div>
         </div>
@@ -386,10 +384,10 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
   }
 
   // ── Option B: Text-only (centered) ──
-  const ctaTextFontSize = slide.text.length <= 25 ? 60 * sc
-    : slide.text.length <= 42 ? 52 * sc
-    : slide.text.length <= 60 ? 44 * sc
-    : 36 * sc;
+  const ctaTextFontSize = slide.text.length <= 25 ? 62 * sc
+    : slide.text.length <= 42 ? 54 * sc
+    : slide.text.length <= 60 ? 46 * sc
+    : 38 * sc;
 
   return (
     <div style={{
@@ -400,28 +398,28 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
     }}>
 
       {/* Dark overlay */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: hasImagen ? 'rgba(0,0,0,0.50)' : 'transparent' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: hasImagen ? 'rgba(0,0,0,0.52)' : 'transparent' }} />
 
-      {/* Stronger radial glow for CTA — adds brand orange on top of any background */}
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 55% at 50% 50%, rgba(255,113,7,0.12) 0%, transparent 70%)' }} />
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 40% 30% at 50% 48%, rgba(255,113,7,0.06) 0%, transparent 65%)' }} />
+      {/* Brand orange radial glow — CTA energy */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 75% 60% at 50% 50%, rgba(255,113,7,0.14) 0%, transparent 70%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 42% 32% at 50% 48%, rgba(255,113,7,0.07) 0%, transparent 65%)' }} />
 
       {/* Centered content */}
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${80 * sc}px ${70 * sc}px` }}>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${80 * sc}px ${72 * sc}px` }}>
 
-        <div style={{ fontSize: `${ctaTextFontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.1, letterSpacing: '-0.03em', textAlign: 'center', marginBottom: `${36 * sc}px` }}>
-          {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary }, { textShadow: '0 0 22px rgba(255,113,7,0.65)' })}
+        <div style={{ fontSize: `${ctaTextFontSize}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, lineHeight: 1.08, letterSpacing: '-0.03em', textAlign: 'center', marginBottom: `${38 * sc}px` }}>
+          {renderWithAccent(slide.text, slide.accent_word, { color: Brand.colors.text_primary }, { textShadow: '0 0 24px rgba(255,113,7,0.70)' })}
         </div>
 
-        <div style={{ width: `${72 * sc}px`, height: `${4 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${40 * sc}px` }} />
+        <div style={{ width: `${96 * sc}px`, height: `${5 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '3px', marginBottom: `${42 * sc}px` }} />
 
         <div style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: `${10 * sc}px`, flexWrap: 'wrap' as const }}>
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>Comment</span>
-          {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, padding: `${8 * sc}px ${24 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${24 * sc}px rgba(255,113,7,0.60), 0 ${2 * sc}px ${10 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
+          {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, padding: `${9 * sc}px ${26 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${28 * sc}px rgba(255,113,7,0.65), 0 ${2 * sc}px ${10 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>I'll send it over 🔥</span>
         </div>
 
-        <div style={{ fontSize: `${36 * sc}px`, color: Brand.colors.accent_primary, lineHeight: 1, marginTop: `${28 * sc}px`, fontFamily: Brand.typography.font_family, letterSpacing: '-0.02em', opacity: 0.85 }}>↓</div>
+        <div style={{ fontSize: `${38 * sc}px`, color: Brand.colors.accent_primary, lineHeight: 1, marginTop: `${30 * sc}px`, fontFamily: Brand.typography.font_family, letterSpacing: '-0.02em', opacity: 0.90 }}>↓</div>
       </div>
 
       {/* Footer */}
@@ -436,7 +434,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
 
 const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, totalSlides, forExport = false }, ref) => {
   const W = forExport ? 1080 : 540, H = forExport ? 1350 : 675, sc = W / 1080;
-  const PH = 52 * sc, PV = 56 * sc;
+  const PH = 64 * sc, PV = 56 * sc;
 
   // ── Cover slide ──
   if (slide.visual?.type === 'cover_photo') {
@@ -489,7 +487,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   const headlineLen = headline.length;
   const headlineFs = isBigQuote
     ? (headlineLen > 120 ? 38 * sc : headlineLen > 70 ? 46 * sc : 54 * sc)
-    : (headlineLen > 60 ? 48 * sc : headlineLen > 40 ? 50 * sc : headlineLen > 28 ? 52 * sc : 56 * sc);
+    : (headlineLen > 80 ? 44 * sc : headlineLen > 60 ? 48 * sc : headlineLen > 40 ? 50 * sc : headlineLen > 28 ? 52 * sc : 56 * sc);
 
   // Text block offset (set via Step 3 drag handle; stored in 1080-scale px)
   const txOff = (slide.textOffsetX || 0) * sc;
@@ -555,7 +553,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 so we still need the divider to separate headline from body copy. */}
             {(!isBigQuote || !visualHasData) && (
               <div style={{
-                width: `${90 * sc}px`, height: `${5 * sc}px`,
+                width: `${120 * sc}px`, height: `${5 * sc}px`,
                 background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`,
                 borderRadius: '3px',
                 marginBottom: `${(!visualHasData && bodyParas.length > 0) ? 32 * sc : 24 * sc}px`,
@@ -574,17 +572,17 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 {renderWithAccent(p, slide.accent_word, undefined, { textShadow: '0 0 12px rgba(255,113,7,0.38)' })}
               </p>
             ))}
-            {/* Kicker — mic-drop takeaway, 28px/800 punchy; 32px gap keeps it connected to body */}
+            {/* Kicker — mic-drop takeaway; wider divider + larger font for maximum punch */}
             {!visualHasData && kicker && (
-              <div style={{ marginTop: `${32 * sc}px` }}>
-                <div style={{ width: `${80 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${16 * sc}px` }} />
+              <div style={{ marginTop: `${36 * sc}px` }}>
+                <div style={{ width: `${100 * sc}px`, height: `${4 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${18 * sc}px` }} />
                 <p style={{
                   margin: 0,
-                  fontSize: `${28 * sc}px`, fontWeight: 800,
+                  fontSize: `${30 * sc}px`, fontWeight: 800,
                   fontFamily: Brand.typography.font_family,
-                  color: Brand.colors.text_primary, lineHeight: 1.28, letterSpacing: '-0.025em',
+                  color: Brand.colors.text_primary, lineHeight: 1.25, letterSpacing: '-0.025em',
                 }}>
-                  {renderWithAccent(kicker, slide.accent_word, undefined, { textShadow: '0 0 18px rgba(255,113,7,0.50)' })}
+                  {renderWithAccent(kicker, slide.accent_word, undefined, { textShadow: '0 0 20px rgba(255,113,7,0.55)' })}
                 </p>
               </div>
             )}
