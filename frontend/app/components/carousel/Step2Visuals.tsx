@@ -16,6 +16,8 @@ export default function Step2Visuals() {
   const [ctaPhotoLoading, setCtaPhotoLoading] = useState(false);
   const [previewScale, setPreviewScale] = useState(0);
   const previewContainerRef = useRef<HTMLDivElement>(null);
+  const mountedRef = useRef(true);
+  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
 
   // Extract slide IDs so photo effects re-run when slides are regenerated (new IDs = new copy generation)
   const coverSlideId = slides[0]?.id;
@@ -98,8 +100,8 @@ export default function Step2Visuals() {
   const generateBg = useCallback(async (slideId: string, slideText: string, slideType: string) => {
     if (busyRef.current[slideId]) return;
     busyRef.current[slideId] = true;
-    setGenerating(prev => ({ ...prev, [slideId]: true }));
-    setBgError(prev => ({ ...prev, [slideId]: '' }));
+    if (mountedRef.current) setGenerating(prev => ({ ...prev, [slideId]: true }));
+    if (mountedRef.current) setBgError(prev => ({ ...prev, [slideId]: '' }));
     useCarouselStore.getState().setSlideBackgroundStatus(slideId, 'generating');
     try {
       const pr = await fetch('/api/carousel/generate-bg-prompt', {
@@ -118,17 +120,17 @@ export default function Step2Visuals() {
       if (id.dataUrl) {
         useCarouselStore.getState().setSlideBackground(slideId, id.dataUrl);
       } else {
-        const msg = id.error || 'Image generation returned no result';
-        setBgError(prev => ({ ...prev, [slideId]: msg }));
+        const msg = id.error || 'Image generation failed — click Regenerate to retry';
+        if (mountedRef.current) setBgError(prev => ({ ...prev, [slideId]: msg }));
         useCarouselStore.getState().setSlideBackgroundStatus(slideId, 'error');
       }
     } catch (e) {
       console.error('Background generation failed:', e);
-      setBgError(prev => ({ ...prev, [slideId]: 'Network error — try again' }));
+      if (mountedRef.current) setBgError(prev => ({ ...prev, [slideId]: 'Network error — click Regenerate to retry' }));
       useCarouselStore.getState().setSlideBackgroundStatus(slideId, 'error');
     } finally {
       busyRef.current[slideId] = false;
-      setGenerating(prev => ({ ...prev, [slideId]: false }));
+      if (mountedRef.current) setGenerating(prev => ({ ...prev, [slideId]: false }));
     }
   }, [topic, category]); // eslint-disable-line react-hooks/exhaustive-deps
 

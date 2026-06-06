@@ -116,7 +116,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 SLIDE CONTEXT:
 - Topic: "${topic}"
-- Slide text: "${slideText.slice(0, 300)}"
+- Slide text: "${slideText.slice(0, 450)}"
 - Slide type: ${slideType}
 
 VISUAL DIRECTION:

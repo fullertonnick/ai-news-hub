@@ -12,7 +12,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
 
-  // ── Use Nano Banana Pro (generateContent API, not predict) ──────────────────
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 55_000);
 
@@ -36,7 +35,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             contents: [{ parts: [{ text: `Generate an image: ${safePrompt}` }] }],
             generationConfig: {
               responseModalities: ['IMAGE', 'TEXT'],
-              responseMimeType: 'text/plain',
             },
           }),
         }
