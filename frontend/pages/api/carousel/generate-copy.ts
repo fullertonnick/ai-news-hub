@@ -483,7 +483,8 @@ Now write a completely original carousel about: "${topic}"`;
 
     const rawKw = (parsed.keyword || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
     const keyword = rawKw.length >= 2 ? rawKw : fallbackKeyword(topic);
-    let caption = stripForbidden(parsed.caption || '');
+    // Strip markdown and forbidden words from caption — AI occasionally emits **bold** in captions
+    let caption = stripForbidden(stripMarkdown(parsed.caption || ''));
     // Ensure the caption uses the resolved keyword
     caption = caption.replace(/Comment\s+[A-Z0-9]+\s+and/gi, `Comment ${keyword} and`);
     // Ensure the CTA line exists before hashtags
