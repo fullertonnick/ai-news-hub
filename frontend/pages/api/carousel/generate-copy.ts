@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { stripForbidden, fixAccentWord, extractGeminiText } from '@/lib/carousel-lib';
+import { stripForbidden, fixAccentWord, extractGeminiText, stripMarkdown } from '@/lib/carousel-lib';
 
 export const config = { maxDuration: 60 };
 
