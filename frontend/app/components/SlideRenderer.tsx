@@ -426,7 +426,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
 
       {/* Footer */}
       <div style={{ position: 'absolute', bottom: `${36 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px` }}>
-        <Footer sc={sc} slideNumber={slideNumber} totalSlides={totalSlides} />
+        <Footer sc={sc} light slideNumber={slideNumber} totalSlides={totalSlides} />
       </div>
     </div>
   );
