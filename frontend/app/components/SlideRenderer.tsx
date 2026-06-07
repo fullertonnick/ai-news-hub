@@ -217,8 +217,8 @@ function getTopicStickers(text: string, headlinePosition: 'top' | 'middle' | 'bo
   };
 
   if (/claude/i.test(t)) push('CLAUDE');
-  if (/code/i.test(t)) push('CODE');
-  if (/make\.com|make/i.test(t)) push('MAKE.COM');
+  if (/\bcode\b/i.test(t)) push('CODE');
+  if (/make\.com/i.test(t)) push('MAKE.COM');
   if (/automat/i.test(t)) push('AUTOMATE');
   if (/agent/i.test(t)) push('AGENTS');
   if (/ai\b/i.test(t)) push('AI');

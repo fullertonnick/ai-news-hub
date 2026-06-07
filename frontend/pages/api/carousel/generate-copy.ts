@@ -10,7 +10,7 @@ const VALID_VISUAL_TYPES = new Set(['cover_photo', 'code_block', 'stats_grid', '
 function detectCategory(topic: string): string {
   const t = topic.toLowerCase();
   if (/claude(?!\s*van|\s*monet)/i.test(t) || /anthropic|mcp\b|claude code/.test(t)) return 'claude-code';
-  if (/make\.com|\bmake\b|n8n|zapier|integromat|workflow|automat|onboard/.test(t)) return 'make-automation';
+  if (/make\.com|n8n|zapier|integromat|workflow|automat|onboard/.test(t)) return 'make-automation';
   if (/\bagent\b|\bagents\b|multi.agent|autonomous|agentic/.test(t)) return 'ai-agents';
   return 'business-ai';
 }
@@ -53,7 +53,7 @@ function fallbackKeyword(topic: string): string {
   const t = topic.toLowerCase();
   if (/memory|remember|context/.test(t)) return 'MEMORY';
   if (/claude/.test(t)) return 'CLAUDE';
-  if (/make|automat|workflow/.test(t)) return 'AUTOMATE';
+  if (/make\.com|automat|workflow/.test(t)) return 'AUTOMATE';
   if (/agent/.test(t)) return 'AGENTS';
   if (/hook/.test(t)) return 'HOOKS';
   if (/prompt/.test(t)) return 'PROMPTS';

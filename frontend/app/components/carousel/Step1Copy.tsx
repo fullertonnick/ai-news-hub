@@ -118,10 +118,16 @@ export default function Step1Copy() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-[10px] text-gray-400 font-bold">{i + 1}</span>
-                  <select value={slide.visual_type} onChange={e => store.updateSlideVisualType(slide.id, e.target.value)}
-                    className="bg-transparent border border-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-400 uppercase tracking-wider focus:outline-none focus:border-brand-orange/50">
-                    {VISUAL_TYPES.map(vt => <option key={vt} value={vt} className="bg-black">{vt.replace(/_/g, ' ')}</option>)}
-                  </select>
+                  {(i === 0 || i === slides.length - 1) ? (
+                    <span className="text-[10px] text-gray-600 uppercase tracking-wider px-2 py-1 border border-white/5 rounded-lg">
+                      {slide.visual_type.replace(/_/g, ' ')}
+                    </span>
+                  ) : (
+                    <select value={slide.visual_type} onChange={e => store.updateSlideVisualType(slide.id, e.target.value)}
+                      className="bg-transparent border border-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-400 uppercase tracking-wider focus:outline-none focus:border-brand-orange/50">
+                      {VISUAL_TYPES.map(vt => <option key={vt} value={vt} className="bg-black">{vt.replace(/_/g, ' ')}</option>)}
+                    </select>
+                  )}
                 </div>
                 <div className="flex gap-1">
                   <button onClick={() => store.reorderSlide(slide.id, 'up')}

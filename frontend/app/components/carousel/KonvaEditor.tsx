@@ -37,9 +37,9 @@ function useKonvaImage(src: string): HTMLImageElement | null {
 }
 
 // ─── Single sticker ─────────────────────────────────────────────────────────
-function StickerNode({ sticker, stageW, stageH, isSelected, onSelect, onMouseEnter, onMouseLeave, onDragStart, onDragEnd }: {
+function StickerNode({ sticker, stageW, stageH, onSelect, onMouseEnter, onMouseLeave, onDragStart, onDragEnd }: {
   sticker: StickerOverlay; stageW: number; stageH: number;
-  isSelected: boolean; onSelect: () => void;
+  onSelect: () => void;
   onMouseEnter?: () => void; onMouseLeave?: () => void;
   onDragStart?: () => void; onDragEnd?: () => void;
 }) {
@@ -268,7 +268,6 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
         {sortedLayers.map(item =>
           item.kind === 'sticker' ? (
             <StickerNode key={item.data.id} sticker={item.data} stageW={width} stageH={height}
-              isSelected={selectedId === item.data.id}
               onSelect={() => onSelect(item.data.id)}
               onMouseEnter={handleMouseEnterNode}
               onMouseLeave={handleMouseLeaveNode}

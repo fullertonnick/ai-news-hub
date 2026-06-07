@@ -344,34 +344,41 @@ export default function Step3Edit() {
             />
             {/* Draggable text handle — only shown for middle slides with baked-in text visible.
                 Hidden when useTextOverlays=true (text is hidden) so the handle isn't misleading.
-                textOffset is stored in 1080-scale px → convert to 360×450 preview space. */}
-            {currentIdx > 0 && currentIdx < slides.length - 1 && !slide?.useTextOverlays && (
-              <div
-                onMouseDown={handleTextDragStart}
-                onTouchStart={handleTextDragStart}
-                style={{
-                  position: 'absolute',
-                  left: `${Math.round(52 * PW / 1080) + Math.round((slide?.textOffsetX || 0) * PW / 1080)}px`,
-                  // ~0.49 approximates the vertical center of the text block (content div uses justify-center minus footer).
-                  top: `${Math.round(PH * 0.49) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
-                  width: '72px',
-                  height: '20px',
-                  cursor: 'move',
-                  zIndex: 25,
-                  background: 'rgba(0,0,0,0.75)',
-                  border: '1px solid rgba(255,113,7,0.6)',
-                  borderRadius: 5,
-                  touchAction: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 3,
-                }}
-                title="Drag to reposition slide text"
-              >
-                <span style={{ fontSize: 8, fontWeight: 800, color: '#FF7107', letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: 'system-ui', pointerEvents: 'none' }}>↕ text</span>
-              </div>
-            )}
+                textOffset is stored in 1080-scale px → convert to 360×450 preview space.
+                Double-click resets the offset to center (0, 0). */}
+            {currentIdx > 0 && currentIdx < slides.length - 1 && !slide?.useTextOverlays && (() => {
+              const hasOffset = !!(slide?.textOffsetX || slide?.textOffsetY);
+              return (
+                <div
+                  onMouseDown={handleTextDragStart}
+                  onTouchStart={handleTextDragStart}
+                  onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); setTextOffset(slide!.id, 0, 0); }}
+                  style={{
+                    position: 'absolute',
+                    left: `${Math.round(52 * PW / 1080) + Math.round((slide?.textOffsetX || 0) * PW / 1080)}px`,
+                    // ~0.49 approximates the vertical center of the text block (content div uses justify-center minus footer).
+                    top: `${Math.round(PH * 0.49) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
+                    width: hasOffset ? '88px' : '72px',
+                    height: '20px',
+                    cursor: 'move',
+                    zIndex: 25,
+                    background: hasOffset ? 'rgba(255,113,7,0.18)' : 'rgba(0,0,0,0.75)',
+                    border: `1px solid rgba(255,113,7,${hasOffset ? '0.9' : '0.6'})`,
+                    borderRadius: 5,
+                    touchAction: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 3,
+                  }}
+                  title={hasOffset ? 'Drag to reposition text • Double-click to reset to center' : 'Drag to reposition slide text • Double-click to reset'}
+                >
+                  <span style={{ fontSize: 8, fontWeight: 800, color: '#FF7107', letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: 'system-ui', pointerEvents: 'none' }}>
+                    {hasOffset ? '↕ text ↺' : '↕ text'}
+                  </span>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Thumbnails */}
@@ -391,6 +398,15 @@ export default function Step3Edit() {
 
         {/* Controls */}
         <div className="w-full lg:w-72 space-y-4">
+          {/* Reset text position — only shown for middle slides when text has been moved */}
+          {currentIdx > 0 && currentIdx < slides.length - 1 && !slide.useTextOverlays && !!(slide.textOffsetX || slide.textOffsetY) && (
+            <button
+              onClick={() => setTextOffset(slide.id, 0, 0)}
+              className="w-full flex items-center justify-center gap-1.5 text-[10px] text-brand-orange border border-brand-orange/30 bg-brand-orange/5 hover:bg-brand-orange/10 py-1.5 rounded-lg transition-colors"
+            >
+              ↺ Reset Text Position
+            </button>
+          )}
           {/* Hide baked-in text toggle — content slides only (not cover or CTA) */}
           {currentIdx > 0 && currentIdx < slides.length - 1 && (
             <button
