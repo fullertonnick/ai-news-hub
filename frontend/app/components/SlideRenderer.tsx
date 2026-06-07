@@ -74,13 +74,13 @@ function highlightCode(code: string, highlights: string[] = [], sc: number): Rea
 function SectionLabel({ label, sc }: { label: string; sc: number }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: `${8 * sc}px`, flexShrink: 0 }}>
-      <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.25)' }} />
+      <div style={{ flex: 1, height: `${2 * sc}px`, background: 'rgba(255,255,255,0.25)' }} />
       <span style={{
         color: Brand.colors.text_muted, fontSize: `${18 * sc}px`, fontWeight: 600,
         letterSpacing: '0.08em', textTransform: 'uppercase' as const, whiteSpace: 'nowrap' as const,
         fontFamily: Brand.typography.font_family,
       }}>{label}</span>
-      <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.25)' }} />
+      <div style={{ flex: 1, height: `${2 * sc}px`, background: 'rgba(255,255,255,0.25)' }} />
     </div>
   );
 }
@@ -359,6 +359,8 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
         <img src={photoSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.62}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.78, zIndex: 1 }} />
         {/* Gradient fade — solid dark on text side, fades to transparent toward photo */}
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 30%, rgba(26,26,26,0.92) 48%, rgba(26,26,26,0.45) 68%, rgba(26,26,26,0.08) 100%)`, zIndex: 2 }} />
+        {/* Bottom gradient — darkens footer strip across full width for readability over photo */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: `${180 * sc}px`, background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.80))', zIndex: 3, pointerEvents: 'none' }} />
         {/* Brand orange glow on left */}
         <div style={{ position: 'absolute', left: 0, top: 0, width: '65%', height: '100%', background: 'radial-gradient(ellipse 80% 60% at 20% 50%, rgba(255,113,7,0.15) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 3 }} />
 
@@ -376,8 +378,8 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
         </div>
 
         {/* Footer */}
-        <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${PH}px`, right: `${PH}px`, zIndex: 4 }}>
-          <Footer sc={sc} slideNumber={slideNumber} totalSlides={totalSlides} />
+        <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${PH}px`, right: `${PH}px`, zIndex: 5 }}>
+          <Footer sc={sc} light slideNumber={slideNumber} totalSlides={totalSlides} />
         </div>
       </div>
     );
@@ -487,7 +489,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
   const headlineLen = headline.length;
   const headlineFs = isBigQuote
     ? (headlineLen > 120 ? 38 * sc : headlineLen > 70 ? 46 * sc : 54 * sc)
-    : (headlineLen > 80 ? 44 * sc : headlineLen > 60 ? 48 * sc : headlineLen > 40 ? 50 * sc : headlineLen > 28 ? 52 * sc : 56 * sc);
+    : (headlineLen > 60 ? 48 * sc : headlineLen > 40 ? 50 * sc : headlineLen > 28 ? 52 * sc : 56 * sc);
 
   // Text block offset (set via Step 3 drag handle; stored in 1080-scale px)
   const txOff = (slide.textOffsetX || 0) * sc;
