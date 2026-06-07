@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Try up to 3 times on empty or rate-limited response
     for (let attempt = 0; attempt < 3; attempt++) {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/nano-banana-pro-preview:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -48,10 +48,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (!response.ok) {
         const errText = await response.text();
-        console.error('Nano Banana API error:', errText);
+        console.error('Image generation API error:', errText);
         // Don't retry on permanent errors (4xx other than 429)
         if (response.status >= 400 && response.status < 500) {
-          return res.status(500).json({ error: 'Image generation rejected — try a different prompt' });
+          return res.status(500).json({ error: 'Image generation rejected — try a different prompt or regenerate' });
         }
         await new Promise(r => setTimeout(r, 1500));
         continue;
@@ -71,7 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // No image in response — retry with short delay
-      console.error(`Nano Banana empty response (attempt ${attempt + 1})`);
+      console.error(`Image generation: no image in response (attempt ${attempt + 1})`);
       await new Promise(r => setTimeout(r, 1500));
     }
 

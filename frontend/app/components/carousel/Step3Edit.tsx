@@ -61,6 +61,7 @@ const STICKER_BANK: BankSticker[] = [
   { label: 'Replicate', src: brandIcon(SI.replicate, '#fff', '#111'), category: 'AI Tools' },
   { label: 'Slack', src: brandIcon(SI.slack, '#fff', '#4A154B'), category: 'Automation' },
   { label: 'Notion', src: brandIcon(SI.notion, '#fff', '#000'), category: 'Automation' },
+  { label: 'Make.com', src: svgUri(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" rx="40" fill="#6D00D7"/><text x="100" y="106" font-family="system-ui,-apple-system,sans-serif" font-size="44" font-weight="800" fill="white" text-anchor="middle">MAKE</text><text x="100" y="148" font-family="system-ui,-apple-system,sans-serif" font-size="26" font-weight="500" fill="rgba(255,255,255,0.75)" text-anchor="middle">.com</text></svg>`), category: 'Automation' },
   { label: 'n8n', src: brandIcon(SI.n8n, '#fff', '#EA4B71'), category: 'Automation' },
   { label: 'HubSpot', src: brandIcon(SI.hubspot, '#fff', '#FF7A59'), category: 'Automation' },
   { label: 'Airtable', src: svgUri(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" rx="40" fill="#18BFFF"/><g transform="translate(38,38) scale(5.167)"><path d="M11.992 1.966c-.434 0-.87.086-1.28.257L1.779 5.917c-.503.208-.49.908.012 1.116l8.982 3.558a3.266 3.266 0 0 0 2.454 0l8.982-3.558c.503-.196.503-.908.012-1.116l-8.957-3.694a3.255 3.255 0 0 0-1.272-.257z" fill="#fff"/></g></svg>`), category: 'Automation' },
