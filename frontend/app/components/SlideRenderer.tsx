@@ -537,7 +537,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
         <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: `${26 * sc}px`, ...(txOff || tyOff ? { transform: `translate(${txOff}px, ${tyOff}px)` } : {}) }}>
           {slide.section_label && <SectionLabel label={slide.section_label} sc={sc} />}
           <div>
-            {/* Headline — always 44-52px bold (Tyler Germain spec) */}
+            {/* Headline — 48-56px bold (Tyler Germain spec: 48px minimum) */}
             <p style={{
               margin: 0, marginBottom: `${16 * sc}px`,
               fontSize: `${headlineFs}px`, fontWeight: 800,
