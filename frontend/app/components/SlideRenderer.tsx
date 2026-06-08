@@ -71,7 +71,7 @@ function highlightCode(code: string, highlights: string[] = [], sc: number): Rea
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function SectionLabel({ label, sc }: { label: string; sc: number }) {
+function SectionLabel({ label, sc, onImage }: { label: string; sc: number; onImage?: boolean }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: `${8 * sc}px`, flexShrink: 0 }}>
       <div style={{ flex: 1, height: `${2 * sc}px`, background: 'rgba(255,255,255,0.25)' }} />
@@ -79,6 +79,7 @@ function SectionLabel({ label, sc }: { label: string; sc: number }) {
         color: Brand.colors.text_muted, fontSize: `${18 * sc}px`, fontWeight: 600,
         letterSpacing: '0.08em', textTransform: 'uppercase' as const, whiteSpace: 'nowrap' as const,
         fontFamily: Brand.typography.font_family,
+        ...(onImage ? { textShadow: '0 1px 4px rgba(0,0,0,0.60)' } : {}),
       }}>{label}</span>
       <div style={{ flex: 1, height: `${2 * sc}px`, background: 'rgba(255,255,255,0.25)' }} />
     </div>
@@ -86,8 +87,8 @@ function SectionLabel({ label, sc }: { label: string; sc: number }) {
 }
 
 function Footer({ sc, light = false, slideNumber, totalSlides }: { sc: number; light?: boolean; slideNumber?: number; totalSlides?: number }) {
-  const color = light ? 'rgba(255,255,255,0.75)' : Brand.colors.text_muted;
-  const border = light ? '1px solid rgba(255,255,255,0.20)' : `1px solid ${Brand.colors.divider}`;
+  const color = light ? 'rgba(255,255,255,0.80)' : Brand.colors.text_muted;
+  const border = light ? '1px solid rgba(255,255,255,0.25)' : '1px solid rgba(255,255,255,0.18)';
   return (
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -513,7 +514,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
       {!hasImagen && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '25%', background: `linear-gradient(to bottom, rgba(255,113,7,0.025), transparent)`, pointerEvents: 'none' }} />}
 
       {/* Orange left border accent — all content slides (Tyler Germain signature) */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${6 * sc}px`, background: Brand.colors.accent_primary, zIndex: 4, boxShadow: `${5 * sc}px 0 ${32 * sc}px rgba(255,113,7,0.52)` }} />
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${6 * sc}px`, background: Brand.colors.accent_primary, zIndex: 4, boxShadow: `${6 * sc}px 0 ${40 * sc}px rgba(255,113,7,0.60), ${2 * sc}px 0 ${16 * sc}px rgba(255,113,7,0.35)` }} />
       {/* Subtle orange radial glow */}
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(255,113,7,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
@@ -535,7 +536,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
             section label so label + headline move together as one unit. */}
         {!slide.useTextOverlays && (
         <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: `${26 * sc}px`, ...(txOff || tyOff ? { transform: `translate(${txOff}px, ${tyOff}px)` } : {}) }}>
-          {slide.section_label && <SectionLabel label={slide.section_label} sc={sc} />}
+          {slide.section_label && <SectionLabel label={slide.section_label} sc={sc} onImage={hasImagen} />}
           <div>
             {/* Headline — 48-56px bold (Tyler Germain spec: 48px minimum) */}
             <p style={{
@@ -546,8 +547,9 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               lineHeight: isBigQuote ? 1.3 : 1.18,
               letterSpacing: '-0.03em',
               ...(isBigQuote ? { fontStyle: 'italic' as const } : {}),
+              ...(hasImagen ? { textShadow: '0 1px 6px rgba(0,0,0,0.65)' } : {}),
             }}>
-              {renderWithAccent(headline, slide.accent_word, undefined, { textShadow: '0 0 18px rgba(255,113,7,0.50)' })}
+              {renderWithAccent(headline, slide.accent_word, undefined, { textShadow: '0 0 24px rgba(255,113,7,0.65)', color: Brand.colors.accent_primary })}
             </p>
             {/* Orange divider — Tyler Germain signature.
                 Skip only when big_quote AND visualHasData (visual block renders its own accent line).
@@ -570,8 +572,9 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 fontFamily: Brand.typography.font_family,
                 color: Brand.colors.text_primary, lineHeight: 1.65,
                 letterSpacing: '-0.01em', whiteSpace: 'pre-line' as const,
+                ...(hasImagen ? { textShadow: '0 1px 4px rgba(0,0,0,0.60)' } : {}),
               }}>
-                {renderWithAccent(p, slide.accent_word, undefined, { textShadow: '0 0 12px rgba(255,113,7,0.38)' })}
+                {renderWithAccent(p, slide.accent_word, undefined, { textShadow: '0 0 16px rgba(255,113,7,0.50)', color: Brand.colors.accent_primary })}
               </p>
             ))}
             {/* Kicker — mic-drop takeaway; wider divider + larger font for maximum punch */}
@@ -580,11 +583,12 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 <div style={{ width: `${100 * sc}px`, height: `${4 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${18 * sc}px` }} />
                 <p style={{
                   margin: 0,
-                  fontSize: `${30 * sc}px`, fontWeight: 800,
+                  fontSize: `${32 * sc}px`, fontWeight: 800,
                   fontFamily: Brand.typography.font_family,
-                  color: Brand.colors.text_primary, lineHeight: 1.25, letterSpacing: '-0.025em',
+                  color: Brand.colors.text_primary, lineHeight: 1.22, letterSpacing: '-0.025em',
+                  ...(hasImagen ? { textShadow: '0 1px 6px rgba(0,0,0,0.65)' } : {}),
                 }}>
-                  {renderWithAccent(kicker, slide.accent_word, undefined, { textShadow: '0 0 20px rgba(255,113,7,0.55)' })}
+                  {renderWithAccent(kicker, slide.accent_word, undefined, { textShadow: '0 0 28px rgba(255,113,7,0.72)', color: Brand.colors.accent_primary })}
                 </p>
               </div>
             )}

@@ -46,6 +46,7 @@ async function preloadFonts() {
       document.fonts.load(`800 42px ${pjs}`),
       document.fonts.load(`800 38px ${pjs}`),
       document.fonts.load(`800 36px ${pjs}`),
+      document.fonts.load(`800 32px ${pjs}`),
       document.fonts.load(`800 30px ${pjs}`),
       document.fonts.load(`800 28px ${pjs}`),
       document.fonts.load(`800 26px ${pjs}`),
