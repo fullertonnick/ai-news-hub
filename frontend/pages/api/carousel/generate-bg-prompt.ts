@@ -107,10 +107,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     none: 'atmospheric dark background with subtle warm texture, clean professional, very subtle orange glow on left edge',
   };
 
-  // Combine up to 2 concept hints for more specific scene direction
+  // Category-aware fallbacks for when slide text has no specific concept matches.
+  // These reinforce the overall aesthetic of the carousel series.
+  const CATEGORY_FALLBACKS: Record<string, string> = {
+    'claude-code': 'dark developer home office at night, multiple monitors with warm amber code glow, mechanical keyboard foreground, shallow depth of field, cinematic',
+    'make-automation': 'dark server rack corridor with warm amber LED strips on hardware, blurred corridor perspective, professional and moody, bokeh depth of field',
+    'ai-agents': 'abstract dark background with softly glowing amber decision-node network suggesting automated flow, cinematic, minimal, deep shadows',
+    'business-ai': 'dark premium executive office, single warm amber desk lamp, elegant closed laptop, blurred floor-to-ceiling window with city bokeh, aspirational',
+  };
+
+  // Use category fallback before generic type fallback for a more cohesive look
+  const typeFallback = SCENE_FALLBACKS[slideType] || SCENE_FALLBACKS.none;
+  const categoryFallback = CATEGORY_FALLBACKS[category] || typeFallback;
+
   const sceneHint = conceptHints.length > 0
     ? `SCENE CONCEPT (derived from slide text): ${conceptHints.slice(0, 2).join(' — with secondary element: ')}`
-    : `SCENE: ${SCENE_FALLBACKS[slideType] || SCENE_FALLBACKS.none}`;
+    : `SCENE: ${categoryFallback}`;
 
   const prompt = `Write a single Imagen 3 image generation prompt for an Instagram carousel slide background.
 
@@ -149,7 +161,7 @@ Output the prompt only — no quotes, no JSON, no explanation.`;
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 300 },
+        generationConfig: { temperature: 0.7, maxOutputTokens: 400 },
         thinkingConfig: { thinkingBudget: 0 },
       }),
     });
