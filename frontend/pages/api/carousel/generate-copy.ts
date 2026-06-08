@@ -17,10 +17,30 @@ function detectCategory(topic: string): string {
 
 function styleHint(style: string): string {
   if (style === 'use_case_list') {
-    return `STYLE: "use_case_list" — Numbered examples. Each content slide = one real use case with a specific, concrete outcome. Labels: "01.", "02.", "Use Case 1", "Example 2".`;
+    return `STYLE: "use_case_list" — Numbered examples. Each content slide = one real use case with a specific, concrete outcome.
+Labels: "01.", "02.", "03."…  (NOT "Step 1", NOT "Level 1" — just the number)
+Each slide: name the use case → describe the setup in one line → show the concrete outcome with a number.
+CALIBRATION EXAMPLES:
+  "5 Claude prompts every agency owner needs" → 5 use case slides, each names one prompt, shows the setup, shows the result.
+  "Make.com automations that save 10 hours/week" → 5 examples, each names the automation, describes what it connects, shows the time saved.`;
   }
   if (style === 'prompt_reveal') {
-    return `STYLE: "prompt_reveal" — Before/After or Myth-Busting. Build tension then flip it. Labels: "The Myth" / "Reality", "Before" / "After", "What you think" / "What actually happens".`;
+    return `STYLE: "prompt_reveal" — Myth-Busting OR Before/After. Pick the ONE that fits this topic:
+
+MYTH-BUSTING (use when topic is about a common misconception or wrong belief):
+  Labels: "The Myth", "The Reality", "The Proof", "The Fix"
+  Flow: State the myth confidently (1 slide) → destroy it with specifics (1 slide) → prove it with a real example (1 slide) → show how to apply the correct belief (1 slide)
+  GOOD for: "Why AI agents fail in production", "Why your Claude prompts stop working", "Why 80% of automations fail"
+
+BEFORE/AFTER (use when topic is about a transformation or state change):
+  Labels: "Before", "After", "What changed", "The result"
+  Flow: Show the painful before state vividly → show the transformed after state → explain the exact mechanism that caused the change → show the measurable result
+  GOOD for: "Claude Code with vs without CLAUDE.md", "My client onboarding before/after automation", "Running an agency before vs after AI"
+
+CALIBRATION EXAMPLES:
+  "Why most AI agents fail in production" → MYTH-BUSTING (The Myth: model is bad → Reality: scope is wrong → The Proof: 1-tool agent runs 6 months → Apply it)
+  "Claude Code memory system" → NOT this style — use tech_breakdown (deep dive) instead
+  "Life before vs after Make.com automation" → BEFORE/AFTER (Before: 3-hour manual process → After: 4 minutes → What changed: webhook + HTTP module → Result: 15 hours/week back)`;
   }
   return `STYLE: "tech_breakdown" — The structure comes from the topic's NATURAL SHAPE, not a template.
 
@@ -429,7 +449,7 @@ Now write a completely original carousel about: "${topic}"`;
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
-        thinkingConfig: { thinkingBudget: 3000 },
+        thinkingConfig: { thinkingBudget: 6000 },
       }),
     });
     const d = await r.json();
