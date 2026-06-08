@@ -372,7 +372,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
           <div style={{ width: `${96 * sc}px`, height: `${4 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px' }} />
           <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: `${8 * sc}px` }}>
             <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>Comment</span>
-            {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, padding: `${8 * sc}px ${22 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${22 * sc}px rgba(255,113,7,0.60), 0 ${2 * sc}px ${8 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
+            <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, padding: `${8 * sc}px ${22 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${22 * sc}px rgba(255,113,7,0.60), 0 ${2 * sc}px ${8 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword || 'BELOW'}</span>
             <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>I'll send it over 🔥</span>
           </div>
         </div>
@@ -417,7 +417,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
 
         <div style={{ textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: `${10 * sc}px`, flexWrap: 'wrap' as const }}>
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>Comment</span>
-          {v.keyword && <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, padding: `${9 * sc}px ${26 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${28 * sc}px rgba(255,113,7,0.65), 0 ${2 * sc}px ${10 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword}</span>}
+          <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000000', fontSize: `${28 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, padding: `${9 * sc}px ${26 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${28 * sc}px rgba(255,113,7,0.65), 0 ${2 * sc}px ${10 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword || 'BELOW'}</span>
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>I'll send it over 🔥</span>
         </div>
 

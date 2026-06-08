@@ -347,7 +347,7 @@ export default function Step3Edit() {
                 Hidden when useTextOverlays=true (text is hidden) so the handle isn't misleading.
                 textOffset is stored in 1080-scale px → convert to 360×450 preview space.
                 Double-click resets the offset to center (0, 0). */}
-            {currentIdx > 0 && currentIdx < slides.length - 1 && !slide?.useTextOverlays && (() => {
+            {currentIdx > 0 && currentIdx < slides.length - 1 && !slide?.useTextOverlays && !selectedId && (() => {
               const hasOffset = !!(slide?.textOffsetX || slide?.textOffsetY);
               return (
                 <div
@@ -509,8 +509,8 @@ export default function Step3Edit() {
               ))}
             </div>
             <div className="grid grid-cols-4 gap-1.5 max-h-44 overflow-y-auto">
-              {filteredBank.map((s, i) => (
-                <button key={i} onClick={() => addSticker(s)} className="flex flex-col items-center gap-1 p-2 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] hover:border-brand-orange/20 group" title={s.label}>
+              {filteredBank.map((s) => (
+                <button key={s.label} onClick={() => addSticker(s)} className="flex flex-col items-center gap-1 p-2 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.06] hover:border-brand-orange/20 group" title={s.label}>
                   <img src={s.src} alt={s.label} className="w-8 h-8 object-contain" />
                   <span className="text-[7px] text-gray-500 group-hover:text-white truncate w-full text-center">{s.label}</span>
                 </button>

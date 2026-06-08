@@ -263,6 +263,12 @@ export const useCarouselStore = create<CarouselStore>()(
     {
       name: 'simpliscale-carousel-pipeline',
       version: 13,
+      // Exclude backgroundImage (base64 data URLs, up to ~500KB each × 8 slides) from localStorage
+      // to prevent exceeding the 5MB quota. Backgrounds are regenerated in Step2 when missing.
+      partialize: (state) => ({
+        ...state,
+        slides: state.slides.map(({ backgroundImage: _bg, ...rest }) => rest),
+      }),
       migrate: (persisted: any, fromVersion: number) => {
         if (fromVersion < 12) {
           return {
