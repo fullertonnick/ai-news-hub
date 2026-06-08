@@ -2,13 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 export const config = { maxDuration: 20 };
 
-/**
- * Fetches a remote image and returns it as a base64 data URL.
- * Used to import web search results into the editor (avoids CORS for canvas export).
- *
- * POST body: { url: string }
- * Returns: { dataUrl: string }
- */
+// Fetches a remote image and returns it as a base64 data URL (CORS-safe for html-to-image export).
+// POST body: { url: string }  →  Returns: { dataUrl: string }
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 

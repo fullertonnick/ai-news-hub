@@ -5,6 +5,18 @@ import { Loader2, Zap, RefreshCw, ArrowUp, ArrowDown, Trash2, Plus, Check, Alert
 
 const VISUAL_TYPES = ['cover_photo', 'code_block', 'stats_grid', 'diagram', 'steps_list', 'skill_card', 'big_quote', 'comparison', 'checklist', 'cta_slide', 'none'];
 
+const STYLE_LABELS: Record<string, string> = {
+  tech_breakdown: 'Breakdown',
+  use_case_list: 'Use Cases',
+  prompt_reveal: 'Myth / Reveal',
+};
+
+const STYLE_TOOLTIPS: Record<string, string> = {
+  tech_breakdown: 'Auto-selects the best structure: Steps, Deep Dive, Comparison, etc.',
+  use_case_list: 'Numbered real-world examples — each slide = one use case with a specific outcome',
+  prompt_reveal: 'Myth-busting or Before/After — build tension and flip it',
+};
+
 export default function Step1Copy() {
   const store = useCarouselStore();
   const { topic, style, slides, caption, keyword, copyLoading, approvals } = store;
@@ -77,9 +89,9 @@ export default function Step1Copy() {
           className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-brand-orange/50" />
         <div className="flex gap-1.5">
           {['tech_breakdown', 'use_case_list', 'prompt_reveal'].map(s => (
-            <button key={s} onClick={() => store.setStyle(s)}
+            <button key={s} onClick={() => store.setStyle(s)} title={STYLE_TOOLTIPS[s]}
               className={`text-xs px-3 py-1.5 rounded-full border transition-all ${style === s ? 'border-brand-orange/40 bg-brand-orange/10 text-brand-orange' : 'border-white/10 text-gray-500 hover:text-white'}`}>
-              {s.replace(/_/g, ' ')}
+              {STYLE_LABELS[s] ?? s.replace(/_/g, ' ')}
             </button>
           ))}
         </div>
