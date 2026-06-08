@@ -2,6 +2,80 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 export const config = { maxDuration: 60 };
 
+// Attempt image generation via Imagen 3 Fast (higher quality, purpose-built for image synthesis).
+// Returns base64 data URL on success, null on any failure.
+async function tryImagen3(prompt: string, apiKey: string, signal: AbortSignal): Promise<string | null> {
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-fast-generate-001:predict?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal,
+        body: JSON.stringify({
+          instances: [{ prompt }],
+          parameters: {
+            sampleCount: 1,
+            aspectRatio: '3:4',
+            safetyFilterLevel: 'block_only_high',
+            personGeneration: 'dont_allow',
+          },
+        }),
+      }
+    );
+    if (!r.ok) return null;
+    const data = await r.json();
+    const pred = data?.predictions?.[0];
+    if (pred?.bytesBase64Encoded) {
+      const mime = pred.mimeType || 'image/jpeg';
+      return `data:${mime};base64,${pred.bytesBase64Encoded}`;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Fallback: Gemini 2.0 Flash experimental multimodal image generation.
+async function tryGeminiFlash(prompt: string, apiKey: string, signal: AbortSignal): Promise<string | null> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const r = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal,
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `Generate an image: ${prompt}` }] }],
+            generationConfig: { responseModalities: ['IMAGE', 'TEXT'] },
+          }),
+        }
+      );
+      if (r.status === 429) {
+        await new Promise(x => setTimeout(x, (attempt + 1) * 2000));
+        continue;
+      }
+      if (!r.ok) {
+        if (r.status >= 400 && r.status < 500) return null; // permanent error, don't retry
+        await new Promise(x => setTimeout(x, 1500));
+        continue;
+      }
+      const data = await r.json();
+      for (const part of (data?.candidates?.[0]?.content?.parts || [])) {
+        if (part.inlineData?.data) {
+          const mime = part.inlineData.mimeType || 'image/jpeg';
+          return `data:${mime};base64,${part.inlineData.data}`;
+        }
+      }
+      await new Promise(x => setTimeout(x, 1500));
+    } catch (err: any) {
+      if (err?.name === 'AbortError') throw err;
+    }
+  }
+  return null;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -15,70 +89,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 55_000);
 
-  // Only append safety rules if the caller didn't already include them.
-  // generate-bg-prompt.ts always appends SAFETY_SUFFIX, so no doubling for bg calls.
+  // Append safety rules if not already present (generate-bg-prompt always includes them).
   const alreadySafe = /no text|no faces|no people/i.test(prompt);
   const safePrompt = alreadySafe
     ? prompt.trim()
     : `${prompt.trim()}, no text, no words, no letters, no typography, no faces, no people, no hands, no human figures, no logos, near-black background, cinematic portrait`;
 
   try {
-    // Try up to 3 times on empty or rate-limited response
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: `Generate an image: ${safePrompt}` }] }],
-            generationConfig: {
-              responseModalities: ['IMAGE', 'TEXT'],
-            },
-          }),
-        }
-      );
+    // Imagen 3 Fast: purpose-built image model, better quality and prompt adherence.
+    const imagen3Result = await tryImagen3(safePrompt, apiKey, controller.signal);
+    if (imagen3Result) return res.status(200).json({ dataUrl: imagen3Result });
 
-      if (response.status === 429) {
-        const delay = (attempt + 1) * 2000;
-        await new Promise(r => setTimeout(r, delay));
-        continue;
-      }
+    // Fallback to Gemini 2.0 Flash multimodal if Imagen 3 is unavailable or rejected.
+    const flashResult = await tryGeminiFlash(safePrompt, apiKey, controller.signal);
+    if (flashResult) return res.status(200).json({ dataUrl: flashResult });
 
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error('Image generation API error:', errText);
-        // Don't retry on permanent errors (4xx other than 429)
-        if (response.status >= 400 && response.status < 500) {
-          return res.status(500).json({ error: 'Image generation rejected — try a different prompt or regenerate' });
-        }
-        await new Promise(r => setTimeout(r, 1500));
-        continue;
-      }
-
-      const data = await response.json();
-      const parts = data?.candidates?.[0]?.content?.parts || [];
-
-      // Find the image part
-      for (const part of parts) {
-        if (part.inlineData?.data) {
-          const mime = part.inlineData.mimeType || 'image/jpeg';
-          return res.status(200).json({
-            dataUrl: `data:${mime};base64,${part.inlineData.data}`,
-          });
-        }
-      }
-
-      // No image in response — retry with short delay
-      console.error(`Image generation: no image in response (attempt ${attempt + 1})`);
-      await new Promise(r => setTimeout(r, 1500));
-    }
-
-    return res.status(500).json({ error: 'No image generated after 3 attempts — try regenerating' });
+    return res.status(500).json({ error: 'No image generated — try regenerating with a different prompt' });
   } catch (err: any) {
     if (err?.name === 'AbortError') {
-      return res.status(504).json({ error: 'Image generation timed out' });
+      return res.status(504).json({ error: 'Image generation timed out — try again' });
     }
     console.error('Image generation error:', err);
     return res.status(500).json({ error: 'Internal server error' });
