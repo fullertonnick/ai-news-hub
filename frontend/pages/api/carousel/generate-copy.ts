@@ -224,6 +224,19 @@ Avoid generic "AI helps your business" — always tie to a specific workflow, ro
 
 TOPIC: "${topic}"
 ${categoryHint[category] ? `\n${categoryHint[category]}\n` : ''}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 0 — DECIDE STRUCTURE FIRST (do this before writing a single slide)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Ask yourself: what is the natural shape of this topic?
+- Is it a sequential process? → STEPS ("Step 1", "Step 2"…)
+- Is it a list of separate examples/tools? → NUMBERED LIST ("01.", "02."…)
+- Does it correct a false belief? → MYTH-BUSTING ("The Myth", "Reality", "The Proof")
+- Is it a clear transformation? → BEFORE/AFTER ("Before", "After", "What changed")
+- Is it explaining a hidden mechanism? → DEEP DIVE ("What it is", "Why it matters", "How it works", "Real example", "Apply it")
+- Is it comparing two options? → COMPARISON ("Option A", "Option B", "The Verdict")
+
+Pick ONE. Lock it in. Write ALL slides using that structure's labels.
+NEVER use "Level 1", "Level 2", "Beginner", "Intermediate", "Advanced" — ever.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 BULLSHIT TEST — every content slide must pass all 3:
@@ -448,8 +461,8 @@ Now write a completely original carousel about: "${topic}"`;
       signal: controller.signal,
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.9, maxOutputTokens: 8192 },
-        thinkingConfig: { thinkingBudget: 6000 },
+        generationConfig: { temperature: 0.85, maxOutputTokens: 8192 },
+        thinkingConfig: { thinkingBudget: 8000 },
       }),
     });
     const d = await r.json();
@@ -469,14 +482,18 @@ Now write a completely original carousel about: "${topic}"`;
         rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
         rawText = rawText.replace(/\s*\n*Comment\s+["']?\w+["']?\s+below[\s\S]*/i, '').trim();
       }
-      // Strip "Level X:" prefix from slide text — AI sometimes ignores the ban despite instructions
+      // Strip "Level X:" and "Beginner/Intermediate/Advanced:" prefixes — AI sometimes ignores the ban
       rawText = rawText.replace(/^Level\s+\d+\s*[:.\s—–]+/gim, '').trim();
+      rawText = rawText.replace(/^(?:Beginner|Intermediate|Advanced)\s*[:.\s—–]+/gim, '').trim();
       rawText = stripMarkdown(rawText);
       const cleanText = stripForbidden(rawText);
       // Normalize section_label: null/"null"/"none" → undefined; strip "Level X" prefix
       const rawLabel: string | null | undefined = s.section_label;
       const sectionLabel = (rawLabel && rawLabel !== 'null' && rawLabel !== 'none')
-        ? rawLabel.replace(/^level\s+\d+\s*[:.]?\s*/i, '').trim() || undefined
+        ? rawLabel
+            .replace(/^level\s+\d+\s*[:.]?\s*/i, '')
+            .replace(/^(?:beginner|intermediate|advanced)\s*[:.]?\s*/i, '')
+            .trim() || undefined
         : undefined;
       // Ensure visual_type is a known value
       const vt = VALID_VISUAL_TYPES.has(s.visual_type) ? s.visual_type : 'none';

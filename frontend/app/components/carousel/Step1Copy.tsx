@@ -122,9 +122,16 @@ export default function Step1Copy() {
       {/* Slide cards */}
       {slides.length > 0 && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{slides.length} Slides — Edit Below</span>
-            {keyword && <span className="text-xs font-bold text-brand-orange bg-brand-orange/10 px-2.5 py-0.5 rounded-full">Keyword: {keyword}</span>}
+            <div className="flex items-center gap-2">
+              {store.category && (
+                <span className="text-[10px] text-gray-500 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full capitalize">
+                  {store.category.replace(/-/g, ' ')}
+                </span>
+              )}
+              {keyword && <span className="text-xs font-bold text-brand-orange bg-brand-orange/10 px-2.5 py-0.5 rounded-full">Keyword: {keyword}</span>}
+            </div>
           </div>
 
           {slides.map((slide, i) => (

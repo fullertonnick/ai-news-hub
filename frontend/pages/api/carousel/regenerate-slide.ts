@@ -86,11 +86,16 @@ Return JSON only: {"text": "...", "accent_word": "...", "section_label": "...or 
       rawText = rawText.replace(/\s*\n*Comment\s+\w+\s+and\s+I['']ll\s+send[\s\S]*/i, '').trim();
       rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
     }
+    rawText = rawText.replace(/^Level\s+\d+\s*[:.\s—–]+/gim, '').trim();
+    rawText = rawText.replace(/^(?:Beginner|Intermediate|Advanced)\s*[:.\s—–]+/gim, '').trim();
     rawText = stripMarkdown(rawText);
     const cleanText = stripForbidden(rawText);
     const rawLabel: string | null | undefined = parsed.section_label;
     const sectionLabel = (rawLabel && rawLabel !== 'null' && rawLabel !== 'none')
-      ? rawLabel.replace(/^level\s+\d+\s*[:.]?\s*/i, '').trim() || undefined
+      ? rawLabel
+          .replace(/^level\s+\d+\s*[:.]?\s*/i, '')
+          .replace(/^(?:beginner|intermediate|advanced)\s*[:.]?\s*/i, '')
+          .trim() || undefined
       : undefined;
     return res.json({
       text: cleanText,

@@ -84,11 +84,8 @@ const STICKER_BANK: BankSticker[] = [
 ];
 const CATEGORIES = ['All', ...Array.from(new Set(STICKER_BANK.map(s => s.category)))];
 
-// ─── Preview dimensions — computed dynamically via ResizeObserver ─────────────
-// PREVIEW_W/H constants kept for the text-drag-handle fallback; actual values
-// come from the canvasW/canvasH state computed below.
+// Max preview width — canvas sizing is computed dynamically via ResizeObserver
 const PREVIEW_W = 360;
-const PREVIEW_H = 450;
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
