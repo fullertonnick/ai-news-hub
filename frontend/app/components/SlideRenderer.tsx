@@ -328,7 +328,7 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
       </div>
 
       {/* Footer */}
-      <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3 }}>
+      <div style={{ position: 'absolute', bottom: `${44 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px`, zIndex: 3 }}>
         <Footer sc={sc} light slideNumber={slideNumber} totalSlides={totalSlides} />
       </div>
     </div>
@@ -376,10 +376,15 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
             <span style={{ backgroundColor: Brand.colors.accent_primary, color: '#000', fontSize: `${26 * sc}px`, fontWeight: 800, fontFamily: Brand.typography.font_family, padding: `${8 * sc}px ${22 * sc}px`, borderRadius: '9999px', lineHeight: 1.2, boxShadow: `0 0 ${22 * sc}px rgba(255,113,7,0.60), 0 ${2 * sc}px ${8 * sc}px rgba(0,0,0,0.4)` }}>{v.keyword || 'BELOW'}</span>
             <span style={{ color: Brand.colors.text_primary, fontSize: `${24 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>I'll send it over 🔥</span>
           </div>
+          {v.subtext && (
+            <p style={{ margin: 0, color: Brand.colors.text_muted, fontSize: `${20 * sc}px`, fontWeight: 500, fontFamily: Brand.typography.font_family, lineHeight: 1.5, letterSpacing: '-0.01em' }}>
+              {v.subtext}
+            </p>
+          )}
         </div>
 
         {/* Footer */}
-        <div style={{ position: 'absolute', bottom: `${34 * sc}px`, left: `${PH}px`, right: `${PH}px`, zIndex: 5 }}>
+        <div style={{ position: 'absolute', bottom: `${44 * sc}px`, left: `${PH}px`, right: `${PH}px`, zIndex: 5 }}>
           <Footer sc={sc} light slideNumber={slideNumber} totalSlides={totalSlides} />
         </div>
       </div>
@@ -422,11 +427,17 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
           <span style={{ color: Brand.colors.text_primary, fontSize: `${26 * sc}px`, fontWeight: 600, fontFamily: Brand.typography.font_family }}>I'll send it over 🔥</span>
         </div>
 
-        <div style={{ fontSize: `${38 * sc}px`, color: Brand.colors.accent_primary, lineHeight: 1, marginTop: `${30 * sc}px`, fontFamily: Brand.typography.font_family, letterSpacing: '-0.02em', opacity: 0.90 }}>↓</div>
+        {v.subtext && (
+          <p style={{ margin: `${20 * sc}px 0 0`, color: Brand.colors.text_muted, fontSize: `${20 * sc}px`, fontWeight: 500, fontFamily: Brand.typography.font_family, lineHeight: 1.5, textAlign: 'center', letterSpacing: '-0.01em' }}>
+            {v.subtext}
+          </p>
+        )}
+
+        <div style={{ fontSize: `${38 * sc}px`, color: Brand.colors.accent_primary, lineHeight: 1, marginTop: `${24 * sc}px`, fontFamily: Brand.typography.font_family, letterSpacing: '-0.02em', opacity: 0.90 }}>↓</div>
       </div>
 
       {/* Footer */}
-      <div style={{ position: 'absolute', bottom: `${36 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px` }}>
+      <div style={{ position: 'absolute', bottom: `${44 * sc}px`, left: `${60 * sc}px`, right: `${60 * sc}px` }}>
         <Footer sc={sc} light slideNumber={slideNumber} totalSlides={totalSlides} />
       </div>
     </div>
@@ -570,17 +581,18 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 margin: 0, marginBottom: `${20 * sc}px`,
                 fontSize: `${24 * sc}px`, fontWeight: 400,
                 fontFamily: Brand.typography.font_family,
-                color: Brand.colors.text_primary, lineHeight: 1.65,
-                letterSpacing: '-0.01em', whiteSpace: 'pre-line' as const,
+                color: Brand.colors.text_primary, lineHeight: 1.60,
+                letterSpacing: '0', whiteSpace: 'pre-line' as const,
                 ...(hasImagen ? { textShadow: '0 1px 4px rgba(0,0,0,0.60)' } : {}),
               }}>
                 {renderWithAccent(p, slide.accent_word, undefined, { textShadow: '0 0 16px rgba(255,113,7,0.50)', color: Brand.colors.accent_primary })}
               </p>
             ))}
-            {/* Kicker — mic-drop takeaway; wider divider + larger font for maximum punch */}
+            {/* Kicker — mic-drop takeaway; shorter divider (vs headline divider 120px) signals
+                a new micro-section without repeating the same visual weight */}
             {!visualHasData && kicker && (
               <div style={{ marginTop: `${36 * sc}px` }}>
-                <div style={{ width: `${100 * sc}px`, height: `${4 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${18 * sc}px` }} />
+                <div style={{ width: `${80 * sc}px`, height: `${4 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${18 * sc}px` }} />
                 <p style={{
                   margin: 0,
                   fontSize: `${32 * sc}px`, fontWeight: 800,
@@ -811,7 +823,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
       </div>
 
       {/* ── Footer ── */}
-      <div style={{ padding: `0 ${PH}px ${26 * sc}px`, flexShrink: 0, position: 'relative' }}>
+      <div style={{ padding: `0 ${PH}px ${32 * sc}px`, flexShrink: 0, position: 'relative' }}>
         <Footer sc={sc} slideNumber={slideNumber} totalSlides={totalSlides} />
       </div>
 
