@@ -3,7 +3,9 @@ import { useCallback, useState } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
 import { Loader2, Zap, RefreshCw, ArrowUp, ArrowDown, Trash2, Plus, Check, AlertCircle } from 'lucide-react';
 
-const VISUAL_TYPES = ['cover_photo', 'code_block', 'stats_grid', 'diagram', 'steps_list', 'skill_card', 'big_quote', 'comparison', 'checklist', 'cta_slide', 'none'];
+// cover_photo and cta_slide are reserved for the first/last slide — exclude from the middle-slide selector
+// so users can't accidentally render a middle slide as a cover or CTA template.
+const VISUAL_TYPES = ['code_block', 'stats_grid', 'diagram', 'steps_list', 'skill_card', 'big_quote', 'comparison', 'checklist', 'none'];
 
 const STYLE_LABELS: Record<string, string> = {
   tech_breakdown: 'Breakdown',

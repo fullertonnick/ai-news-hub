@@ -363,20 +363,19 @@ export default function Step4Export() {
         ))}
       </div>
 
-      {/* Caption */}
-      {caption && (
-        <div className="rounded-xl bg-white/[0.03] border border-white/10 p-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Instagram Caption</span>
-            <button onClick={copyCaption} className="text-xs text-gray-400 hover:text-white flex items-center gap-1.5">
-              {captionCopied ? <><Check size={11} className="text-green-400" /><span className="text-green-400">Copied!</span></> : <><Copy size={11} />Copy</>}
-            </button>
-          </div>
-          <textarea value={caption} onChange={e => store.setCaption(e.target.value)}
-            className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-xs text-gray-300 leading-relaxed resize-y focus:outline-none focus:border-brand-orange/30" rows={10} />
-          {keyword && <div className="flex items-center gap-2"><span className="text-xs text-gray-600">Keyword:</span><span className="text-xs font-bold text-brand-orange bg-brand-orange/10 px-2.5 py-0.5 rounded-full">{keyword}</span></div>}
+      {/* Caption — always rendered so users can write one even if AI returned empty */}
+      <div className="rounded-xl bg-white/[0.03] border border-white/10 p-4 space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Instagram Caption</span>
+          <button onClick={copyCaption} disabled={!caption} className="text-xs text-gray-400 hover:text-white flex items-center gap-1.5 disabled:opacity-30">
+            {captionCopied ? <><Check size={11} className="text-green-400" /><span className="text-green-400">Copied!</span></> : <><Copy size={11} />Copy</>}
+          </button>
         </div>
-      )}
+        <textarea value={caption} onChange={e => store.setCaption(e.target.value)}
+          placeholder="Write your Instagram caption here..."
+          className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-xs text-gray-300 leading-relaxed resize-y focus:outline-none focus:border-brand-orange/30 placeholder-gray-700" rows={10} />
+        {keyword && <div className="flex items-center gap-2"><span className="text-xs text-gray-600">Keyword:</span><span className="text-xs font-bold text-brand-orange bg-brand-orange/10 px-2.5 py-0.5 rounded-full">{keyword}</span></div>}
+      </div>
 
       {/* Navigation */}
       <div className="flex gap-3">

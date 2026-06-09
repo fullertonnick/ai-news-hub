@@ -356,7 +356,7 @@ export default function Step3Edit() {
                   onDoubleClick={(e) => { e.preventDefault(); e.stopPropagation(); setTextOffset(slide!.id, 0, 0); }}
                   style={{
                     position: 'absolute',
-                    left: `${Math.round(52 * PW / 1080) + Math.round((slide?.textOffsetX || 0) * PW / 1080)}px`,
+                    left: `${Math.round(64 * PW / 1080) + Math.round((slide?.textOffsetX || 0) * PW / 1080)}px`,
                     // ~0.49 approximates the vertical center of the text block (content div uses justify-center minus footer).
                     top: `${Math.round(PH * 0.49) + Math.round((slide?.textOffsetY || 0) * PH / 1350)}px`,
                     width: hasOffset ? '88px' : '72px',
