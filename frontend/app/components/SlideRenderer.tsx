@@ -341,8 +341,6 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
   const v = slide.visual as CTASlideVisual;
   const PH = 60 * sc;
 
-  const hasImagen = !!slide.backgroundImage;
-
   // ── Option A: Photo variant — Nick on right, dark brand bg on left ──
   if (v.layout_variant === 'photo') {
     const photoSrc = slide.backgroundImage || '/nick.jpg';
@@ -400,13 +398,8 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
   return (
     <div style={{
       position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden', fontFamily: Brand.typography.font_family,
-      ...(hasImagen
-        ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : { backgroundColor: Brand.colors.bg_primary }),
+      backgroundColor: Brand.colors.bg_primary,
     }}>
-
-      {/* Dark overlay */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: hasImagen ? 'rgba(0,0,0,0.52)' : 'transparent' }} />
 
       {/* Brand orange radial glow — CTA energy */}
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 75% 60% at 50% 50%, rgba(255,113,7,0.14) 0%, transparent 70%)' }} />

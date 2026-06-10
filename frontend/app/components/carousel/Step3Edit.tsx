@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useCarouselStore, type TextOverlay } from '../../stores/useCarouselStore';
 import { Check, Trash2, ChevronLeft, ChevronRight, Upload, Loader2, Wand2, Type, ArrowUp, ArrowDown } from 'lucide-react';
@@ -120,8 +120,10 @@ export default function Step3Edit() {
   }, [currentIdx]);
 
   const slide = slides[currentIdx];
-  const stickers = slide?.stickers || [];
-  const textOverlays = slide?.textOverlays || [];
+  // Stable references for empty arrays — prevents KonvaEditor Transformer effect from re-firing
+  // on every render when stickers/overlays are undefined (|| [] creates a new array each time).
+  const stickers = useMemo(() => slide?.stickers || [], [slide?.stickers]);
+  const textOverlays = useMemo(() => slide?.textOverlays || [], [slide?.textOverlays]);
   const filteredBank = selectedCategory === 'All' ? STICKER_BANK : STICKER_BANK.filter(s => s.category === selectedCategory);
 
   // Responsive canvas sizing — keeps KonvaEditor hit-detection accurate
