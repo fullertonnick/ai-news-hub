@@ -126,6 +126,7 @@ export interface StickerOverlay {
 // ─── Carousel Slide ───────────────────────────────────────────────────────────
 
 export interface CarouselSlide {
+  id?: string;
   slide_number?: number;
   type?: 'hook' | 'context' | 'proof' | 'how_it_works' | 'results' | 'cta' | 'cover' | 'content' | 'step' | 'skill';
   text: string;

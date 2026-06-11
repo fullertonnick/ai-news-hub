@@ -168,6 +168,7 @@ export default function Step4Export() {
     else if (isLast) visual = { type: 'cta_slide', keyword, layout_variant: ctaLayout };
     else visual = s.visual || { type: s.visual_type || 'none' };
     return {
+      id: s.id,
       text: s.text, accent_word: s.accent_word, section_label: s.section_label,
       visual, backgroundImage: s.backgroundImage,
       stickers: s.stickers, textOverlays: s.textOverlays,
@@ -402,7 +403,7 @@ export default function Step4Export() {
     {isMounted && createPortal(
       <div style={{ position: 'fixed', left: '-99999px', top: 0, pointerEvents: 'none', zIndex: -1 }} aria-hidden="true">
         {renderSlides.map((slide, i) => (
-          <SlideRenderer key={slides[i]?.id || i} ref={el => { exportRefs.current[i] = el; }} slide={slide} slideNumber={i + 1} totalSlides={slides.length} forExport />
+          <SlideRenderer key={slide.id || i} ref={el => { exportRefs.current[i] = el; }} slide={slide} slideNumber={i + 1} totalSlides={slides.length} forExport />
         ))}
       </div>,
       document.body

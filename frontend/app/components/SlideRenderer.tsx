@@ -74,21 +74,21 @@ function highlightCode(code: string, highlights: string[] = [], sc: number): Rea
 function SectionLabel({ label, sc, onImage }: { label: string; sc: number; onImage?: boolean }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: `${8 * sc}px`, flexShrink: 0 }}>
-      <div style={{ flex: 1, height: `${2 * sc}px`, background: 'rgba(255,255,255,0.25)' }} />
+      <div style={{ flex: 1, height: `${2 * sc}px`, background: 'rgba(255,113,7,0.25)' }} />
       <span style={{
         color: Brand.colors.text_muted, fontSize: `${18 * sc}px`, fontWeight: 600,
         letterSpacing: '0.08em', textTransform: 'uppercase' as const, whiteSpace: 'nowrap' as const,
         fontFamily: Brand.typography.font_family,
         ...(onImage ? { textShadow: '0 1px 4px rgba(0,0,0,0.60)' } : {}),
       }}>{label}</span>
-      <div style={{ flex: 1, height: `${2 * sc}px`, background: 'rgba(255,255,255,0.25)' }} />
+      <div style={{ flex: 1, height: `${2 * sc}px`, background: 'rgba(255,113,7,0.25)' }} />
     </div>
   );
 }
 
 function Footer({ sc, light = false, slideNumber, totalSlides }: { sc: number; light?: boolean; slideNumber?: number; totalSlides?: number }) {
   const color = light ? 'rgba(255,255,255,0.80)' : Brand.colors.text_muted;
-  const border = light ? '1px solid rgba(255,255,255,0.25)' : '1px solid rgba(255,255,255,0.18)';
+  const border = light ? '1px solid rgba(255,255,255,0.25)' : '1px solid rgba(255,255,255,0.25)';
   return (
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -275,11 +275,11 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
         />
       )}
 
-      {/* Dark overlay — slightly heavier so text always pops over bright photos */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)' }} />
+      {/* Dark overlay — heavier so text always pops over bright photos */}
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.52)' }} />
 
       {/* Bottom gradient — strong dark behind headline and footer */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.10) 20%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.78) 62%, rgba(0,0,0,0.95) 80%, rgba(0,0,0,0.99) 100%)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.10) 20%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.78) 62%, rgba(0,0,0,0.95) 80%, rgba(0,0,0,0.95) 100%)' }} />
 
       {/* Top gradient — darkens badge/headline area; heavier for top/middle positions */}
       <div style={{ position: 'absolute', inset: 0, background: headlinePos === 'top' || headlinePos === 'middle'
@@ -355,7 +355,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
       }}>
         {/* Nick's photo on right — uses the selected photo from Step2 shuffle */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={photoSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.62}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.78, zIndex: 1 }} />
+        <img src={photoSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.62}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.88, zIndex: 1 }} />
         {/* Gradient fade — solid dark on text side, fades to transparent toward photo */}
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 30%, rgba(26,26,26,0.92) 48%, rgba(26,26,26,0.45) 68%, rgba(26,26,26,0.08) 100%)`, zIndex: 2 }} />
         {/* Bottom gradient — darkens footer strip across full width for readability over photo */}
@@ -575,7 +575,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 fontSize: `${24 * sc}px`, fontWeight: 400,
                 fontFamily: Brand.typography.font_family,
                 color: Brand.colors.text_primary, lineHeight: 1.60,
-                letterSpacing: '0', whiteSpace: 'pre-line' as const,
+                letterSpacing: '-0.01em', whiteSpace: 'pre-line' as const,
                 ...(hasImagen ? { textShadow: '0 1px 4px rgba(0,0,0,0.60)' } : {}),
               }}>
                 {renderWithAccent(p, slide.accent_word, undefined, { textShadow: '0 0 16px rgba(255,113,7,0.50)', color: Brand.colors.accent_primary })}
@@ -643,7 +643,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                         display: 'flex', flexDirection: 'column', gap: `${8 * sc}px`,
                       }}>
                         <div style={{ fontSize: `${28 * sc}px`, lineHeight: 1 }}>{s.icon}</div>
-                        <div style={{ fontSize: `${64 * sc}px`, fontWeight: 800, color: Brand.colors.accent_primary, lineHeight: 1, letterSpacing: '-0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{s.value}</div>
+                        <div style={{ fontSize: `${64 * sc}px`, fontWeight: 800, color: Brand.colors.accent_primary, lineHeight: 1, letterSpacing: '-0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, minWidth: 0 }}>{s.value}</div>
                         <div style={{ fontSize: `${17 * sc}px`, color: Brand.colors.text_muted, textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
                       </div>
                     ))}
