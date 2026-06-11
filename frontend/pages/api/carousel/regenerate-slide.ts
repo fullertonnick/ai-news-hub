@@ -64,10 +64,14 @@ section_label: the label text, or null if this slide genuinely has no structural
 Return JSON only: {"text": "...", "accent_word": "...", "section_label": "...or null"}`;
 
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 25_000);
+
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.85, maxOutputTokens: 500 },
@@ -102,7 +106,10 @@ Return JSON only: {"text": "...", "accent_word": "...", "section_label": "...or 
       accent_word: fixAccentWord(cleanText, parsed.accent_word),
       section_label: sectionLabel ?? null,
     });
-  } catch {
-    return res.json({ text: null, accent_word: null, error: 'Generation failed — try again' });
+  } catch (err: any) {
+    const msg = err?.name === 'AbortError' ? 'Generation timed out — try again' : 'Generation failed — try again';
+    return res.json({ text: null, accent_word: null, error: msg });
+  } finally {
+    clearTimeout(timeout);
   }
 }

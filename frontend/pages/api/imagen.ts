@@ -36,12 +36,12 @@ async function tryImagen3(prompt: string, apiKey: string, signal: AbortSignal): 
   }
 }
 
-// Fallback: Gemini 2.0 Flash experimental multimodal image generation.
+// Fallback: Gemini 2.0 Flash multimodal image generation.
 async function tryGeminiFlash(prompt: string, apiKey: string, signal: AbortSignal): Promise<string | null> {
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const r = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

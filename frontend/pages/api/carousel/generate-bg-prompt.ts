@@ -155,10 +155,14 @@ BRAND STYLE:
 
 Output the prompt only — no quotes, no JSON, no explanation.`;
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20_000);
+
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 400 },
@@ -167,10 +171,13 @@ Output the prompt only — no quotes, no JSON, no explanation.`;
     });
     const d = await r.json();
     const generatedPrompt = extractGeminiText(d).trim();
+    if (!generatedPrompt) throw new Error('empty response');
     return res.json({ prompt: generatedPrompt + SAFETY_SUFFIX });
   } catch {
     return res.json({
       prompt: `Dark cinematic background representing "${topic}", warm orange accent lighting, deep shadows, professional atmosphere, bokeh depth of field${SAFETY_SUFFIX}`,
     });
+  } finally {
+    clearTimeout(timeout);
   }
 }

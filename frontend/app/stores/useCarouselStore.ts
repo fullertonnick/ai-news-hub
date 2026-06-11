@@ -265,9 +265,16 @@ export const useCarouselStore = create<CarouselStore>()(
       version: 13,
       // Exclude backgroundImage (base64 data URLs, up to ~500KB each × 8 slides) from localStorage
       // to prevent exceeding the 5MB quota. Backgrounds are regenerated in Step2 when missing.
+      // Also drop uploaded image stickers (non-SVG base64 data URLs, 100KB–2MB each) so persisted
+      // state stays well under the 5MB quota. SVG data URIs (~1–5KB) from the sticker bank are kept.
       partialize: (state) => ({
         ...state,
-        slides: state.slides.map(({ backgroundImage: _bg, ...rest }) => rest),
+        slides: state.slides.map(({ backgroundImage: _bg, ...rest }) => ({
+          ...rest,
+          stickers: rest.stickers?.filter(
+            st => !st.src.startsWith('data:') || st.src.startsWith('data:image/svg+xml'),
+          ),
+        })),
       }),
       migrate: (persisted: any, fromVersion: number) => {
         if (fromVersion < 12) {
