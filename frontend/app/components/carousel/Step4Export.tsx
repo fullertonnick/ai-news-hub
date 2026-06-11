@@ -117,6 +117,8 @@ export default function Step4Export() {
   const [downloading, setDownloading] = useState<number | 'zip' | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   const [captionCopied, setCaptionCopied] = useState(false);
+  const captionCopiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (captionCopiedTimer.current) clearTimeout(captionCopiedTimer.current); }, []);
   const [previewScale, setPreviewScale] = useState(0);
   const [proxyingImages, setProxyingImages] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>(null);
@@ -262,10 +264,15 @@ export default function Step4Export() {
     setDownloading(null);
   }, [slides, caption, keyword, store.topic, ensureDataUrls]);
 
+  const scheduleCaptionReset = useCallback(() => {
+    if (captionCopiedTimer.current) clearTimeout(captionCopiedTimer.current);
+    setCaptionCopied(true);
+    captionCopiedTimer.current = setTimeout(() => setCaptionCopied(false), 2000);
+  }, []);
+
   const copyCaption = () => {
     navigator.clipboard.writeText(caption).then(() => {
-      setCaptionCopied(true);
-      setTimeout(() => setCaptionCopied(false), 2000);
+      scheduleCaptionReset();
     }).catch(() => {
       // Clipboard access denied — fall back to execCommand
       try {
@@ -277,8 +284,7 @@ export default function Step4Export() {
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        setCaptionCopied(true);
-        setTimeout(() => setCaptionCopied(false), 2000);
+        scheduleCaptionReset();
       } catch { /* silent */ }
     });
   };

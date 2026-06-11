@@ -113,10 +113,11 @@ export default function Step3Edit() {
     }
   }, [slides.length, currentIdx]);
 
-  // Reset selection and error when navigating to a different slide
+  // Reset selection, error, and AI panel when navigating to a different slide
   useEffect(() => {
     setSelectedId(null);
     setVisualError(null);
+    setShowPrompt(false);
   }, [currentIdx]);
 
   const slide = slides[currentIdx];
@@ -333,6 +334,7 @@ export default function Step3Edit() {
                 Konva uses getBoundingClientRect() for hit detection; if it lived inside the
                 scale(0.667) wrapper its stage coords would be 1.5× off from mouse position. */}
             <KonvaEditor
+              slideId={slide.id}
               stickers={stickers}
               textOverlays={textOverlays}
               selectedId={selectedId}

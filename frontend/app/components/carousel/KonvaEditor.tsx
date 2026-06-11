@@ -131,6 +131,7 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
 
 // ─── Main ───────────────────────────────────────────────────────────────────
 interface Props {
+  slideId: string;
   stickers: StickerOverlay[];
   textOverlays: TextOverlay[];
   selectedId: string | null;
@@ -141,7 +142,7 @@ interface Props {
   height: number;
 }
 
-export default function KonvaEditor({ stickers, textOverlays, selectedId, onSelect, onUpdateSticker, onUpdateTextOverlay, width, height }: Props) {
+export default function KonvaEditor({ slideId, stickers, textOverlays, selectedId, onSelect, onUpdateSticker, onUpdateTextOverlay, width, height }: Props) {
   const stageRef = useRef<any>(null);
   const trRef = useRef<any>(null);
   const [cursor, setCursor] = useState<string>('default');
@@ -156,8 +157,10 @@ export default function KonvaEditor({ stickers, textOverlays, selectedId, onSele
     ...textOverlays.map(t => ({ kind: 'text' as const, data: t })),
   ].sort((a, b) => (a.data.zIndex ?? 10) - (b.data.zIndex ?? 10));
 
-  // Reset cursor when the slide changes (stickers/overlays swapped out from under us)
-  useEffect(() => { setCursor('default'); }, [stickers, textOverlays]);
+  // Reset cursor when the slide changes. slideId is the primary dep — it changes on every
+  // slide navigation, even when both slides have empty sticker/overlay arrays (in which case
+  // stickers/textOverlays are the same [] reference from useMemo and would not trigger a reset).
+  useEffect(() => { setCursor('default'); }, [slideId]);
 
   // Attach transformer to selected node.
   // Sticker images (especially uploaded PNGs) load async — poll until the node is

@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
 import { Loader2, Zap, RefreshCw, ArrowUp, ArrowDown, Trash2, Plus, Check, AlertCircle } from 'lucide-react';
 
@@ -24,6 +24,8 @@ export default function Step1Copy() {
   const { topic, style, slides, caption, keyword, copyLoading, approvals } = store;
   const [error, setError] = useState<string | null>(null);
   const [isFallback, setIsFallback] = useState(false);
+  const [regenConfirm, setRegenConfirm] = useState(false);
+  const regenConfirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [regenError, setRegenError] = useState<Record<string, string>>({});
   const [slideRegenLoading, setSlideRegenLoading] = useState<Record<string, boolean>>({});
 
@@ -56,6 +58,20 @@ export default function Step1Copy() {
     }
   }, [topic, style, store]);
 
+  // When slides already exist, require a second click to confirm (prevents accidental
+  // destruction of background images and stickers added in Steps 2-3).
+  const handleGenerateCopy = useCallback(() => {
+    if (slides.length > 0 && !regenConfirm) {
+      setRegenConfirm(true);
+      if (regenConfirmTimer.current) clearTimeout(regenConfirmTimer.current);
+      regenConfirmTimer.current = setTimeout(() => setRegenConfirm(false), 4000);
+      return;
+    }
+    setRegenConfirm(false);
+    if (regenConfirmTimer.current) clearTimeout(regenConfirmTimer.current);
+    generateCopy();
+  }, [slides.length, regenConfirm, generateCopy]);
+
   const regenerateSlide = useCallback(async (slideId: string) => {
     const slide = slides.find(s => s.id === slideId);
     if (!slide) return;
@@ -86,7 +102,7 @@ export default function Step1Copy() {
       {/* Topic + style */}
       <div className="rounded-xl bg-white/[0.03] border border-white/10 p-4 space-y-3">
         <input type="text" value={topic} onChange={e => store.setTopic(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && !copyLoading && topic.trim()) generateCopy(); }}
+          onKeyDown={e => { if (e.key === 'Enter' && !copyLoading && topic.trim()) handleGenerateCopy(); }}
           placeholder="Topic: e.g. Make.com automating client onboarding"
           className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-4 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-brand-orange/50" />
         <div className="flex gap-1.5">
@@ -97,9 +113,13 @@ export default function Step1Copy() {
             </button>
           ))}
         </div>
-        <button onClick={generateCopy} disabled={copyLoading || !topic.trim()}
-          className="w-full bg-brand-orange hover:bg-orange-500 disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
-          {copyLoading ? <><Loader2 size={14} className="animate-spin" />Generating Copy...</> : <><Zap size={14} />{slides.length ? 'Regenerate All Copy' : 'Generate Copy'}</>}
+        <button onClick={handleGenerateCopy} disabled={copyLoading || !topic.trim()}
+          className={`w-full font-bold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-40 ${regenConfirm ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-brand-orange hover:bg-orange-500 text-white'}`}>
+          {copyLoading
+            ? <><Loader2 size={14} className="animate-spin" />Generating Copy...</>
+            : regenConfirm
+              ? <><AlertCircle size={14} />This will reset all backgrounds &amp; stickers — confirm?</>
+              : <><Zap size={14} />{slides.length ? 'Regenerate All Copy' : 'Generate Copy'}</>}
         </button>
       </div>
 
