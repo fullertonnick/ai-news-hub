@@ -110,6 +110,23 @@ async function preloadFonts() {
     ]);
 }
 
+// Waits for every <img> inside the export element to fully decode before capture.
+// html-to-image reads pixel data synchronously — images that haven't decoded yet
+// appear blank even if their src is a valid data: URL.
+async function waitForImages(el: HTMLElement) {
+  const imgs = [...el.querySelectorAll('img')] as HTMLImageElement[];
+  await Promise.all(
+    imgs.map(img =>
+      img.complete
+        ? (img.decode ? img.decode().catch(() => {}) : Promise.resolve())
+        : new Promise<void>(resolve => {
+            img.onload  = () => resolve();
+            img.onerror = () => resolve();
+          })
+    )
+  );
+}
+
 export default function Step4Export() {
   const store = useCarouselStore();
   const { slides, keyword, ctaLayout, caption, coverPosition } = store;
@@ -201,13 +218,14 @@ export default function Step4Export() {
     }
     try {
       await preloadFonts();
-      // 900ms gives CSS backgrounds and custom fonts time to fully settle before capture
-      await new Promise(r => setTimeout(r, 900));
+      await waitForImages(el);
+      // 500ms lets CSS paint and GPU compositing finish after fonts + images are ready
+      await new Promise(r => setTimeout(r, 500));
       let png: string;
       try {
         png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
       } catch {
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 600));
         png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
       }
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
@@ -224,7 +242,7 @@ export default function Step4Export() {
     await ensureDataUrls();
     try {
       await preloadFonts();
-      await new Promise(r => setTimeout(r, 900));
+      await new Promise(r => setTimeout(r, 500));
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       let missingRefs = 0;
@@ -238,6 +256,7 @@ export default function Step4Export() {
           }
         }
         if (!el) { missingRefs++; continue; }
+        await waitForImages(el);
         let png: string;
         try {
           png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
@@ -246,7 +265,7 @@ export default function Step4Export() {
           png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
         }
         zip.file(`slide-${String(i + 1).padStart(2, '0')}.png`, png.replace(/^data:image\/png;base64,/, ''), { base64: true });
-        await new Promise(r => setTimeout(r, 400));
+        await new Promise(r => setTimeout(r, 200));
       }
       if (missingRefs > 0) {
         console.warn(`ZIP export: ${missingRefs} slide ref(s) were null and skipped. Refresh and retry if slides are missing.`);

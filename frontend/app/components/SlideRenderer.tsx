@@ -404,6 +404,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
   }
 
   // ── Option B: Text-only (centered) ──
+  const ctaHasBg = !!slide.backgroundImage;
   const ctaTextFontSize = slide.text.length <= 25 ? 62 * sc
     : slide.text.length <= 42 ? 54 * sc
     : slide.text.length <= 60 ? 46 * sc
@@ -414,7 +415,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
       position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden', fontFamily: Brand.typography.font_family,
       backgroundColor: Brand.colors.bg_primary,
     }}>
-      {hasImagen && (
+      {ctaHasBg && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={slide.backgroundImage} alt="" aria-hidden="true" crossOrigin="anonymous"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
