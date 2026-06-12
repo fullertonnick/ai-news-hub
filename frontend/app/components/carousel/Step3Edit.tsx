@@ -188,26 +188,31 @@ export default function Step3Edit() {
     };
   }, [slide, setTextOffset, canvasW, canvasH]);
 
-  const buildRenderSlide = (s: typeof slides[0], i: number) => {
-    const isFirst = i === 0, isLast = i === slides.length - 1;
+  // Memoize the render slide so SlideRenderer doesn't re-render on every UI interaction
+  // (e.g. sticker drag, panel hover). Only recompute when the actual slide data changes.
+  const renderSlide = useMemo(() => {
+    if (!slide) return null;
+    const isFirst = currentIdx === 0, isLast = currentIdx === slides.length - 1;
     let visual: any;
     if (isFirst) visual = { type: 'cover_photo', gradient_hue: 25, position: coverPosition };
     else if (isLast) visual = { type: 'cta_slide', keyword, layout_variant: ctaLayout };
-    else visual = s.visual || { type: s.visual_type || 'none' };
+    else visual = slide.visual || { type: slide.visual_type || 'none' };
     return {
-      text: s.text,
-      accent_word: s.accent_word,
-      section_label: s.section_label,
+      id: slide.id,
+      text: slide.text,
+      accent_word: slide.accent_word,
+      section_label: slide.section_label,
       visual,
-      backgroundImage: s.backgroundImage,
+      backgroundImage: slide.backgroundImage,
       // Stickers and overlays intentionally omitted here: KonvaEditor renders them
       // interactively on top of the SlideRenderer. Including them would double-render.
-      useTextOverlays: s.useTextOverlays,
+      useTextOverlays: slide.useTextOverlays,
       // Only apply text offset when baked-in text is visible
-      textOffsetX: s.useTextOverlays ? 0 : s.textOffsetX,
-      textOffsetY: s.useTextOverlays ? 0 : s.textOffsetY,
+      textOffsetX: slide.useTextOverlays ? 0 : slide.textOffsetX,
+      textOffsetY: slide.useTextOverlays ? 0 : slide.textOffsetY,
     };
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slide?.id, slide?.text, slide?.accent_word, slide?.section_label, slide?.visual, slide?.backgroundImage, slide?.useTextOverlays, slide?.textOffsetX, slide?.textOffsetY, currentIdx, slides.length, coverPosition, keyword, ctaLayout]);
 
   const addSticker = useCallback((bs: BankSticker) => {
     if (!slide) return;
@@ -277,14 +282,13 @@ export default function Step3Edit() {
   }, [slide, store, stickers.length]);
 
 
-  if (!slide) return null;
+  if (!slide || !renderSlide) return null;
 
   const selSticker = selectedId ? stickers.find(s => s.id === selectedId) : null;
   const selText = selectedId ? textOverlays.find(t => t.id === selectedId) : null;
   const layers = [...stickers.map(s => ({ kind: 'sticker' as const, id: s.id, label: s.label, z: s.zIndex || 10 })), ...textOverlays.map(t => ({ kind: 'text' as const, id: t.id, label: t.text.slice(0, 20), z: t.zIndex || 5 }))].sort((a, b) => b.z - a.z);
 
   const PW = canvasW, PH = canvasH;
-  const renderSlide = buildRenderSlide(slide, currentIdx);
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-5">
@@ -488,6 +492,10 @@ export default function Step3Edit() {
                     <option value={400}>Normal</option><option value={700}>Bold</option><option value={800}>Extra Bold</option>
                   </select>
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div><label className="text-[9px] text-gray-500">Opacity</label><input type="range" min={10} max={100} value={Math.round((selText.opacity ?? 1) * 100)} onChange={e => store.updateTextOverlay(slide.id, selectedId!, { opacity: +e.target.value / 100 })} className="w-full accent-orange-500" /></div>
+                <div className="flex items-end pb-0.5"><span className="text-[9px] text-gray-500">{Math.round((selText.opacity ?? 1) * 100)}%</span></div>
               </div>
               <div className="flex gap-1">
                 {['#FFFFFF', '#FF7107', '#22C55E', '#1D9BF0', '#A855F7', '#EF4444'].map(c => (

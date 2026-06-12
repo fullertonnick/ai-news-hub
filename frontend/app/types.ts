@@ -107,6 +107,7 @@ export interface TextOverlay {
   zIndex: number;
   fontFamily?: string;
   rotation?: number;  // degrees
+  opacity?: number;   // 0–1, defaults to 1
 }
 
 // ─── Sticker Overlay ─────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCarouselStore } from '../../stores/useCarouselStore';
 import { Loader2, Zap, RefreshCw, ArrowUp, ArrowDown, Trash2, Plus, Check, AlertCircle } from 'lucide-react';
 
@@ -26,6 +26,7 @@ export default function Step1Copy() {
   const [isFallback, setIsFallback] = useState(false);
   const [regenConfirm, setRegenConfirm] = useState(false);
   const regenConfirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (regenConfirmTimer.current) clearTimeout(regenConfirmTimer.current); }, []);
   const [regenError, setRegenError] = useState<Record<string, string>>({});
   const [slideRegenLoading, setSlideRegenLoading] = useState<Record<string, boolean>>({});
 

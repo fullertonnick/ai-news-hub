@@ -144,6 +144,9 @@ export default function Step4Export() {
     return () => ro.disconnect();
   }, []);
 
+  // Stable reference to the store action — won't cause ensureDataUrls to be recreated on every state change
+  const setSlideBackground = useCarouselStore(s => s.setSlideBackground);
+
   // Safety net: proxy any non-data-URL backgrounds before first export
   const ensureDataUrls = useCallback(async () => {
     const external = slides.filter(s => s.backgroundImage && !s.backgroundImage.startsWith('data:'));
@@ -152,13 +155,13 @@ export default function Step4Export() {
     await Promise.all(external.map(async s => {
       try {
         const dataUrl = await toDataUrl(s.backgroundImage!);
-        if (dataUrl.startsWith('data:')) store.setSlideBackground(s.id, dataUrl);
+        if (dataUrl.startsWith('data:')) setSlideBackground(s.id, dataUrl);
       } catch { /* leave as-is */ }
     }));
     // Wait for React to flush store updates and CSS background-image to decode
     await new Promise(r => setTimeout(r, 800));
     setProxyingImages(false);
-  }, [slides, store]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [slides, setSlideBackground]);
 
   // Build render slides — memoized so hidden 1080px renderers don't re-render on every UI state change
   const renderSlides: CarouselSlide[] = useMemo(() => slides.map((s, i) => {

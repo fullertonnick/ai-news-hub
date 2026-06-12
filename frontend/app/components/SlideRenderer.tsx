@@ -159,6 +159,7 @@ function RenderOverlays({ slide, W, H }: { slide: CarouselSlide; W: number; H: n
               wordBreak: 'break-word',
               whiteSpace: 'pre-wrap',
               zIndex: t.zIndex ?? 10,
+              opacity: t.opacity ?? 1,
               pointerEvents: 'none',
               userSelect: 'none' as const,
               textShadow: '0 2px 8px rgba(0,0,0,0.7)',
@@ -237,7 +238,12 @@ function getTopicStickers(text: string, headlinePosition: 'top' | 'middle' | 'bo
 
 function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: CarouselSlide; W: number; H: number; sc: number; slideNumber?: number; totalSlides?: number }) {
   const v = slide.visual as CoverPhotoVisual;
-  const [coverHeadline, coverSubtitle] = slide.text.split('\n\n').map(s => s.replace(/^\(|\)$/g, '').trim());
+  // Split on \n\n — first part is the headline, second (if any) is the subtitle.
+  // Use only the headline for sizing so subtitle words don't inflate the word count
+  // and push the headline font too small.
+  const rawParts = slide.text.split('\n\n');
+  const coverHeadline = (rawParts[0] || slide.text).replace(/^\(|\)$/g, '').trim();
+  const coverSubtitle = rawParts.length >= 2 ? rawParts[1].replace(/^\(|\)$/g, '').trim() : undefined;
   const headlineWords = coverHeadline.split(/\s+/);
   // Scale by word count first, then clamp down further if total chars are very long
   // (guards against multi-syllable words overflowing the 1080px - 120px padding space).

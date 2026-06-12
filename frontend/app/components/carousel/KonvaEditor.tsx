@@ -108,6 +108,7 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
       fontStyle={overlay.fontWeight >= 800 ? '800' : overlay.fontWeight >= 700 ? 'bold' : 'normal'}
       fontFamily={resolveForCanvas(overlay.fontFamily || '"Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif')}
       fill={overlay.color}
+      opacity={overlay.opacity ?? 1}
       width={pxW}
       align="center"
       shadowColor="rgba(0,0,0,0.7)"
