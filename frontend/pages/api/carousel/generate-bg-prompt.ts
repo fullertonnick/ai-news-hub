@@ -6,7 +6,7 @@ export const config = { maxDuration: 60 };
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { topic, slideText, slideType, category } = req.body;
+  const { topic, slideText, slideType, category, slideLabel } = req.body;
   if (!topic || !slideText) return res.status(400).json({ error: 'topic and slideText required' });
 
   const SAFETY_SUFFIX = ', no text, no words, no letters, no typography, no faces, no people, no hands, no human figures, no logos, no UI, near-black background, cinematic 3:4 portrait, professional photography';
@@ -128,6 +128,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 SLIDE CONTEXT:
 - Topic: "${topic}"
+- Slide label: "${slideLabel || 'none'}"
 - Slide text: "${slideText.slice(0, 450)}"
 - Slide type: ${slideType}
 

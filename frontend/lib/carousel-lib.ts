@@ -34,9 +34,9 @@ export function fixAccentWord(text: string, accentWord: string | undefined): str
     if (subEnd.length >= 3 && subEnd !== sub && text.toLowerCase().includes(subEnd.toLowerCase())) return subEnd;
   }
   // Fallback: extract the most impactful phrase from text.
-  // Check kicker (last paragraph) first — it's the mic-drop, most likely to be screenshot-worthy.
+  // Check last paragraph first — in Tyler Germain style, even 2-para slides end with the kicker.
   const paras = text.split('\n\n').filter(Boolean);
-  const kicker = paras.length >= 3 ? paras[paras.length - 1] : null;
+  const kicker = paras.length >= 2 ? paras[paras.length - 1] : null;
   const searchZones = kicker ? [kicker, text] : [text];
   for (const zone of searchZones) {
     const dollar = zone.match(/\$[\d,]+(?:[kKmM])?(?:\/\w+)?/);

@@ -97,7 +97,7 @@ export default function Step2Visuals() {
   // Generate middle slide background.
   // Uses getState() for Zustand actions so the callback doesn't need `store` in deps,
   // which would otherwise cause stale closures and excessive re-creations.
-  const generateBg = useCallback(async (slideId: string, slideText: string, slideType: string) => {
+  const generateBg = useCallback(async (slideId: string, slideText: string, slideType: string, slideLabel?: string) => {
     if (busyRef.current[slideId]) return;
     busyRef.current[slideId] = true;
     if (mountedRef.current) setGenerating(prev => ({ ...prev, [slideId]: true }));
@@ -106,7 +106,7 @@ export default function Step2Visuals() {
     try {
       const pr = await fetch('/api/carousel/generate-bg-prompt', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic, slideText, slideType, category }),
+        body: JSON.stringify({ topic, slideText, slideType, category, slideLabel }),
       });
       const pd = await pr.json();
       const prompt = pd.prompt || `Dark cinematic workspace, warm orange desk lamp glow, deep shadows, no text, no faces, bokeh`;
@@ -139,7 +139,7 @@ export default function Step2Visuals() {
   const generateAll = useCallback(async () => {
     for (const s of slides.slice(1, -1)) {
       if (!busyRef.current[s.id] && !s.backgroundImage) {
-        await generateBg(s.id, s.text, s.visual_type || 'none');
+        await generateBg(s.id, s.text, s.visual_type || 'none', s.section_label);
         await new Promise(r => setTimeout(r, 400));
       }
     }
@@ -149,7 +149,7 @@ export default function Step2Visuals() {
   const regenerateAll = useCallback(async () => {
     for (const s of slides.slice(1, -1)) {
       if (!busyRef.current[s.id]) {
-        await generateBg(s.id, s.text, s.visual_type || 'none');
+        await generateBg(s.id, s.text, s.visual_type || 'none', s.section_label);
         await new Promise(r => setTimeout(r, 400));
       }
     }
@@ -339,7 +339,7 @@ export default function Step2Visuals() {
                 <input type="text" value={slide.accent_word || ''} onChange={e => store.updateSlideAccent(slide.id, e.target.value)}
                   className="w-full bg-white/[0.02] border border-white/5 rounded-lg px-3 py-2 text-sm text-brand-orange focus:outline-none focus:border-brand-orange/30" />
               </div>
-              <button onClick={() => generateBg(slide.id, slide.text, slide.visual_type || 'none')} disabled={generating[slide.id]}
+              <button onClick={() => generateBg(slide.id, slide.text, slide.visual_type || 'none', slide.section_label)} disabled={generating[slide.id]}
                 className="w-full flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium py-2.5 rounded-xl transition-colors disabled:opacity-40">
                 {generating[slide.id] ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
                 {generating[slide.id] ? 'Generating...' : slide.backgroundImage ? 'Regenerate Background' : 'Generate Background'}

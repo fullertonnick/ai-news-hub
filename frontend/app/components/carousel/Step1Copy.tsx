@@ -19,6 +19,20 @@ const STYLE_TOOLTIPS: Record<string, string> = {
   prompt_reveal: 'Myth-busting or Before/After — build tension and flip it',
 };
 
+// Infer the chosen structure from section labels so users know what the AI picked
+function detectStructure(slides: { section_label?: string }[]): string | null {
+  const labels = slides.slice(1, -1).map(s => s.section_label).filter(Boolean) as string[];
+  if (!labels.length) return null;
+  const first = labels[0].toLowerCase();
+  if (/^step\s*\d/.test(first)) return 'Steps';
+  if (/^\d{1,2}\./.test(first)) return 'Numbered List';
+  if (/myth|the myth/.test(first)) return 'Myth-Busting';
+  if (/before/.test(first)) return 'Before/After';
+  if (/what it|why it|how it|real example/.test(first)) return 'Deep Dive';
+  if (/option [ab]/.test(first)) return 'Comparison';
+  return null;
+}
+
 export default function Step1Copy() {
   const store = useCarouselStore();
   const { topic, style, slides, caption, keyword, copyLoading, approvals } = store;
@@ -146,6 +160,7 @@ export default function Step1Copy() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{slides.length} Slides — Edit Below</span>
             <div className="flex items-center gap-2">
+              {(() => { const s = detectStructure(slides); return s ? <span className="text-[10px] text-blue-400 bg-blue-400/10 border border-blue-400/20 px-2 py-0.5 rounded-full">{s}</span> : null; })()}
               {store.category && (
                 <span className="text-[10px] text-gray-500 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full capitalize">
                   {store.category.replace(/-/g, ' ')}

@@ -59,28 +59,34 @@ DECISION TREE — work through in order, pick the FIRST that fits perfectly:
    Labels: "Option A", "Option B", "The Verdict"…
 
 CALIBRATION EXAMPLES — use these to pick your structure:
-"Claude Code memory system" → DEEP DIVE (mechanism: what it is → why it matters → how it works → real example → apply it)
-"Make.com client onboarding automation" → STEPS (sequential: Step 1 → Step 2 → Step 3 → Step 4)
-"Why 80% of AI agents fail in production" → MYTH-BUSTING (The Myth → Reality → The Proof → Apply It)
+"Claude Code memory system" → DEEP DIVE (hidden mechanism: What it is → Why it matters → How it works → Real example → Apply it)
+"Claude Code hooks system" → STEPS (setup process: Step 1 install → Step 2 configure → Step 3 test → Step 4 deploy)
+"Make.com client onboarding automation" → STEPS (workflow: Step 1 webhook → Step 2 validate → Step 3 create → Step 4 notify)
+"Why 80% of AI agents fail in production" → MYTH-BUSTING (The Myth: model is bad → Reality: scope is wrong → The Proof → Apply It)
 "5 Claude prompts every agency owner needs" → NUMBERED LIST (01. → 02. → 03. → 04. → 05.)
 "ChatGPT vs Claude for business writing" → COMPARISON (Option A → Option B → The Verdict)
-"Claude Code hooks system" → STEPS (how to add a hook: Step 1 install → Step 2 configure → Step 3 test → Step 4 deploy)
+"My agency before and after switching to Claude Code" → BEFORE/AFTER (Before: slow → After: 4× faster → What changed → The result)
 
 BANNED: "The Problem / The Fix" as a default structure — it flattens every topic into the same shape. Reserve it ONLY when the topic IS a pain-point story (e.g., "Why your automations fail silently at 3am"). Most topics are not.`;
 }
 
 function fallbackKeyword(topic: string): string {
   const t = topic.toLowerCase();
+  // More specific matches first
   if (/memory|remember|context/.test(t)) return 'MEMORY';
-  if (/claude/.test(t)) return 'CLAUDE';
-  if (/make\.com|automat|workflow/.test(t)) return 'AUTOMATE';
-  if (/agent/.test(t)) return 'AGENTS';
   if (/hook/.test(t)) return 'HOOKS';
+  if (/agent/.test(t)) return 'AGENTS';
   if (/prompt/.test(t)) return 'PROMPTS';
+  if (/error|fail|debug/.test(t)) return 'ERRORS';
   if (/revenue|money|income/.test(t)) return 'REVENUE';
-  if (/tool|stack/.test(t)) return 'TOOLS';
+  if (/onboard/.test(t)) return 'ONBOARD';
+  if (/make\.com|automat|workflow/.test(t)) return 'AUTOMATE';
+  if (/claude code/.test(t)) return 'CLAUDE';
+  if (/claude/.test(t)) return 'CLAUDE';
+  if (/stack|tool/.test(t)) return 'STACK';
   if (/system/.test(t)) return 'SYSTEM';
-  const words = topic.toUpperCase().split(/\s+/).filter(w => !['THE', 'A', 'AN', 'HOW', 'TO', 'OF', 'IN', 'FOR', 'WITH', 'AND'].includes(w));
+  const stopWords = new Set(['THE', 'A', 'AN', 'HOW', 'TO', 'OF', 'IN', 'FOR', 'WITH', 'AND', 'OR', 'MY', 'YOUR', 'WHY', 'WHAT', 'WHEN']);
+  const words = topic.toUpperCase().split(/\s+/).filter(w => !stopWords.has(w) && w.length >= 3);
   return (words[0] || 'BUILD').slice(0, 8);
 }
 
@@ -327,13 +333,16 @@ SLIDE 1 (COVER):
     "Claude Code forgets your entire stack between sessions\\n\\n(the 5-minute CLAUDE.md fix that changes this forever)"
     "Most AI agents fail within 2 weeks of deployment\\n\\n(it's never the model's fault)"
     "Make.com scenarios fail in silence by default\\n\\n(here's the 4-minute error handler that ends midnight alerts)"
+    "Your Claude Code sessions start from zero every single time\\n\\n(one file in your project root fixes this permanently)"
   WEAK COVERS (avoid):
     "How to use Claude Code\\n\\n(tips and tricks)" ← vague, no tension, no payoff
+    "Claude Code memory system\\n\\n(a guide to memory)" ← no tension, no specific payoff
   visual_type: "cover_photo"
   section_label: null
-  accent_word: pick the TENSION phrase — the counter-intuitive claim, the surprising number, or the specific mechanism that makes the headline land. NOT the topic name itself.
-    GOOD cover accents: "never the model's fault", "fails in silence", "blank slate", "5-minute fix"
-    BAD cover accents: "Claude Code", "AI agents", "automation", "memory" (too generic — anyone could guess these)
+  accent_word: pick the TENSION phrase — the counter-intuitive claim, the surprising number, or the specific mechanism.
+    The accent_word must NOT be the topic name or a word anyone would predict. It should be the phrase that makes the reader pause.
+    GOOD cover accents: "never the model's fault", "fail in silence", "blank slate", "5-minute fix", "from one file"
+    BAD cover accents: "Claude Code", "AI agents", "automation", "memory system" (topic name fragments — too predictable)
 
 SLIDES 2 to N-1 (CONTENT):
   text: 2-4 punchy sentences. One key insight. Last line = the kicker.
@@ -398,53 +407,53 @@ BEFORE GENERATING JSON — run this checklist mentally:
 □ Does the keyword appear in the caption's "Comment X and I'll send you..." line?
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-FORMAT EXAMPLE — shows JSON structure ONLY. This example uses Deep Dive structure.
+FORMAT EXAMPLE — shows JSON structure ONLY. This example uses STEPS structure.
 Yours may use a completely different structure. IGNORE topic and content below.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {
   "slides": [
     {
-      "text": "Most AI agents fail within 2 weeks of deployment\\n\\n(and it's never the model's fault)",
-      "accent_word": "never the model's fault",
+      "text": "Make.com scenarios fail in silence by default\\n\\n(this 4-minute fix ends the midnight client alerts)",
+      "accent_word": "fail in silence",
       "section_label": null,
       "visual_type": "cover_photo"
     },
     {
-      "text": "An AI agent is a loop: perceive → decide → act → repeat. That's it.\\n\\nNot magic. Not sentience. A program that reads inputs, calls tools, and writes outputs — until a condition is met or a human stops it.",
-      "accent_word": "perceive → decide → act",
-      "section_label": "What it actually is",
+      "text": "Every HTTP module can throw an error with zero notification.\\n\\nYour scenario stops. Data disappears. No Slack ping. No email. Nothing.\\n\\nYour client notices before you do.",
+      "accent_word": "zero notification",
+      "section_label": "Step 1",
       "visual_type": "none"
     },
     {
-      "text": "Agents fail when scope is wrong, not when models are wrong.\\n\\nA GPT-4-level model with one clear task outperforms a frontier model with 12 vague tasks every time.\\n\\nScope is the architecture decision. Model is the implementation detail.",
-      "accent_word": "one clear task",
-      "section_label": "Why most fail",
+      "text": "Add an Error Handler route after every HTTP module — not just the last one.\\n\\nPipe the failure to Slack: scenario name, module number, error text, timestamp.\\n\\n4 minutes to build. Your on-call schedule shrinks to zero.",
+      "accent_word": "4 minutes",
+      "section_label": "Step 2",
       "visual_type": "none"
     },
     {
-      "text": "My best-performing agent handles exactly one job: email triage. It reads, labels, drafts replies, and flags anything over $10K.\\n\\nIt's been running 6 months. Zero crashes. 3 tools. 200 lines of code.",
-      "accent_word": "3 tools",
-      "section_label": "Real example",
+      "text": "Log every failure to a Make Data Store: date, scenario ID, error code, bundle data.\\n\\nNow you have a searchable audit trail instead of a Slack message you'll scroll past.\\n\\nClients stop asking 'what happened' — because you already know.",
+      "accent_word": "audit trail",
+      "section_label": "Step 3",
       "visual_type": "none"
     },
     {
-      "text": "Start with the smallest useful task in your workflow — the one you do 10 times a day and hate.\\n\\nBuild the agent for that. Ship in a week. Add tasks only after it runs clean for 30 days.",
-      "accent_word": "30 days",
-      "section_label": "How to apply it",
+      "text": "Add a retry filter: if the error is a 5xx or timeout (not a 4xx), wait 30 seconds and re-run.\\n\\n90% of transient failures self-resolve without human intervention.\\n\\n4xx errors are data problems — those go straight to the alert, no retry.",
+      "accent_word": "90%",
+      "section_label": "Step 4",
       "visual_type": "none"
     },
     {
-      "text": "Want the agent architecture template I use on every client deployment?",
-      "accent_word": "architecture template",
+      "text": "Want the Make.com error handler blueprint I use on every client build?",
+      "accent_word": "error handler blueprint",
       "section_label": null,
       "visual_type": "cta_slide"
     }
   ],
-  "caption": "Most AI agents fail — and it's not because the models are bad.\\n\\nHere's what's actually going wrong:\\n\\n→ The perceive-decide-act loop every agent runs (it's simpler than you think)\\n→ Why scope kills more agents than bad models\\n→ A 3-tool agent that's been running flawlessly for 6 months\\n→ The 30-day rule before you add complexity\\n\\nComment AGENTS and I'll send you the full architecture template 🔥\\n📌 Save this before you lose it\\n\\n#aiagents #autonomousai #claude #anthropic #aitools #simpliscale #thenickcornelius #agencyowner #automation #buildwithAI",
-  "keyword": "AGENTS"
+  "caption": "Most Make.com automations fail silently. Here's the 4-minute fix that ends midnight alerts.\\n\\n→ Why HTTP modules fail with zero notification by default\\n→ The Slack alert setup that tells you exactly what broke and when\\n→ Data Store logging for a full searchable audit trail\\n→ The retry logic that auto-resolves 90% of transient errors\\n\\nComment ERRORS and I'll send you the complete error handler blueprint 🔥\\n📌 Save this before you lose it\\n\\n#makecom #automation #nocode #aiautomation #simpliscale #thenickcornelius #agencyowner #workflow #makecreator #automateyourbusiness",
+  "keyword": "ERRORS"
 }
 
-The example above is AI agents with Deep Dive structure — purely a format reference. YOUR carousel must use whatever structure naturally fits "${topic}". Do NOT copy this structure.
+The example above is Make.com error handling with STEPS structure — purely a format reference. YOUR carousel must use whatever structure naturally fits "${topic}". Do NOT copy this structure.
 Now write a completely original carousel about: "${topic}"`;
 
   if (!apiKey) {
