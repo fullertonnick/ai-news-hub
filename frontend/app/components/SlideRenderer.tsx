@@ -270,14 +270,22 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
       position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden',
       fontFamily: Brand.typography.font_family,
       backgroundColor: Brand.colors.bg_primary,
-      ...(hasPhoto ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center top' } : {}),
     }}>
+
+      {/* Background photo as <img> — not CSS background-image — so html-to-image can
+          await img.decode() before capture and never exports a blank/missing background. */}
+      {hasPhoto && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={slide.backgroundImage} alt="" aria-hidden="true" crossOrigin="anonymous"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+        />
+      )}
 
       {/* Fallback: nick.jpg if no uploaded photo and photo is enabled */}
       {showFallbackPhoto && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src="/nick.jpg" alt="" crossOrigin="anonymous"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
+        <img src="/nick.jpg" alt="" aria-hidden="true" crossOrigin="anonymous"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
         />
       )}
 
@@ -406,6 +414,12 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
       position: 'relative', width: `${W}px`, height: `${H}px`, overflow: 'hidden', fontFamily: Brand.typography.font_family,
       backgroundColor: Brand.colors.bg_primary,
     }}>
+      {hasImagen && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={slide.backgroundImage} alt="" aria-hidden="true" crossOrigin="anonymous"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+        />
+      )}
 
       {/* Brand orange radial glow — CTA energy */}
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 75% 60% at 50% 50%, rgba(255,113,7,0.14) 0%, transparent 70%)' }} />
@@ -512,13 +526,18 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
       position: 'relative', overflow: 'hidden', flexShrink: 0,
       fontFamily: Brand.typography.font_family,
       display: 'flex', flexDirection: 'column',
-      // Imagen 3 background when available, else dark solid
-      ...(hasImagen
-        ? { backgroundImage: `url(${slide.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-        : { backgroundColor: Brand.colors.bg_primary }),
+      backgroundColor: Brand.colors.bg_primary,
     }}>
+      {/* Background as <img> — not CSS background-image — so html-to-image can
+          await img.decode() before capture and never exports a blank background. */}
+      {hasImagen && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={slide.backgroundImage} alt="" aria-hidden="true" crossOrigin="anonymous"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+        />
+      )}
       {/* Dark overlay for text readability over Imagen 3 */}
-      {hasImagen && <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', zIndex: 0, pointerEvents: 'none' }} />}
+      {hasImagen && <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', pointerEvents: 'none' }} />}
 
       {/* Subtle top gradient wash — only when no Imagen 3 */}
       {!hasImagen && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '25%', background: `linear-gradient(to bottom, rgba(255,113,7,0.025), transparent)`, pointerEvents: 'none' }} />}
