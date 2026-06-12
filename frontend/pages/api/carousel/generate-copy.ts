@@ -90,6 +90,65 @@ function fallbackKeyword(topic: string): string {
   return (words[0] || 'BUILD').slice(0, 8);
 }
 
+// ─── Category context hints (module-level — not recreated per request) ────────
+
+const CATEGORY_HINTS: Record<string, string> = {
+  'claude-code': `CATEGORY CONTEXT (claude-code): Use specific, accurate Claude Code terminology.
+Key concepts:
+- CLAUDE.md: project memory file, read automatically at session start from project root or ~/.claude/CLAUDE.md
+- .claude/settings.json: project-level permission and hook config
+- /hooks: bash commands that run before/after specific tool calls (PreToolUse, PostToolUse, Stop)
+- Claude Code CLI: runs as "claude" command in terminal
+- Current models: claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5-20251001
+- Sessions start blank — CLAUDE.md is the ONLY persistence mechanism by default
+- Context window: ~200K tokens; compaction happens automatically when approaching limit
+- Tool use: Bash, Read, Edit, Write, Agent are the core tools Claude Code uses
+Name exact file paths, commands, and flags. Never say "a config file" — say "CLAUDE.md".`,
+  'make-automation': `CATEGORY CONTEXT (make-automation): Use specific Make.com terminology.
+Key concepts: scenarios, modules, HTTP request modules, webhooks, data stores, error handler routes, routers, bundles/collections, operations count, instant triggers vs scheduled.
+Name real integrations: Slack, Notion, HubSpot, Airtable, Gmail, Google Sheets.
+Name specific error types: mapping errors, connection errors, rate limits, timeouts.
+Mention real Make.com UX details: scenario builder, module config panels, run history, bundle inspector.`,
+  'ai-agents': `CATEGORY CONTEXT (ai-agents): Use specific, accurate AI agent terminology.
+Key concepts: agent loops (perceive → plan → act → observe), tool calls, context injection, system prompts, handoff between agents, memory types (short-term: context window; long-term: vector DB or files).
+Real frameworks to reference: Claude's native tool use, LangGraph, CrewAI, AutoGen, n8n AI nodes.
+Common failure modes: scope creep, tool hallucination, infinite loops, context window exhaustion.
+Real-world details: token cost per agent run, latency per tool call, error recovery patterns.`,
+  'business-ai': `CATEGORY CONTEXT (business-ai): Focus on measurable business outcomes for agency owners and entrepreneurs.
+Use specific numbers: time saved in hours per week, cost in $/month, revenue impact in $/month.
+Name real tools: Claude, ChatGPT, Make.com, n8n, Zapier, Notion, Slack, HubSpot, Airtable.
+Reference Nick's context: $70K+/month agency, SimpliScale, KingCaller AI, solopreneur/small team workflows.
+Avoid generic "AI helps your business" — always tie to a specific workflow, role, or dollar amount.`,
+};
+
+// ─── Caption normalizer ────────────────────────────────────────────────────────
+
+function normalizeCaption(raw: string, keyword: string): string {
+  let caption = stripForbidden(stripMarkdown(raw));
+  // Ensure caption uses the resolved keyword in the CTA line
+  caption = caption.replace(/Comment\s+[A-Z0-9]+\s+and/gi, `Comment ${keyword} and`);
+  // Inject CTA line if missing entirely
+  if (caption && !/comment\s+[A-Z0-9]+/i.test(caption)) {
+    const hi = caption.indexOf('#');
+    const cta = `Comment ${keyword} and I'll send it over 🔥\n📌 Save this before you lose it`;
+    caption = hi >= 0
+      ? caption.slice(0, hi).trimEnd() + '\n\n' + cta + '\n\n' + caption.slice(hi)
+      : caption.trimEnd() + '\n\n' + cta;
+  }
+  // Ensure the 📌 save line exists
+  if (caption && !caption.includes('📌') && !caption.includes('Save this')) {
+    const hi = caption.indexOf('#');
+    const save = '📌 Save this before you lose it';
+    caption = hi >= 0
+      ? caption.slice(0, hi).trimEnd() + '\n' + save + '\n\n' + caption.slice(hi)
+      : caption.trimEnd() + '\n' + save;
+  }
+  // Ensure brand hashtags
+  if (!caption.includes('#simpliscale')) caption += '\n\n#simpliscale #thenickcornelius';
+  else if (!caption.includes('#thenickcornelius')) caption += ' #thenickcornelius';
+  return caption;
+}
+
 // ─── Category-aware fallback carousel ─────────────────────────────────────────
 
 type FallbackCategory = 'claude-code' | 'make-automation' | 'ai-agents' | 'business-ai';
@@ -197,39 +256,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const apiKey = process.env.GEMINI_API_KEY;
   const category = detectCategory(topic);
 
-  const categoryHint: Record<string, string> = {
-    'claude-code': `CATEGORY CONTEXT (claude-code): Use specific, accurate Claude Code terminology.
-Key concepts:
-- CLAUDE.md: project memory file, read automatically at session start from project root or ~/.claude/CLAUDE.md
-- .claude/settings.json: project-level permission and hook config
-- /hooks: bash commands that run before/after specific tool calls (PreToolUse, PostToolUse, Stop)
-- Claude Code CLI: runs as "claude" command in terminal
-- Current models: claude-opus-4-8, claude-sonnet-4-6, claude-haiku-4-5-20251001
-- Sessions start blank — CLAUDE.md is the ONLY persistence mechanism by default
-- Context window: ~200K tokens; compaction happens automatically when approaching limit
-- Tool use: Bash, Read, Edit, Write, Agent are the core tools Claude Code uses
-Name exact file paths, commands, and flags. Never say "a config file" — say "CLAUDE.md".`,
-    'make-automation': `CATEGORY CONTEXT (make-automation): Use specific Make.com terminology.
-Key concepts: scenarios, modules, HTTP request modules, webhooks, data stores, error handler routes, routers, bundles/collections, operations count, instant triggers vs scheduled.
-Name real integrations: Slack, Notion, HubSpot, Airtable, Gmail, Google Sheets.
-Name specific error types: mapping errors, connection errors, rate limits, timeouts.
-Mention real Make.com UX details: scenario builder, module config panels, run history, bundle inspector.`,
-    'ai-agents': `CATEGORY CONTEXT (ai-agents): Use specific, accurate AI agent terminology.
-Key concepts: agent loops (perceive → plan → act → observe), tool calls, context injection, system prompts, handoff between agents, memory types (short-term: context window; long-term: vector DB or files).
-Real frameworks to reference: Claude's native tool use, LangGraph, CrewAI, AutoGen, n8n AI nodes.
-Common failure modes: scope creep, tool hallucination, infinite loops, context window exhaustion.
-Real-world details: token cost per agent run, latency per tool call, error recovery patterns.`,
-    'business-ai': `CATEGORY CONTEXT (business-ai): Focus on measurable business outcomes for agency owners and entrepreneurs.
-Use specific numbers: time saved in hours per week, cost in $/month, revenue impact in $/month.
-Name real tools: Claude, ChatGPT, Make.com, n8n, Zapier, Notion, Slack, HubSpot, Airtable.
-Reference Nick's context: $70K+/month agency, SimpliScale, KingCaller AI, solopreneur/small team workflows.
-Avoid generic "AI helps your business" — always tie to a specific workflow, role, or dollar amount.`,
-  };
-
   const prompt = `You are writing an Instagram carousel for Nick Cornelius (@thenickcornelius) — SimpliScale + KingCaller AI, $70K+/month. Audience: entrepreneurs and agency owners who use AI to scale.
 
 TOPIC: "${topic}"
-${categoryHint[category] ? `\n${categoryHint[category]}\n` : ''}
+${CATEGORY_HINTS[category] ? `\n${CATEGORY_HINTS[category]}\n` : ''}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 STEP 0 — DECIDE STRUCTURE FIRST (do this before writing a single slide)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -537,28 +567,7 @@ Now write a completely original carousel about: "${topic}"`;
 
     const rawKw = (parsed.keyword || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
     const keyword = rawKw.length >= 2 ? rawKw : fallbackKeyword(topic);
-    // Strip markdown and forbidden words from caption — AI occasionally emits **bold** in captions
-    let caption = stripForbidden(stripMarkdown(parsed.caption || ''));
-    // Ensure the caption uses the resolved keyword
-    caption = caption.replace(/Comment\s+[A-Z0-9]+\s+and/gi, `Comment ${keyword} and`);
-    // Ensure the CTA line exists before hashtags
-    if (caption && !/comment\s+[A-Z0-9]+/i.test(caption)) {
-      const hashtagIdx = caption.indexOf('#');
-      const ctaLine = `Comment ${keyword} and I'll send it over 🔥\n📌 Save this before you lose it`;
-      caption = hashtagIdx >= 0
-        ? caption.slice(0, hashtagIdx).trimEnd() + '\n\n' + ctaLine + '\n\n' + caption.slice(hashtagIdx)
-        : caption.trimEnd() + '\n\n' + ctaLine;
-    }
-    // Ensure "📌 Save this" line exists
-    if (caption && !caption.includes('📌') && !caption.includes('Save this')) {
-      const hashtagIdx = caption.indexOf('#');
-      const saveLine = '📌 Save this before you lose it';
-      caption = hashtagIdx >= 0
-        ? caption.slice(0, hashtagIdx).trimEnd() + '\n' + saveLine + '\n\n' + caption.slice(hashtagIdx)
-        : caption.trimEnd() + '\n' + saveLine;
-    }
-    if (caption && !caption.includes('#simpliscale')) caption += '\n\n#simpliscale #thenickcornelius';
-    else if (caption && !caption.includes('#thenickcornelius')) caption += ' #thenickcornelius';
+    const caption = normalizeCaption(parsed.caption || '', keyword);
     return res.json({ slides: finalSlides, caption, keyword, category, _fallback: false });
   } catch (err: any) {
     if (err?.name === 'AbortError') {
