@@ -88,3 +88,12 @@ export function stripMarkdown(text: string): string {
     .replace(/_{1,2}(.*?)_{1,2}/g, '$1')
     .trim();
 }
+
+// Remove "Level X:" and "Beginner/Intermediate/Advanced:" prefixes the AI sometimes emits
+// despite explicit bans in the prompt. Applied after stripMarkdown so markup is gone first.
+export function stripLevelLabels(text: string): string {
+  return text
+    .replace(/^Level\s+\d+\s*[:.\s—–]+/gim, '')
+    .replace(/^(?:Beginner|Intermediate|Advanced)\s*[:.\s—–]+/gim, '')
+    .trim();
+}

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { stripForbidden, fixAccentWord, extractGeminiText, stripMarkdown } from '@/lib/carousel-lib';
+import { stripForbidden, fixAccentWord, extractGeminiText, stripMarkdown, stripLevelLabels } from '@/lib/carousel-lib';
 
 export const config = { maxDuration: 60 };
 
@@ -541,18 +541,12 @@ Now write a completely original carousel about: "${topic}"`;
         rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
         rawText = rawText.replace(/\s*\n*Comment\s+["']?\w+["']?\s+below[\s\S]*/i, '').trim();
       }
-      // Strip "Level X:" and "Beginner/Intermediate/Advanced:" prefixes — AI sometimes ignores the ban
-      rawText = rawText.replace(/^Level\s+\d+\s*[:.\s—–]+/gim, '').trim();
-      rawText = rawText.replace(/^(?:Beginner|Intermediate|Advanced)\s*[:.\s—–]+/gim, '').trim();
-      rawText = stripMarkdown(rawText);
+      rawText = stripLevelLabels(stripMarkdown(rawText));
       const cleanText = stripForbidden(rawText);
       // Normalize section_label: null/"null"/"none" → undefined; strip "Level X" prefix
       const rawLabel: string | null | undefined = s.section_label;
       const sectionLabel = (rawLabel && rawLabel !== 'null' && rawLabel !== 'none')
-        ? rawLabel
-            .replace(/^level\s+\d+\s*[:.]?\s*/i, '')
-            .replace(/^(?:beginner|intermediate|advanced)\s*[:.]?\s*/i, '')
-            .trim() || undefined
+        ? stripLevelLabels(rawLabel) || undefined
         : undefined;
       // Ensure visual_type is a known value
       const vt = VALID_VISUAL_TYPES.has(s.visual_type) ? s.visual_type : 'none';

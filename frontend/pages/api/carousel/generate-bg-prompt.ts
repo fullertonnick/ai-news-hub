@@ -91,6 +91,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (/mindset|focus|discipline|habit|routine|morning/.test(slideWords)) conceptHints.push('dark minimal desk at dawn, single amber lamp casting long warm shadow, coffee cup bokeh, contemplative and aspirational');
   // Scale / growth
   if (/scale|grow|10x|multiply|expand|compoun/.test(slideWords)) conceptHints.push('dark premium office with upward-angled amber accent lighting, blurred city skyline through floor-to-ceiling window, aspirational');
+  // Deep dive — "What it is" / "Why it matters" slides
+  if (/what it is|why it matters|the concept|the mechanism|under the hood/.test(slideWords)) conceptHints.push('dark minimal desk with open notebook showing abstract diagram in warm amber ink, blurred mechanical keyboard, single desk lamp, cinematic shallow depth of field');
+  // Deep dive — "How it works" slides
+  if (/how it works|under the hood|the process|the flow|the loop|step by step/.test(slideWords)) conceptHints.push('dark workspace with blurred amber flowchart glow on monitor, abstract node connections, professional developer setup, shallow depth of field, cinematic');
+  // Deep dive — "Real example" slides
+  if (/real example|in practice|for example|case study|concrete example|in action/.test(slideWords)) conceptHints.push('dark desk with terminal showing blurred real-world amber code output, professional workspace, warm single lamp, shallow depth of field');
+  // Deep dive — "Apply it" / action slides
+  if (/apply it|try it|start today|do this|right now|this week|take action|next step/.test(slideWords)) conceptHints.push('dark home office, hands over mechanical keyboard in warm amber lamp glow, ready to type, cinematic angle, professional and motivating');
 
   // Type-specific scene fallbacks — used when slide text doesn't match any concept hint
   const SCENE_FALLBACKS: Record<string, string> = {

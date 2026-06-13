@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { stripForbidden, fixAccentWord, extractGeminiText, stripMarkdown } from '@/lib/carousel-lib';
+import { stripForbidden, fixAccentWord, extractGeminiText, stripMarkdown, stripLevelLabels } from '@/lib/carousel-lib';
 
 export const config = { maxDuration: 60 };
 
@@ -43,9 +43,9 @@ Current text: "${currentText}"
 - Concrete: "Claude reads your repo in 15s" NOT "AI understands your codebase"
 
 ━━━ ACCENT WORD ━━━
-accent_word MUST appear verbatim in the text (case-insensitive). Pick what a reader would screenshot.
-Priority: numbers with units ("3 hours", "$200/month", "4x") → file/tool/command names ("CLAUDE.md", "/hooks") → myth being busted → core mechanism → named concept
-NEVER pick generic adjectives, filler words, or anything not in the text.
+After writing the slide text: find the single phrase a reader would screenshot. Check verbatim in text. If not there, rewrite the last sentence to include it. Then set accent_word to that exact substring.
+Priority: numbers with units ("3 hours", "$200/month", "4x", "5-minute") → file/tool/command names ("CLAUDE.md", "/hooks") → myth being busted → core mechanism → named concept
+NEVER pick generic adjectives, filler words, or anything not verbatim in the text.
 ${isFirst ? `
 ━━━ COVER FORMAT ━━━
 Bold headline 5-8 words + optional subtitle after \\n\\n in parens: (specific payoff, one line)
@@ -90,16 +90,11 @@ Return JSON only: {"text": "...", "accent_word": "...", "section_label": "...or 
       rawText = rawText.replace(/\s*\n*Comment\s+\w+\s+and\s+I['']ll\s+send[\s\S]*/i, '').trim();
       rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
     }
-    rawText = rawText.replace(/^Level\s+\d+\s*[:.\s—–]+/gim, '').trim();
-    rawText = rawText.replace(/^(?:Beginner|Intermediate|Advanced)\s*[:.\s—–]+/gim, '').trim();
-    rawText = stripMarkdown(rawText);
+    rawText = stripLevelLabels(stripMarkdown(rawText));
     const cleanText = stripForbidden(rawText);
     const rawLabel: string | null | undefined = parsed.section_label;
     const sectionLabel = (rawLabel && rawLabel !== 'null' && rawLabel !== 'none')
-      ? rawLabel
-          .replace(/^level\s+\d+\s*[:.]?\s*/i, '')
-          .replace(/^(?:beginner|intermediate|advanced)\s*[:.]?\s*/i, '')
-          .trim() || undefined
+      ? stripLevelLabels(rawLabel) || undefined
       : undefined;
     return res.json({
       text: cleanText,
