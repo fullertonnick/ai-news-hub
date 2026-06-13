@@ -178,6 +178,7 @@ export default function Step2Visuals() {
   else if (isLast) visual = { type: 'cta_slide', keyword, layout_variant: ctaLayout };
   else visual = slide.visual || { type: slide.visual_type || 'none' };
   const renderSlide = {
+    id: slide.id,
     text: slide.text,
     accent_word: slide.accent_word,
     section_label: slide.section_label,

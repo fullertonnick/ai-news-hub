@@ -88,7 +88,7 @@ function SectionLabel({ label, sc, onImage }: { label: string; sc: number; onIma
 
 function Footer({ sc, light = false, slideNumber, totalSlides }: { sc: number; light?: boolean; slideNumber?: number; totalSlides?: number }) {
   const color = light ? 'rgba(255,255,255,0.80)' : Brand.colors.text_muted;
-  const border = light ? '1px solid rgba(255,255,255,0.25)' : '1px solid rgba(255,255,255,0.25)';
+  const border = light ? '1px solid rgba(255,255,255,0.25)' : `1px solid ${Brand.colors.divider}`;
   return (
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',

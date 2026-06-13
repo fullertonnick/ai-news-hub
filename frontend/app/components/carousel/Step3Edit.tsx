@@ -345,6 +345,8 @@ export default function Step3Edit() {
               onSelect={setSelectedId}
               onUpdateSticker={(id, u) => store.updateSticker(slide.id, id, u)}
               onUpdateTextOverlay={(id, u) => store.updateTextOverlay(slide.id, id, u)}
+              onDeleteSticker={(id) => { store.removeSticker(slide.id, id); setSelectedId(null); }}
+              onDeleteTextOverlay={(id) => { store.removeTextOverlay(slide.id, id); setSelectedId(null); }}
               width={PW}
               height={PH}
             />
@@ -456,6 +458,10 @@ export default function Step3Edit() {
                 <div><label className="text-[9px] text-gray-500">Size</label><input type="range" min={5} max={90} value={selSticker.width} onChange={e => store.updateSticker(slide.id, selectedId!, { width: +e.target.value })} className="w-full accent-orange-500" /></div>
                 <div><label className="text-[9px] text-gray-500">Opacity</label><input type="range" min={10} max={100} value={Math.round(selSticker.opacity * 100)} onChange={e => store.updateSticker(slide.id, selectedId!, { opacity: +e.target.value / 100 })} className="w-full accent-orange-500" /></div>
               </div>
+              <div>
+                <label className="text-[9px] text-gray-500 block mb-0.5">Rotation <span className="text-gray-600">{selSticker.rotation}°</span></label>
+                <input type="range" min={-180} max={180} value={selSticker.rotation} onChange={e => store.updateSticker(slide.id, selectedId!, { rotation: +e.target.value })} className="w-full accent-orange-500" />
+              </div>
             </div>
           )}
 
@@ -497,11 +503,20 @@ export default function Step3Edit() {
                 <div><label className="text-[9px] text-gray-500">Opacity</label><input type="range" min={10} max={100} value={Math.round((selText.opacity ?? 1) * 100)} onChange={e => store.updateTextOverlay(slide.id, selectedId!, { opacity: +e.target.value / 100 })} className="w-full accent-orange-500" /></div>
                 <div className="flex items-end pb-0.5"><span className="text-[9px] text-gray-500">{Math.round((selText.opacity ?? 1) * 100)}%</span></div>
               </div>
-              <div className="flex gap-1">
-                {['#FFFFFF', '#FF7107', '#22C55E', '#1D9BF0', '#A855F7', '#EF4444'].map(c => (
-                  <button key={c} onClick={() => store.updateTextOverlay(slide.id, selectedId!, { color: c })}
-                    className={`w-5 h-5 rounded-full border-2 ${selText.color === c ? 'border-white' : 'border-transparent'}`} style={{ backgroundColor: c }} />
-                ))}
+              <div>
+                <label className="text-[9px] text-gray-500 block mb-0.5">Rotation <span className="text-gray-600">{selText.rotation ?? 0}°</span></label>
+                <input type="range" min={-180} max={180} value={selText.rotation ?? 0} onChange={e => store.updateTextOverlay(slide.id, selectedId!, { rotation: +e.target.value })} className="w-full accent-orange-500" />
+              </div>
+              <div>
+                <label className="text-[9px] text-gray-500 block mb-1">Color</label>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {['#FFFFFF', '#FF7107', '#22C55E', '#1D9BF0', '#A855F7', '#EF4444'].map(c => (
+                    <button key={c} onClick={() => store.updateTextOverlay(slide.id, selectedId!, { color: c })}
+                      className={`w-5 h-5 rounded-full border-2 ${selText.color === c ? 'border-white' : 'border-transparent'}`} style={{ backgroundColor: c }} />
+                  ))}
+                  <input type="color" value={selText.color} onChange={e => store.updateTextOverlay(slide.id, selectedId!, { color: e.target.value })}
+                    className="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent" title="Custom color" />
+                </div>
               </div>
             </div>
           )}

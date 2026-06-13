@@ -139,11 +139,13 @@ interface Props {
   onSelect: (id: string | null) => void;
   onUpdateSticker: (id: string, updates: Partial<StickerOverlay>) => void;
   onUpdateTextOverlay: (id: string, updates: Partial<TextOverlay>) => void;
+  onDeleteSticker?: (id: string) => void;
+  onDeleteTextOverlay?: (id: string) => void;
   width: number;
   height: number;
 }
 
-export default function KonvaEditor({ slideId, stickers, textOverlays, selectedId, onSelect, onUpdateSticker, onUpdateTextOverlay, width, height }: Props) {
+export default function KonvaEditor({ slideId, stickers, textOverlays, selectedId, onSelect, onUpdateSticker, onUpdateTextOverlay, onDeleteSticker, onDeleteTextOverlay, width, height }: Props) {
   const stageRef = useRef<any>(null);
   const trRef = useRef<any>(null);
   const [cursor, setCursor] = useState<string>('default');
@@ -258,6 +260,26 @@ export default function KonvaEditor({ slideId, stickers, textOverlays, selectedI
   const handleStageClick = useCallback((e: any) => {
     if (e.target === e.target.getStage()) onSelect(null);
   }, [onSelect]);
+
+  // Delete/Backspace key removes the selected item. Guard against firing while the
+  // user is typing in an input or textarea (e.g. the text overlay content field).
+  useEffect(() => {
+    if (!selectedId) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      const isSticker = stickers.some(s => s.id === selectedId);
+      if (isSticker) {
+        onDeleteSticker?.(selectedId);
+      } else {
+        onDeleteTextOverlay?.(selectedId);
+      }
+      onSelect(null);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [selectedId, stickers, onDeleteSticker, onDeleteTextOverlay, onSelect]);
 
   if (width <= 0 || height <= 0) return null;
 
