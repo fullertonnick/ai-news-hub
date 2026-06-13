@@ -41,7 +41,8 @@ export function fixAccentWord(text: string, accentWord: string | undefined): str
   for (const zone of searchZones) {
     const dollar = zone.match(/\$[\d,]+(?:[kKmM])?(?:\/\w+)?/);
     if (dollar) return dollar[0].trim();
-    const num = zone.match(/\b\d+(?:\.\d+)?(?:\+)?\s*(?:x\b|%|hrs?|hours?|min(?:utes?)?|sec(?:onds?)?|days?|weeks?|months?|[kKmM]\b)/i);
+    // Match numbers with units — allow hyphen between number and unit (e.g. "5-minute", "10-hour", "3-day")
+    const num = zone.match(/\b\d+(?:\.\d+)?(?:\+)?[-\s]*(?:x\b|%|hrs?|hours?|min(?:utes?)?|sec(?:onds?)?|days?|weeks?|months?|[kKmM]\b)/i);
     if (num) return num[0].trim();
     // Tool/file names in kicker get priority over generic words
     const kickerTool = zone.match(/\b[A-Za-z][A-Za-z0-9]*\.(?:md|json|ts|js|py|sh|txt|yaml|toml)\b/i);

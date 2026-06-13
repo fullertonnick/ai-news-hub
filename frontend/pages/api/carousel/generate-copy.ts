@@ -319,10 +319,13 @@ BAD accent words (never use these):
   - Any word NOT in the slide text
 
 CRITICAL — do this AFTER writing each slide's text, NOT before:
-  1. Re-read the slide text.
-  2. Find the single phrase a reader would screenshot.
-  3. Confirm that exact phrase is in the text.
-  4. Set that as accent_word.
+  1. Re-read the slide text word by word.
+  2. Find the single phrase a reader would screenshot (a number, a specific name, the kicker mechanism).
+  3. Search for it verbatim (case-insensitive) in the slide text.
+  4. If it IS there → copy it exactly (including hyphens, capitalization, slashes) as accent_word.
+  5. If it is NOT there → rewrite the last sentence of the slide to include it naturally, then set accent_word.
+  NEVER output an accent_word that cannot be found character-for-character in the slide text.
+  NEVER skip this check — a mismatched accent_word will not render.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${styleHint(style)}
@@ -342,6 +345,14 @@ Choose the structure where each slide writes itself:
 • Myth-Busting → "The Myth" then "Reality": correcting beliefs people hold
 • Deep Dive → What it is → Why it matters → How it works → Real example → How to apply
 • Comparison → Side A vs Side B → pick one: tradeoffs, which to choose and why
+
+QUICK CALIBRATION — use these as reference:
+"Claude Code memory system" → DEEP DIVE (hidden mechanism, not a process)
+"Claude Code hooks system" → STEPS (sequential setup: install → configure → test → deploy)
+"Why AI agents fail in production" → MYTH-BUSTING (The Myth → Reality → Proof → Apply)
+"Make.com client onboarding" → STEPS (trigger → validate → create → notify)
+"5 Claude prompts every agency owner needs" → NUMBERED LIST (01. → 02. → 03. → 04. → 05.)
+"ChatGPT vs Claude for business writing" → COMPARISON (Option A → Option B → The Verdict)
 
 The right structure makes every slide title obvious. If you can't title a slide naturally, you picked the wrong structure.
 
@@ -373,6 +384,12 @@ SLIDE 1 (COVER):
     The accent_word must NOT be the topic name or a word anyone would predict. It should be the phrase that makes the reader pause.
     GOOD cover accents: "never the model's fault", "fail in silence", "blank slate", "5-minute fix", "from one file"
     BAD cover accents: "Claude Code", "AI agents", "automation", "memory system" (topic name fragments — too predictable)
+    COVER ACCENT FLOW (mandatory):
+      a. Write the full headline + subtitle.
+      b. Identify the tension phrase that delivers the punch (the surprising claim, the counter-intuitive fact).
+      c. Make sure that tension phrase appears verbatim in your headline or subtitle text.
+         If it doesn't, rewrite one line to include it.
+      d. Copy it exactly (hyphens, slashes, capitalization) as the accent_word value.
 
 SLIDES 2 to N-1 (CONTENT):
   text: 2-4 punchy sentences. One key insight. Last line = the kicker.
@@ -391,15 +408,18 @@ SLIDES 2 to N-1 (CONTENT):
 LAST SLIDE (CTA):
   text: ONE compelling question that flows naturally from the content. STOP after the question mark.
     Do NOT write "Comment X and I'll send you Y" — the slide template renders that from keyword.
-    The question should make the reader think "yes, I need that right now."
+    The question should name the SPECIFIC deliverable a reader wants after seeing this carousel.
+    It should feel like the punchline — the moment they realize they want the full thing.
   STRONG CTA questions:
-    "Want the exact CLAUDE.md template I use on every project?"
-    "Ready to stop re-explaining your stack every Claude Code session?"
-    "Want the Make.com error handler template that's saved 50+ client builds?"
-    "Ready to build your first real AI agent this weekend?"
+    "Want the exact CLAUDE.md template I use on every project?" ← names the deliverable
+    "Ready to stop re-explaining your stack every Claude Code session?" ← speaks to the pain
+    "Want the Make.com error handler template that's saved 50+ client builds?" ← specific + credible
+    "Ready to build your first real AI agent this weekend?" ← specific timeframe creates urgency
   WEAK CTA questions (avoid):
-    "Want to learn more about this?" ← too vague
+    "Want to learn more about this?" ← too vague, no deliverable
     "Interested in AI tools?" ← no connection to the carousel content
+    "Want the guide?" ← "guide" is too generic, name the actual thing
+  accent_word: pick a phrase from the CTA text that names the deliverable — e.g. "CLAUDE.md template", "error handler", "agent setup"
   visual_type: "cta_slide"
   section_label: null
 
@@ -414,26 +434,26 @@ KEYWORD: max 8 chars, ALL CAPS, the single core concept that makes a great DM tr
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CAPTION — ready to paste into Instagram. Use \\n\\n for blank lines between sections.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[HOOK] ONE sentence. Stops scrolling. Reframes the topic unexpectedly. NOT the slide headline verbatim.
+[HOOK] ONE sentence. Stops scrolling. Reframes the topic from a surprising angle. MUST be different from the cover headline — don't repeat it. Think: what's the version of this topic that surprises even someone who already uses the tool?
 \\n\\n
-[BULLETS] 3-5 lines each starting with → that tease the most surprising insight inside. Actual takeaways, not vague promises. Each line feels like a secret the reader doesn't know yet.
+[BULLETS] 3-5 lines each starting with → that tease the most surprising insight inside. These are ACTUAL takeaways (numbers, specifics, counter-intuitive facts), not vague promises. Each line should feel like a secret the reader doesn't know yet.
 \\n\\n
-Comment [KEYWORD] and I'll send you [exact deliverable — e.g. "the template", "the full setup guide", "the checklist"] 🔥
+Comment [KEYWORD] and I'll send you [exact deliverable — be specific: "the CLAUDE.md template", "the Make.com error handler blueprint", "the 5-step agent setup guide"] 🔥
 📌 Save this before you lose it
 \\n\\n
-[HASHTAGS] 10-15 on one line — must include #simpliscale #thenickcornelius #aitools
+[HASHTAGS] 10-15 on one line — must include #simpliscale #thenickcornelius #aitools. Choose hashtags relevant to the specific topic.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 BEFORE GENERATING JSON — run this checklist mentally:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-□ Did I pick ONE structure that fits this topic naturally (not just "the default")?
-□ Does the cover headline reveal tension or a counter-intuitive fact?
+□ Did I pick ONE structure that fits this topic naturally (checked the QUICK CALIBRATION examples)?
+□ Does the cover headline reveal tension or a counter-intuitive fact (NOT just the topic rephrased)?
 □ Does every content slide pass all 3 Bullshit Test criteria?
-□ Is the last sentence of each content slide a punchy kicker?
-□ Does every accent_word appear verbatim in its slide's text?
-□ Does the CTA question feel like the punchline of the whole carousel?
-□ Does the caption tease surprising insights (not just restate slide headlines)?
-□ Is the keyword ≤8 chars, ALL CAPS, and would a reader actually comment it?
+□ Is the last sentence of each content slide a punchy kicker (short, reframes everything above it)?
+□ For EVERY slide: search the text for the accent_word substring. Is it there verbatim? If not, fix it.
+□ Does the CTA question name the specific deliverable (not just "the guide")?
+□ Does the caption hook differ from the cover headline?
+□ Is the keyword ≤8 chars, ALL CAPS, and would a reader actually comment it to get the offer?
 □ Does the keyword appear in the caption's "Comment X and I'll send you..." line?
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
