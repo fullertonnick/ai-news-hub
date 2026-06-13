@@ -47,7 +47,7 @@ async function preloadFonts() {
       document.fonts.load(`800 38px ${pjs}`),
       document.fonts.load(`800 36px ${pjs}`),
       document.fonts.load(`800 32px ${pjs}`),
-      document.fonts.load(`800 30px ${pjs}`),
+      document.fonts.load(`800 30px ${pjs}`),   // kicker line
       document.fonts.load(`800 28px ${pjs}`),
       document.fonts.load(`800 26px ${pjs}`),
       document.fonts.load(`800 20px ${pjs}`),
@@ -59,7 +59,7 @@ async function preloadFonts() {
       document.fonts.load(`700 16px ${pjs}`),
       document.fonts.load(`700 13px ${pjs}`),
       // ── Plus Jakarta Sans 600 (SemiBold) ───────────────────────────────────────
-      // Footer handle: 20px; slide count: 18px; section label: 16px; stats label: 17px;
+      // Footer handle: 20px; slide count: 18px; section label: 20px; stats label: 17px;
       // CTA "Comment…" text: 24–26px; diagram title: 13px; skill category: 13px
       document.fonts.load(`600 26px ${pjs}`),
       document.fonts.load(`600 24px ${pjs}`),
@@ -68,6 +68,7 @@ async function preloadFonts() {
       document.fonts.load(`600 17px ${pjs}`),
       document.fonts.load(`600 16px ${pjs}`),
       document.fonts.load(`600 13px ${pjs}`),
+      document.fonts.load(`600 10px ${pjs}`),
       // ── Plus Jakarta Sans 500 (Medium) ─────────────────────────────────────────
       // Footer save CTA: 20px; cover subtitle: 24px; code instruction label: 13px
       document.fonts.load(`500 24px ${pjs}`),
@@ -219,13 +220,14 @@ export default function Step4Export() {
     try {
       await preloadFonts();
       await waitForImages(el);
-      // 500ms lets CSS paint and GPU compositing finish after fonts + images are ready
-      await new Promise(r => setTimeout(r, 500));
+      // 750ms lets CSS paint, GPU compositing, and @font-face application all finish.
+      await new Promise(r => setTimeout(r, 750));
       let png: string;
       try {
         png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
       } catch {
-        await new Promise(r => setTimeout(r, 600));
+        await waitForImages(el);
+        await new Promise(r => setTimeout(r, 800));
         png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
       }
       const a = document.createElement('a'); a.href = png; a.download = `carousel-slide-${i + 1}.png`; a.click();
@@ -242,7 +244,7 @@ export default function Step4Export() {
     await ensureDataUrls();
     try {
       await preloadFonts();
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 750));
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
       let missingRefs = 0;
@@ -261,7 +263,8 @@ export default function Step4Export() {
         try {
           png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
         } catch {
-          await new Promise(r => setTimeout(r, 600));
+          await waitForImages(el);
+          await new Promise(r => setTimeout(r, 800));
           png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
         }
         zip.file(`slide-${String(i + 1).padStart(2, '0')}.png`, png.replace(/^data:image\/png;base64,/, ''), { base64: true });
