@@ -371,7 +371,7 @@ function CTATemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: Car
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={photoSrc} alt="" crossOrigin="anonymous" style={{ position: 'absolute', right: 0, top: 0, width: `${W * 0.62}px`, height: `${H}px`, objectFit: 'cover', objectPosition: 'center top', opacity: 0.88, zIndex: 1 }} />
         {/* Gradient fade — solid dark on text side, fades to transparent toward photo */}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 30%, rgba(26,26,26,0.92) 48%, rgba(26,26,26,0.45) 68%, rgba(26,26,26,0.08) 100%)`, zIndex: 2 }} />
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${Brand.colors.bg_primary} 38%, rgba(26,26,26,0.92) 52%, rgba(26,26,26,0.45) 70%, rgba(26,26,26,0.08) 100%)`, zIndex: 2 }} />
         {/* Bottom gradient — darkens footer strip across full width for readability over photo */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: `${180 * sc}px`, background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.80))', zIndex: 3, pointerEvents: 'none' }} />
         {/* Brand orange glow on left */}
@@ -546,7 +546,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
       {!hasImagen && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '25%', background: `linear-gradient(to bottom, rgba(255,113,7,0.025), transparent)`, pointerEvents: 'none' }} />}
 
       {/* Orange left border accent — all content slides (Tyler Germain signature) */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${6 * sc}px`, background: Brand.colors.accent_primary, zIndex: 4, boxShadow: `${6 * sc}px 0 ${32 * sc}px rgba(255,113,7,0.50), ${2 * sc}px 0 ${14 * sc}px rgba(255,113,7,0.28)` }} />
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${8 * sc}px`, background: Brand.colors.accent_primary, zIndex: 4, boxShadow: `${8 * sc}px 0 ${36 * sc}px rgba(255,113,7,0.55), ${3 * sc}px 0 ${16 * sc}px rgba(255,113,7,0.32)` }} />
       {/* Subtle orange radial glow */}
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(255,113,7,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
@@ -589,7 +589,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 so we still need the divider to separate headline from body copy. */}
             {(!isBigQuote || !visualHasData) && (
               <div style={{
-                width: `${120 * sc}px`, height: `${5 * sc}px`,
+                width: `${160 * sc}px`, height: `${6 * sc}px`,
                 background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`,
                 borderRadius: '3px',
                 marginBottom: `${(!visualHasData && bodyParas.length > 0) ? 32 * sc : 24 * sc}px`,
@@ -612,8 +612,8 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
             {/* Kicker — mic-drop takeaway; shorter divider (vs headline divider 120px) signals
                 a new micro-section without repeating the same visual weight */}
             {!visualHasData && kicker && (
-              <div style={{ marginTop: `${32 * sc}px` }}>
-                <div style={{ width: `${100 * sc}px`, height: `${4 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${16 * sc}px` }} />
+              <div style={{ marginTop: `${36 * sc}px` }}>
+                <div style={{ width: `${80 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${16 * sc}px` }} />
                 <p style={{
                   margin: 0,
                   fontSize: `${30 * sc}px`, fontWeight: 800,
@@ -671,7 +671,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                         display: 'flex', flexDirection: 'column', gap: `${8 * sc}px`,
                       }}>
                         <div style={{ fontSize: `${28 * sc}px`, lineHeight: 1 }}>{s.icon}</div>
-                        <div style={{ fontSize: `${64 * sc}px`, fontWeight: 800, color: Brand.colors.accent_primary, lineHeight: 1, letterSpacing: '-0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, minWidth: 0 }}>{s.value}</div>
+                        <div style={{ fontSize: `${64 * sc}px`, fontWeight: 800, color: Brand.colors.accent_primary, lineHeight: 1, letterSpacing: '-0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, minWidth: 0, fontVariantNumeric: 'tabular-nums' as const }}>{s.value}</div>
                         <div style={{ fontSize: `${17 * sc}px`, color: Brand.colors.text_muted, textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
                       </div>
                     ))}

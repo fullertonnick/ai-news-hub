@@ -10,7 +10,7 @@ export const Brand = {
     accent_secondary: '#FFC26B',     // Sunrise yellow — gradient end, subtle highlights
     text_primary: '#F9F9FB',         // Dim white — headlines and body
     text_muted: '#C4C4C4',           // Cool gray — secondary text, footer
-    divider: 'rgba(255,255,255,0.12)',
+    divider: 'rgba(255,255,255,0.15)',
     code_border: 'rgba(255,255,255,0.07)',
     star: '#FF7107',
   },
