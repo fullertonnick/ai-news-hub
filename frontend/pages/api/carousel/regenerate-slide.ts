@@ -87,8 +87,11 @@ Return JSON only: {"text": "...", "accent_word": "...", "section_label": "...or 
     const parsed = JSON.parse(text.trim());
     let rawText = parsed.text || '';
     if (isLast) {
-      rawText = rawText.replace(/\s*\n*Comment\s+\w+\s+and\s+I['']ll\s+send[\s\S]*/i, '').trim();
-      rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
+      rawText = rawText.replace(/\s*\n*Comment\s+[\w\[\]]+\s+and\s+I['']ll\s+send[\s\S]*/i, '').trim();
+      rawText = rawText.replace(/\s*\n*Drop\s+["']?[\w\[\]]+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
+      rawText = rawText.replace(/\s*\n*Comment\s+["']?[\w\[\]]+["']?\s+below[\s\S]*/i, '').trim();
+      rawText = rawText.replace(/\s*\n*DM\s+me[\s\S]*/i, '').trim();
+      rawText = rawText.replace(/\s*\n*Reply\s+with\s+[\w\[\]]+[\s\S]*/i, '').trim();
     }
     rawText = stripLevelLabels(stripMarkdown(rawText));
     const cleanText = stripForbidden(rawText);

@@ -34,8 +34,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const guidance = slideTypeGuidance[slideType] || slideTypeGuidance.none;
 
-  // Pull concrete nouns from slide text to make the background scene specific
-  const slideWords = slideText.slice(0, 450).toLowerCase();
+  // Pull concrete nouns from slide text + label to make the background scene specific
+  const slideWords = (slideText.slice(0, 450) + ' ' + (slideLabel || '')).toLowerCase();
   const conceptHints: string[] = [];
   // Claude Code specific
   if (/claude\.md|claudefile|memory file|context file|\.claude|memory system/.test(slideWords)) conceptHints.push('dark developer desk with open text editor showing highlighted CLAUDE.md file in sidebar, single warm amber desk lamp, mechanical keyboard foreground, shallow depth of field, cinematic');
