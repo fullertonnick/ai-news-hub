@@ -22,11 +22,10 @@ export function stripForbidden(text: string): string {
 // Ensure accent_word appears verbatim in text; fallback to most impactful phrase.
 // Priority: kicker-line content → dollar amounts → numbers+units → tool/file names → arrow sequences → first strong noun.
 export function fixAccentWord(text: string, accentWord: string | undefined): string {
-  if (!accentWord) return '';
   // Exact substring match (case-insensitive) — the happy path
-  if (text.toLowerCase().includes(accentWord.toLowerCase())) return accentWord;
+  if (accentWord && text.toLowerCase().includes(accentWord.toLowerCase())) return accentWord;
   // Try each word in the accent phrase individually — catches "Claude Code memory" → "Claude Code"
-  const accentParts = accentWord.trim().split(/\s+/);
+  const accentParts = (accentWord || '').trim().split(/\s+/);
   for (let len = accentParts.length - 1; len >= 1; len--) {
     const sub = accentParts.slice(0, len).join(' ');
     if (sub.length >= 3 && text.toLowerCase().includes(sub.toLowerCase())) return sub;
@@ -67,7 +66,7 @@ export function fixAccentWord(text: string, accentWord: string | undefined): str
     const clean = w.replace(/[^a-zA-Z]/g, '').toLowerCase();
     return clean.length > 4 && !stop.has(clean);
   });
-  const candidate = words[0] || accentWord;
+  const candidate = words[0] || accentWord || '';
   return candidate.replace(/[.,!?;:]$/, '');
 }
 

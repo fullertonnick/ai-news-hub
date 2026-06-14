@@ -125,8 +125,10 @@ Avoid generic "AI helps your business" — always tie to a specific workflow, ro
 
 function normalizeCaption(raw: string, keyword: string): string {
   let caption = stripForbidden(stripMarkdown(raw));
-  // Ensure caption uses the resolved keyword in the CTA line
-  caption = caption.replace(/Comment\s+[A-Z0-9]+\s+and/gi, `Comment ${keyword} and`);
+  // Replace bracket placeholders (e.g. "[KEYWORD]", "[MEMORY]") that the AI emits verbatim
+  caption = caption.replace(/\[KEYWORD\]/gi, keyword);
+  // Ensure caption uses the resolved keyword in the CTA line (handles any ALL-CAPS word after "Comment")
+  caption = caption.replace(/Comment\s+[A-Z0-9\[\]_]+\s+and/gi, `Comment ${keyword} and`);
   // Inject CTA line if missing entirely
   if (caption && !/comment\s+[A-Z0-9]+/i.test(caption)) {
     const hi = caption.indexOf('#');
@@ -521,7 +523,7 @@ Now write a completely original carousel about: "${topic}"`;
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.85, maxOutputTokens: 8192 },
-        thinkingConfig: { thinkingBudget: 8000 },
+        thinkingConfig: { thinkingBudget: 5000 },
       }),
     });
     const d = await r.json();
@@ -537,9 +539,11 @@ Now write a completely original carousel about: "${topic}"`;
       const isLastSlide = idx === (parsed.slides || []).length - 1;
       // CTA slide: strip any "Comment X and I'll send you Y" the AI adds — the slide template renders it from keyword
       if (isLastSlide || s.visual_type === 'cta_slide') {
-        rawText = rawText.replace(/\s*\n*Comment\s+\w+\s+and\s+I['']ll\s+send[\s\S]*/i, '').trim();
-        rawText = rawText.replace(/\s*\n*Drop\s+["']?\w+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
-        rawText = rawText.replace(/\s*\n*Comment\s+["']?\w+["']?\s+below[\s\S]*/i, '').trim();
+        rawText = rawText.replace(/\s*\n*Comment\s+[\w\[\]]+\s+and\s+I['']ll\s+send[\s\S]*/i, '').trim();
+        rawText = rawText.replace(/\s*\n*Drop\s+["']?[\w\[\]]+["']?\s+in\s+the\s+comments?[\s\S]*/i, '').trim();
+        rawText = rawText.replace(/\s*\n*Comment\s+["']?[\w\[\]]+["']?\s+below[\s\S]*/i, '').trim();
+        rawText = rawText.replace(/\s*\n*DM\s+me[\s\S]*/i, '').trim();
+        rawText = rawText.replace(/\s*\n*Reply\s+with\s+[\w\[\]]+[\s\S]*/i, '').trim();
       }
       rawText = stripLevelLabels(stripMarkdown(rawText));
       const cleanText = stripForbidden(rawText);

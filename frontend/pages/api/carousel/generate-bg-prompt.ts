@@ -99,6 +99,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (/real example|in practice|for example|case study|concrete example|in action/.test(slideWords)) conceptHints.push('dark desk with terminal showing blurred real-world amber code output, professional workspace, warm single lamp, shallow depth of field');
   // Deep dive — "Apply it" / action slides
   if (/apply it|try it|start today|do this|right now|this week|take action|next step/.test(slideWords)) conceptHints.push('dark home office, hands over mechanical keyboard in warm amber lamp glow, ready to type, cinematic angle, professional and motivating');
+  // The Myth / misconception slides
+  if (/the myth|common myth|people think|most people believe|wrong about/.test(slideWords)) conceptHints.push('dark atmospheric scene, single amber spotlight cutting through dark smoke revealing truth, theatrical high-contrast lighting, moody and revealing');
+  // The Reality / correction slides
+  if (/the reality|the truth|actually|in reality|real answer/.test(slideWords)) conceptHints.push('dark minimal background, single clean amber spotlight on empty desk surface, clear and uncluttered, professional revelation aesthetic');
+  // The Result / outcome slides
+  if (/the result|the outcome|end result|what happened|the impact|what changed/.test(slideWords)) conceptHints.push('dark premium office, single overhead amber spotlight illuminating closed laptop and achievement items, aspirational and clean, cinematic wide angle');
+  // Comparison — Option A slides (before/old way)
+  if (/option a|the old way|before i|without this|the slow way/.test(slideWords)) conceptHints.push('dark muted workspace, cool blue-tinted monitor glow on cluttered desk, tired and inefficient feeling, cinematic');
+  // Comparison — Option B slides (after/new way)
+  if (/option b|the new way|after i|with this|the fast way/.test(slideWords)) conceptHints.push('dark clean workspace, warm amber monitor glow, modern minimal desk setup, optimized and confident feeling, cinematic');
 
   // Type-specific scene fallbacks — used when slide text doesn't match any concept hint
   const SCENE_FALLBACKS: Record<string, string> = {

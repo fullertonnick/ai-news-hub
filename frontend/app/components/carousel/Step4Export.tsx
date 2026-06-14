@@ -137,7 +137,7 @@ export default function Step4Export() {
   const [captionCopied, setCaptionCopied] = useState(false);
   const captionCopiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (captionCopiedTimer.current) clearTimeout(captionCopiedTimer.current); }, []);
-  const [previewScale, setPreviewScale] = useState(0);
+  const [previewScale, setPreviewScale] = useState(Math.min(400 / 540, 1));
   const [proxyingImages, setProxyingImages] = useState(false);
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const exportRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -365,7 +365,7 @@ export default function Step4Export() {
           className="p-2 rounded-xl hover:bg-white/5 text-gray-600 hover:text-white disabled:opacity-20"><ChevronLeft size={20} /></button>
         <div className="flex-1 flex justify-center">
           <div ref={previewContainerRef} style={{ width: '100%', maxWidth: 400, aspectRatio: '4/5', position: 'relative' }}>
-            <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 12, opacity: previewScale > 0 ? 1 : 0, transition: 'opacity 0.15s' }}>
+            <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', borderRadius: 12 }}>
               <div style={{ transform: `scale(${previewScale || 0.74})`, transformOrigin: 'top left', width: 540, height: 675 }}>
                 {renderSlides[safeIdx] && <SlideRenderer slide={renderSlides[safeIdx]} slideNumber={safeIdx + 1} totalSlides={slides.length} />}
               </div>
