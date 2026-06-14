@@ -239,7 +239,11 @@ export default function Step3Edit() {
 
   const addText = useCallback(() => {
     if (!slide) return;
-    const t: TextOverlay = { id: uid(), text: 'Edit this text', x: 50, y: 30, fontSize: 40, fontWeight: 700, color: '#FFFFFF', maxWidth: 80, zIndex: nextZ(), fontFamily: FONT_OPTIONS[0].family, rotation: 0 };
+    // Offset each new overlay so multiple text overlays don't stack at the same position
+    const offset = textOverlays.length;
+    const x = 50 + (offset % 3) * 6 - 6;
+    const y = 30 + Math.floor(offset / 3) * 10;
+    const t: TextOverlay = { id: uid(), text: 'Edit this text', x, y, fontSize: 40, fontWeight: 700, color: '#FFFFFF', maxWidth: 80, zIndex: nextZ(), fontFamily: FONT_OPTIONS[0].family, rotation: 0 };
     store.addTextOverlay(slide.id, t);
     // Defer select so Konva has time to mount the new node before drag
     requestAnimationFrame(() => {
