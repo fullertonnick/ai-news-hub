@@ -214,6 +214,13 @@ export default function Step3Edit() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slide?.id, slide?.text, slide?.accent_word, slide?.section_label, slide?.visual, slide?.backgroundImage, slide?.useTextOverlays, slide?.textOffsetX, slide?.textOffsetY, currentIdx, slides.length, coverPosition, keyword, ctaLayout]);
 
+  // Next z-index above every existing layer (sticker or text) so a freshly added item
+  // always paints on top — prevents new text from rendering beneath existing stickers.
+  const nextZ = useCallback(() => {
+    const zs = [...stickers.map(s => s.zIndex || 10), ...textOverlays.map(t => t.zIndex || 5)];
+    return (zs.length ? Math.max(...zs) : 9) + 1;
+  }, [stickers, textOverlays]);
+
   const addSticker = useCallback((bs: BankSticker) => {
     if (!slide) return;
     // Offset each new sticker so multiple stickers don't stack at the same position
@@ -221,31 +228,31 @@ export default function Step3Edit() {
     const x = 50 + (offset % 3) * 6 - 6;
     const y = 40 + Math.floor(offset / 3) * 8;
     // Convert URL-encoded SVG data URIs to base64 so html-to-image captures them reliably
-    const s: StickerOverlay = { id: uid(), src: toBase64SvgUri(bs.src), label: bs.label, x, y, width: 20, rotation: 0, opacity: 1, zIndex: 10 + stickers.length };
+    const s: StickerOverlay = { id: uid(), src: toBase64SvgUri(bs.src), label: bs.label, x, y, width: 20, rotation: 0, opacity: 1, zIndex: nextZ() };
     store.addSticker(slide.id, s);
     // Defer selection — sticker images (SVG data URIs) load async. The Konva node
     // won't exist until useKonvaImage resolves, so the Transformer can't attach yet.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setSelectedId(s.id));
     });
-  }, [slide, store, stickers.length]);
+  }, [slide, store, stickers.length, nextZ]);
 
   const addText = useCallback(() => {
     if (!slide) return;
-    const t: TextOverlay = { id: uid(), text: 'Edit this text', x: 50, y: 30, fontSize: 40, fontWeight: 700, color: '#FFFFFF', maxWidth: 80, zIndex: 5 + textOverlays.length, fontFamily: FONT_OPTIONS[0].family, rotation: 0 };
+    const t: TextOverlay = { id: uid(), text: 'Edit this text', x: 50, y: 30, fontSize: 40, fontWeight: 700, color: '#FFFFFF', maxWidth: 80, zIndex: nextZ(), fontFamily: FONT_OPTIONS[0].family, rotation: 0 };
     store.addTextOverlay(slide.id, t);
     // Defer select so Konva has time to mount the new node before drag
     requestAnimationFrame(() => {
       requestAnimationFrame(() => setSelectedId(t.id));
     });
-  }, [slide, store, textOverlays.length]);
+  }, [slide, store, textOverlays.length, nextZ]);
 
   const handleUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !slide) return;
     const reader = new FileReader();
     reader.onload = () => {
-      const s: StickerOverlay = { id: uid(), src: reader.result as string, label: file.name.replace(/\.\w+$/, ''), x: 50, y: 40, width: 30, rotation: 0, opacity: 1, zIndex: 10 + stickers.length };
+      const s: StickerOverlay = { id: uid(), src: reader.result as string, label: file.name.replace(/\.\w+$/, ''), x: 50, y: 40, width: 30, rotation: 0, opacity: 1, zIndex: nextZ() };
       store.addSticker(slide.id, s);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => setSelectedId(s.id));
@@ -253,7 +260,7 @@ export default function Step3Edit() {
     };
     reader.readAsDataURL(file);
     e.target.value = '';
-  }, [slide, store, stickers.length]);
+  }, [slide, store, stickers.length, nextZ]);
 
   const generateVisual = useCallback(async (prompt?: string) => {
     if (!slide) return;
@@ -264,7 +271,7 @@ export default function Step3Edit() {
       const r = await fetch('/api/imagen', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: p }) });
       const d = await r.json();
       if (d.dataUrl) {
-        const s: StickerOverlay = { id: uid(), src: d.dataUrl, label: prompt ? 'Custom Visual' : 'AI Visual', x: 50, y: 55, width: 60, rotation: 0, opacity: 0.9, zIndex: 10 + stickers.length };
+        const s: StickerOverlay = { id: uid(), src: d.dataUrl, label: prompt ? 'Custom Visual' : 'AI Visual', x: 50, y: 55, width: 60, rotation: 0, opacity: 0.9, zIndex: nextZ() };
         store.addSticker(slide.id, s);
         requestAnimationFrame(() => {
           requestAnimationFrame(() => setSelectedId(s.id));
@@ -279,7 +286,7 @@ export default function Step3Edit() {
       setVisualError('Network error — check connection and try again.');
     }
     setGeneratingVisual(false);
-  }, [slide, store, stickers.length]);
+  }, [slide, store, stickers.length, nextZ]);
 
 
   if (!slide || !renderSlide) return null;

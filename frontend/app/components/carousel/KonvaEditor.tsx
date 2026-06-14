@@ -82,29 +82,32 @@ function TextNode({ overlay, stageW, stageH, onSelect, onMouseEnter, onMouseLeav
   onMouseEnter?: () => void; onMouseLeave?: () => void;
   onDragStart?: () => void; onDragEnd?: () => void;
 }) {
+  const textRef = useRef<any>(null);
   const pxW = (overlay.maxWidth / 100) * stageW;
   const fs = overlay.fontSize * (stageW / 1080);
-  // Estimate total rendered height to match SlideRenderer's translate(-50%,-50%) center anchor.
-  // Count explicit newlines PLUS wrapped lines (Konva wraps at pxW like the HTML renderer).
-  // Average char width ≈ 0.58 * fontSize for Plus Jakarta Sans at typical weights.
-  const avgCharW = fs * 0.58;
-  const charsPerLine = Math.max(1, Math.floor(pxW / avgCharW));
-  const wrappedLineCount = overlay.text.split('\n').reduce(
-    (sum, line) => sum + Math.max(1, Math.ceil((line.length || 1) / charsPerLine)),
-    0,
-  );
-  const estimatedHeight = fs * 1.3 * wrappedLineCount;
+
+  // Measure the node's REAL rendered height (Konva lays out wrapped lines using true font
+  // metrics) and use it for the vertical center anchor. This makes the editor's center match
+  // SlideRenderer's translate(-50%,-50%) DOM centering, so text doesn't jump on export.
+  // A char-width estimate would diverge for different fonts/weights and long-word breaks.
+  const [measuredH, setMeasuredH] = useState(fs * 1.3);
+  useEffect(() => {
+    const h = textRef.current?.height();
+    if (h && Math.abs(h - measuredH) > 0.5) setMeasuredH(h);
+  });
 
   return (
     <KText
+      ref={textRef}
       x={(overlay.x / 100) * stageW}
       y={(overlay.y / 100) * stageH}
       offsetX={pxW / 2}
-      offsetY={estimatedHeight / 2}
+      offsetY={measuredH / 2}
       rotation={overlay.rotation || 0}
       text={overlay.text}
       fontSize={fs}
       lineHeight={1.3}
+      wrap="word"
       fontStyle={overlay.fontWeight >= 800 ? '800' : overlay.fontWeight >= 700 ? 'bold' : 'normal'}
       fontFamily={resolveForCanvas(overlay.fontFamily || '"Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif')}
       fill={overlay.color}
@@ -270,16 +273,17 @@ export default function KonvaEditor({ slideId, stickers, textOverlays, selectedI
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
       const isSticker = stickers.some(s => s.id === selectedId);
+      const isText = textOverlays.some(t => t.id === selectedId);
       if (isSticker) {
         onDeleteSticker?.(selectedId);
-      } else {
+      } else if (isText) {
         onDeleteTextOverlay?.(selectedId);
       }
       onSelect(null);
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [selectedId, stickers, onDeleteSticker, onDeleteTextOverlay, onSelect]);
+  }, [selectedId, stickers, textOverlays, onDeleteSticker, onDeleteTextOverlay, onSelect]);
 
   if (width <= 0 || height <= 0) return null;
 
