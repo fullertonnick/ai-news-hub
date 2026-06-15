@@ -672,7 +672,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                       }}>
                         <div style={{ fontSize: `${28 * sc}px`, lineHeight: 1 }}>{s.icon}</div>
                         <div style={{ fontSize: `${64 * sc}px`, fontWeight: 800, color: Brand.colors.accent_primary, lineHeight: 1, letterSpacing: '-0.03em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, minWidth: 0, fontVariantNumeric: 'tabular-nums' as const }}>{s.value}</div>
-                        <div style={{ fontSize: `${17 * sc}px`, color: Brand.colors.text_muted, textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
+                        <div style={{ fontSize: `${19 * sc}px`, color: Brand.colors.text_muted, textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
                       </div>
                     ))}
                   </div>
@@ -811,7 +811,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                       <div key={side} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: `${10 * sc}px` }}>
                         <div style={{ fontSize: `${20 * sc}px`, fontWeight: 700, color: headerColor[side], letterSpacing: '0.02em', marginBottom: `${8 * sc}px`, lineHeight: 1.3 }}>{label}</div>
                         {items.map((item, i) => (
-                          <div key={i} style={{ display: 'flex', gap: `${10 * sc}px`, alignItems: 'flex-start', backgroundColor: itemBg[side], borderRadius: `${8 * sc}px`, padding: `${10 * sc}px ${12 * sc}px`, border: `1px solid ${itemBorder[side]}` }}>
+                          <div key={i} style={{ display: 'flex', gap: `${10 * sc}px`, alignItems: 'flex-start', backgroundColor: itemBg[side], borderRadius: `${10 * sc}px`, padding: `${12 * sc}px ${14 * sc}px`, border: `1px solid ${itemBorder[side]}` }}>
                             <span style={{ color: markColor[side], fontSize: `${16 * sc}px`, flexShrink: 0, marginTop: `${2 * sc}px`, fontWeight: 800 }}>{side === 'before' ? '✕' : '✓'}</span>
                             <span style={{ fontSize: `${21 * sc}px`, color: side === 'before' ? Brand.colors.text_muted : Brand.colors.text_primary, lineHeight: 1.4 }}>{item}</span>
                           </div>
