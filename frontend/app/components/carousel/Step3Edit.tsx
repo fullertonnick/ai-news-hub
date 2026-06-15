@@ -232,7 +232,7 @@ export default function Step3Edit() {
 
   const addText = useCallback(() => {
     if (!slide) return;
-    const t: TextOverlay = { id: uid(), text: 'Edit this text', x: 50, y: 30, fontSize: 40, fontWeight: 700, color: '#FFFFFF', maxWidth: 80, zIndex: 5 + textOverlays.length, fontFamily: FONT_OPTIONS[0].family, rotation: 0 };
+    const t: TextOverlay = { id: uid(), text: 'Edit this text', x: 50, y: 30, fontSize: 40, fontWeight: 700, color: '#FFFFFF', maxWidth: 80, zIndex: 5 + textOverlays.length, fontFamily: FONT_OPTIONS[0].family, rotation: 0, opacity: 1 };
     store.addTextOverlay(slide.id, t);
     // Defer select so Konva has time to mount the new node before drag
     requestAnimationFrame(() => {
@@ -277,8 +277,9 @@ export default function Step3Edit() {
     } catch (e) {
       console.error('AI visual generation failed:', e);
       setVisualError('Network error — check connection and try again.');
+    } finally {
+      setGeneratingVisual(false);
     }
-    setGeneratingVisual(false);
   }, [slide, store, stickers.length]);
 
 

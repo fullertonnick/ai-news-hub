@@ -259,6 +259,8 @@ export default function Step4Export() {
         }
         if (!el) { missingRefs++; continue; }
         await waitForImages(el);
+        // Short settle so CSS paint + @font-face application complete before capture
+        await new Promise(r => setTimeout(r, 300));
         let png: string;
         try {
           png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
@@ -268,7 +270,7 @@ export default function Step4Export() {
           png = await toPng(el, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1350, backgroundColor: '#1A1A1A' });
         }
         zip.file(`slide-${String(i + 1).padStart(2, '0')}.png`, png.replace(/^data:image\/png;base64,/, ''), { base64: true });
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 150));
       }
       if (missingRefs > 0) {
         console.warn(`ZIP export: ${missingRefs} slide ref(s) were null and skipped. Refresh and retry if slides are missing.`);
