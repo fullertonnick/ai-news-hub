@@ -52,20 +52,21 @@ async function preloadFonts() {
       document.fonts.load(`800 26px ${pjs}`),
       document.fonts.load(`800 20px ${pjs}`),
       // ── Plus Jakarta Sans 700 (Bold) ────────────────────────────────────────────
-      // Steps title / skill name: 22px; comparison headers + diagram nodes: 18px;
+      // Steps title: 26px; skill name: 22px; comparison headers + diagram nodes: 18px;
       // skill card bg label: 16px; code instruction arrow: 13px
+      document.fonts.load(`700 26px ${pjs}`),
       document.fonts.load(`700 22px ${pjs}`),
       document.fonts.load(`700 18px ${pjs}`),
       document.fonts.load(`700 16px ${pjs}`),
       document.fonts.load(`700 13px ${pjs}`),
       // ── Plus Jakarta Sans 600 (SemiBold) ───────────────────────────────────────
-      // Footer handle: 20px; slide count: 18px; section label: 20px; stats label: 17px;
+      // Footer handle: 20px; slide count: 18px; section label: 20px; stats label: 19px;
       // CTA "Comment…" text: 24–26px; diagram title: 13px; skill category: 13px
       document.fonts.load(`600 26px ${pjs}`),
       document.fonts.load(`600 24px ${pjs}`),
       document.fonts.load(`600 20px ${pjs}`),
+      document.fonts.load(`600 19px ${pjs}`),
       document.fonts.load(`600 18px ${pjs}`),
-      document.fonts.load(`600 17px ${pjs}`),
       document.fonts.load(`600 16px ${pjs}`),
       document.fonts.load(`600 13px ${pjs}`),
       document.fonts.load(`600 10px ${pjs}`),
