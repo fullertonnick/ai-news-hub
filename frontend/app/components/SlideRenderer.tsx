@@ -74,14 +74,14 @@ function highlightCode(code: string, highlights: string[] = [], sc: number): Rea
 function SectionLabel({ label, sc, onImage }: { label: string; sc: number; onImage?: boolean }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: `${10 * sc}px`, flexShrink: 0 }}>
-      <div style={{ flex: 1, height: `${2 * sc}px`, background: 'rgba(255,113,7,0.45)' }} />
+      <div style={{ flex: 1, height: `${3 * sc}px`, background: 'rgba(255,113,7,0.65)' }} />
       <span style={{
         color: Brand.colors.text_muted, fontSize: `${20 * sc}px`, fontWeight: 600,
         letterSpacing: '0.10em', textTransform: 'uppercase' as const, whiteSpace: 'nowrap' as const,
         fontFamily: Brand.typography.font_family,
         ...(onImage ? { textShadow: '0 1px 6px rgba(0,0,0,0.80)' } : {}),
       }}>{label}</span>
-      <div style={{ flex: 1, height: `${2 * sc}px`, background: 'rgba(255,113,7,0.45)' }} />
+      <div style={{ flex: 1, height: `${3 * sc}px`, background: 'rgba(255,113,7,0.65)' }} />
     </div>
   );
 }
@@ -290,7 +290,7 @@ function CoverTemplate({ slide, W, H, sc, slideNumber, totalSlides }: { slide: C
       )}
 
       {/* Dark overlay — heavier so text always pops over bright photos */}
-      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.54)' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.62)' }} />
 
       {/* Bottom gradient — strong dark behind headline and footer */}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.12) 20%, rgba(0,0,0,0.58) 42%, rgba(0,0,0,0.82) 60%, rgba(0,0,0,0.97) 78%, rgba(0,0,0,0.97) 100%)' }} />
@@ -581,7 +581,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
               ...(isBigQuote ? { fontStyle: 'italic' as const } : {}),
               ...(hasImagen ? { textShadow: '0 1px 6px rgba(0,0,0,0.65)' } : {}),
             }}>
-              {renderWithAccent(headline, slide.accent_word, undefined, { textShadow: '0 0 24px rgba(255,113,7,0.65)', color: Brand.colors.accent_primary })}
+              {renderWithAccent(headline, slide.accent_word, undefined, { textShadow: hasImagen ? '0 0 24px rgba(255,113,7,0.65), 0 1px 6px rgba(0,0,0,0.65)' : '0 0 24px rgba(255,113,7,0.65)', color: Brand.colors.accent_primary })}
             </p>
             {/* Orange divider — Tyler Germain signature.
                 Skip only when big_quote AND visualHasData (visual block renders its own accent line).
@@ -589,31 +589,31 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                 so we still need the divider to separate headline from body copy. */}
             {(!isBigQuote || !visualHasData) && (
               <div style={{
-                width: `${160 * sc}px`, height: `${6 * sc}px`,
+                width: `${200 * sc}px`, height: `${6 * sc}px`,
                 background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`,
                 borderRadius: '3px',
-                marginBottom: `${(!visualHasData && bodyParas.length > 0) ? 32 * sc : 24 * sc}px`,
+                marginBottom: `${(!visualHasData && bodyParas.length > 0) ? 36 * sc : 28 * sc}px`,
               }} />
             )}
             {/* Body — 24px regular, only for text-only slides (no visual block).
                 whiteSpace pre-line preserves \n line breaks in arrow lists. */}
             {!visualHasData && bodyParas.map((p, i) => (
               <p key={i} style={{
-                margin: 0, marginBottom: `${20 * sc}px`,
+                margin: 0, marginBottom: `${24 * sc}px`,
                 fontSize: `${24 * sc}px`, fontWeight: 400,
                 fontFamily: Brand.typography.font_family,
                 color: Brand.colors.text_primary, lineHeight: 1.55,
                 letterSpacing: '-0.01em', whiteSpace: 'pre-line' as const,
                 ...(hasImagen ? { textShadow: '0 1px 4px rgba(0,0,0,0.60)' } : {}),
               }}>
-                {renderWithAccent(p, slide.accent_word, undefined, { textShadow: '0 0 16px rgba(255,113,7,0.50)', color: Brand.colors.accent_primary })}
+                {renderWithAccent(p, slide.accent_word, undefined, { textShadow: hasImagen ? '0 0 16px rgba(255,113,7,0.50), 0 1px 4px rgba(0,0,0,0.60)' : '0 0 16px rgba(255,113,7,0.50)', color: Brand.colors.accent_primary })}
               </p>
             ))}
             {/* Kicker — mic-drop takeaway; shorter divider (vs headline divider 120px) signals
                 a new micro-section without repeating the same visual weight */}
             {!visualHasData && kicker && (
-              <div style={{ marginTop: `${36 * sc}px` }}>
-                <div style={{ width: `${80 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${16 * sc}px` }} />
+              <div style={{ marginTop: `${40 * sc}px` }}>
+                <div style={{ width: `${96 * sc}px`, height: `${3 * sc}px`, background: `linear-gradient(90deg, ${Brand.colors.accent_primary}, ${Brand.colors.accent_secondary})`, borderRadius: '2px', marginBottom: `${16 * sc}px` }} />
                 <p style={{
                   margin: 0,
                   fontSize: `${30 * sc}px`, fontWeight: 800,
@@ -621,7 +621,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                   color: Brand.colors.text_primary, lineHeight: 1.22, letterSpacing: '-0.02em',
                   ...(hasImagen ? { textShadow: '0 1px 6px rgba(0,0,0,0.65)' } : {}),
                 }}>
-                  {renderWithAccent(kicker, slide.accent_word, undefined, { textShadow: '0 0 28px rgba(255,113,7,0.72)', color: Brand.colors.accent_primary })}
+                  {renderWithAccent(kicker, slide.accent_word, undefined, { textShadow: hasImagen ? '0 0 28px rgba(255,113,7,0.72), 0 1px 6px rgba(0,0,0,0.65)' : '0 0 28px rgba(255,113,7,0.72)', color: Brand.colors.accent_primary })}
                 </p>
               </div>
             )}
@@ -729,8 +729,7 @@ const SlideRenderer = forwardRef<HTMLDivElement, Props>(({ slide, slideNumber, t
                           <text
                             x={p.x + nW / 2} y={p.y + nH / 2}
                             textAnchor="middle" dominantBaseline="middle"
-                            fill={c.text} fontSize={18 * sc}
-                            fontFamily={Brand.typography.font_family} fontWeight="700"
+                            style={{ fill: c.text, fontSize: `${18 * sc}px`, fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif', fontWeight: 700 }}
                           >{n.label}</text>
                         </g>
                       );
